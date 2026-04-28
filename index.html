@@ -930,6 +930,9 @@ window.onload = () => {
   // Автовход без авторизации — роль admin по умолчанию
   STATE.user = { email: 'local', name: 'Пользователь', role: 'admin', token: '' };
   showApp();
+
+  // Автозагрузка данных при открытии
+  loadCurrentOrders();
 };
 
 // ════════════════════════════════
