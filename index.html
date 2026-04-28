@@ -897,7 +897,7 @@ function doGet(e) {
 // ════════════════════════════════
 // STATE
 // ════════════════════════════════
-const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbzrovf_Su2znxqbwhdZSkWrGfjIKmF0d2bfqgEkY-aG_DVv0OHatHdk7WrprF9RO8xYPA/exec';
+const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbzKoIHP1NOnEci-GkKgo2aZzlp7QfZrqLC3RwgSVZ1IoSugDRlutVKhhTduXU90yQAD/exec';
 
 const STATE = {
   currentRows: [],
@@ -917,10 +917,9 @@ const STATE = {
 // INIT
 // ════════════════════════════════
 window.onload = () => {
-  // Принудительно обновляем URL если он устарел
-  const correctUrl = DEFAULT_URL;
-  localStorage.setItem('appsScriptUrl', correctUrl);
-  STATE.appsScriptUrl = correctUrl;
+  // Всегда используем захардкоженный URL
+  STATE.appsScriptUrl = DEFAULT_URL;
+  localStorage.setItem('appsScriptUrl', DEFAULT_URL);
 
   setTodayDate();
   loadConfig();
@@ -972,14 +971,10 @@ function loadConfig() {
   document.getElementById('cfg_curators').value = curators;
   document.getElementById('cfg_orders').value = orders;
 
-  // Always enforce URL — never leave empty
-  STATE.appsScriptUrl = url || DEFAULT_URL;
+  // Always use hardcoded DEFAULT_URL — ignore localStorage
+  STATE.appsScriptUrl = DEFAULT_URL;
   STATE.srcId = srcId;
-
-  // Persist so next load picks it up
-  if (!localStorage.getItem('appsScriptUrl')) {
-    localStorage.setItem('appsScriptUrl', DEFAULT_URL);
-  }
+  localStorage.setItem('appsScriptUrl', DEFAULT_URL);
 }
 
 function saveConfig() {
@@ -1029,12 +1024,11 @@ function loadOrderTypesFromConfig() {
 }
 
 function updateSheetBadge() {
-  const url = STATE.appsScriptUrl;
   const badge = document.getElementById('sheetBadge');
-  const activeUrl = url || DEFAULT_URL;
-  badge.textContent = activeUrl ? '✓ подключено' : 'не подключено';
-  badge.style.color = activeUrl ? 'var(--success)' : 'var(--text3)';
-  badge.style.borderColor = activeUrl ? 'rgba(61,220,132,.4)' : '';
+  // Always connected — URL is hardcoded
+  badge.textContent = '✓ подключено';
+  badge.style.color = 'var(--success)';
+  badge.style.borderColor = 'rgba(61,220,132,.4)';
 }
 
 // ════════════════════════════════
@@ -1055,7 +1049,9 @@ function switchTab(name) {
 function apiCall(params) {
   return new Promise((resolve, reject) => {
     const cbName = 'cb_' + Date.now();
-    const url = STATE.appsScriptUrl;
+    // Always use DEFAULT_URL
+    const url = DEFAULT_URL;
+    STATE.appsScriptUrl = url;
     if (!url) { reject(new Error('URL Apps Script не настроен')); return; }
 
     // Auth injection (если пользователь авторизован)
