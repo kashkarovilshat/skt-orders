@@ -1442,13 +1442,14 @@ function handleAutocomplete(input, listId, colType) {
     const highlighted = idx >= 0
       ? m.slice(0,idx) + `<span class="match">${m.slice(idx, idx+val.length)}</span>` + m.slice(idx+val.length)
       : m;
-    return `<div class="autocomplete-item" onmousedown="selectSuggestion('${listId}','${colType}',\`${m}\`)">${highlighted}</div>`;
+    return `<div class="autocomplete-item" onmousedown="selectSuggestion('${listId}','${colType}',this)" data-val="${m.replace(/"/g,'&quot;')}">${highlighted}</div>`;
   }).join('');
 
   list.classList.add('show');
 }
 
-function selectSuggestion(listId, colType, value) {
+function selectSuggestion(listId, colType, el) {
+  const value = typeof el === 'string' ? el : el.dataset.val;
   const inputId = colType === 'G' ? 'f_drawingG' : 'f_detailH';
   document.getElementById(inputId).value = value;
   document.getElementById(listId).classList.remove('show');
@@ -1564,34 +1565,21 @@ async function installApp() {
 
 function showInstallGuide() {
   const guide = document.createElement('div');
-  guide.style.cssText = `
-    position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;
-    display:flex;align-items:center;justify-content:center;
-  `;
-  guide.innerHTML = \`
-    <div style="background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent);
-                border-radius:8px;padding:32px;max-width:480px;width:90%;">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--accent);margin-bottom:16px;">
-        Установка приложения
-      </div>
-      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text2);line-height:1.8;">
-        <b style="color:var(--text)">Chrome / Edge:</b><br>
-        Адресная строка → иконка ⊕ справа → «Установить»<br><br>
-        <b style="color:var(--text)">Если иконки нет:</b><br>
-        Меню (⋮) → «Сохранить и поделиться» → «Создать ярлык»<br>
-        ✓ Отметьте «Открывать в отдельном окне»<br><br>
-        <b style="color:var(--accent)">Важно:</b> Файл должен быть открыт через<br>
-        веб-сервер или Chrome с флагом --allow-file-access
-      </div>
-      <button onclick="this.closest('div').parentElement.remove()" style="
-        margin-top:20px;background:var(--accent);color:#0f1117;border:none;
-        padding:10px 24px;border-radius:4px;font-family:'IBM Plex Mono',monospace;
-        font-size:11px;font-weight:700;cursor:pointer;text-transform:uppercase;
-      ">Понятно</button>
-    </div>
-  \`;
+  guide.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  guide.innerHTML = '<div style="background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:8px;padding:32px;max-width:480px;width:90%;">'
+    + '<div style="font-family:Bebas Neue,sans-serif;font-size:22px;letter-spacing:3px;color:var(--accent);margin-bottom:16px;">Установка приложения</div>'
+    + '<div style="font-family:IBM Plex Mono,monospace;font-size:12px;color:var(--text2);line-height:1.8;">'
+    + '<b style="color:var(--text)">Chrome / Edge:</b><br>'
+    + 'Адресная строка → иконка ⊕ справа → «Установить»<br><br>'
+    + '<b style="color:var(--text)">Если иконки нет:</b><br>'
+    + 'Меню (⋮) → «Сохранить и поделиться» → «Создать ярлык»<br>'
+    + '✓ Отметьте «Открывать в отдельном окне»'
+    + '</div>'
+    + '<button onclick="this.closest(\'div\').parentElement.remove()" style="margin-top:20px;background:var(--accent);color:#0f1117;border:none;padding:10px 24px;border-radius:4px;font-family:IBM Plex Mono,monospace;font-size:11px;font-weight:700;cursor:pointer;text-transform:uppercase;">Понятно</button>'
+    + '</div>';
   document.body.appendChild(guide);
 }
+
 
 function showScriptHelper() {
   const el = document.getElementById('scriptHelperBlock');
