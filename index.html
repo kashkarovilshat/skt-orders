@@ -639,6 +639,7 @@
     <button class="tab active" onclick="switchTab('new')">Новый заказ</button>
     <button class="tab" onclick="switchTab('current')">Текущие заказы</button>
     <button class="tab" onclick="switchTab('archive')">Архив<span class="archive-indicator"></span></button>
+    <button class="tab" onclick="switchTab('sbordata')">Сбор данных</button>
     <button class="tab" onclick="switchTab('history')">История</button>
     <button class="tab" onclick="switchTab('config')">Настройки</button>
   </div>
@@ -807,6 +808,69 @@
   </div>
 </div>
 
+<!-- ════════════ TAB: СБОР ДАННЫХ ════════════ -->
+<div class="page" id="page-sbordata">
+  <div class="table-header" style="flex-wrap:wrap;gap:8px;padding:10px 20px;">
+
+    <!-- Поиск -->
+    <div class="search-box">
+      <input type="text" id="searchSbor" placeholder="Поиск по ФИО, операции…" oninput="applySborFilters()">
+    </div>
+
+    <!-- Фильтр по станку -->
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">Станок:</span>
+      <select id="sborStationFilter" onchange="applySborFilters()" style="
+        background:var(--surface2);border:1px solid var(--border);color:var(--text);
+        padding:4px 10px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace;
+      ">
+        <option value="">Все</option>
+      </select>
+    </div>
+
+    <!-- Фильтр по дате от -->
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">С:</span>
+      <input type="date" id="sborDateFrom" onchange="applySborFilters()" style="
+        background:var(--surface2);border:1px solid var(--border);color:var(--text);
+        padding:4px 8px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace;
+      ">
+    </div>
+
+    <!-- Фильтр по дате до -->
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">По:</span>
+      <input type="date" id="sborDateTo" onchange="applySborFilters()" style="
+        background:var(--surface2);border:1px solid var(--border);color:var(--text);
+        padding:4px 8px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace;
+      ">
+    </div>
+
+    <!-- Фильтр по статусу -->
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">Статус:</span>
+      <select id="sborStatusFilter" onchange="applySborFilters()" style="
+        background:var(--surface2);border:1px solid var(--border);color:var(--text);
+        padding:4px 10px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace;
+      ">
+        <option value="">Все</option>
+        <option value="Готово">Готово</option>
+        <option value="В работе">В работе</option>
+      </select>
+    </div>
+
+    <!-- Кнопки справа -->
+    <div style="display:flex;gap:8px;align-items:center;margin-left:auto;">
+      <button class="btn btn-secondary" style="font-size:10px;padding:4px 10px;" onclick="clearSborFilters()">✕ Сбросить</button>
+      <div class="count-badge">Записей: <span id="countSbor">0</span></div>
+      <button class="btn btn-secondary" style="font-size:10px;padding:6px 14px;" onclick="loadSborData()">↻ Обновить</button>
+    </div>
+  </div>
+  <div class="table-wrap" id="tableSbor">
+    <div class="empty-state"><div class="icon">📊</div><div>Нажмите «↻ Обновить»</div></div>
+  </div>
+</div>
+
 <!-- ════════════ TAB: ИСТОРИЯ ════════════ -->
 <div class="page" id="page-history">
   <div class="table-header">
@@ -908,6 +972,9 @@ const STATE = {
   drawingSuggestions: [],
   detailSuggestions: [],
   archiveMonthFilter: 'all',
+  sbordataRows: [],
+  sbordataFiltered: [],
+  sbordataStations: [],
   appsScriptUrl: localStorage.getItem('appsScriptUrl') || DEFAULT_URL,
   srcId: localStorage.getItem('srcId') || '1F25NFAp_Ghu1A-JsLwotNmOqeKzYdFV_t1KrqrMjUCA',
   user: null,  // { email, name, role, token }
@@ -1039,7 +1106,7 @@ function updateSheetBadge() {
 // ════════════════════════════════
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t,i) => {
-    const names = ['new','current','archive','history','config'];
+    const names = ['new','current','archive','sbordata','history','config'];
     t.classList.toggle('active', names[i] === name);
   });
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1533,6 +1600,173 @@ function showToast(msg, isError = false) {
 // ════════════════════════════════
 // SCRIPT HELPER
 // ════════════════════════════════
+// ════════════════════════════════
+// СБОР ДАННЫХ
+// ════════════════════════════════
+const SBORDATA_ID    = '1hYTxpzs5P1QFgZ9VoiQpkjuqb27uz_Up3hSRn6uRxtQ';
+const SBORDATA_SHEET = 'Сбор данных';
+
+// Колонки: A=Отметка времени, B=ФИО, C=Станок, D=№Сорр-ID, E=Кол-во, F=Операция, G=Комментарий, H=Статус
+// I=№Сорр, J=Наименование, K=Чертёж, L=Годные, M=Брак
+
+async function loadSborData() {
+  document.getElementById('tableSbor').innerHTML =
+    '<div class="loading"><div class="spinner"></div>Загрузка данных…</div>';
+
+  try {
+    const data = await apiCall({ action: 'read', id: SBORDATA_ID, sheet: SBORDATA_SHEET });
+    const rows = (data.data || []).slice(1).filter(r =>
+      r.some(c => String(c || '').trim())
+    );
+    STATE.sbordataRows = rows;
+
+    // Собрать уникальные станки
+    const stations = [...new Set(rows.map(r => String(r[2] || '').trim()).filter(Boolean))].sort();
+    STATE.sbordataStations = stations;
+    buildSborStationFilter(stations);
+
+    // Установить даты по умолчанию — последние 30 дней
+    const today = new Date();
+    const month = new Date(today);
+    month.setDate(month.getDate() - 30);
+    document.getElementById('sborDateTo').value   = today.toISOString().slice(0,10);
+    document.getElementById('sborDateFrom').value = month.toISOString().slice(0,10);
+
+    applySborFilters();
+  } catch(e) {
+    document.getElementById('tableSbor').innerHTML =
+      '<div class="empty-state"><div class="icon">⚠️</div><div>' + e.message + '</div></div>';
+  }
+}
+
+function buildSborStationFilter(stations) {
+  const sel = document.getElementById('sborStationFilter');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Все</option>';
+  stations.forEach(s => {
+    const o = document.createElement('option');
+    o.value = s; o.textContent = s;
+    if (s === cur) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
+function applySborFilters() {
+  const query      = (document.getElementById('searchSbor').value || '').toLowerCase();
+  const station    = document.getElementById('sborStationFilter').value;
+  const dateFromEl = document.getElementById('sborDateFrom').value;
+  const dateToEl   = document.getElementById('sborDateTo').value;
+  const status     = document.getElementById('sborStatusFilter').value;
+
+  const dateFrom = dateFromEl ? new Date(dateFromEl + 'T00:00:00') : null;
+  const dateTo   = dateToEl   ? new Date(dateToEl   + 'T23:59:59') : null;
+
+  let rows = STATE.sbordataRows;
+
+  // Фильтр по дате (колонка A)
+  if (dateFrom || dateTo) {
+    rows = rows.filter(r => {
+      const d = r[0] ? new Date(r[0]) : null;
+      if (!d || isNaN(d)) return true;
+      if (dateFrom && d < dateFrom) return false;
+      if (dateTo   && d > dateTo)   return false;
+      return true;
+    });
+  }
+
+  // Фильтр по станку (колонка C)
+  if (station) {
+    rows = rows.filter(r => String(r[2] || '').trim() === station);
+  }
+
+  // Фильтр по статусу (колонка H)
+  if (status) {
+    rows = rows.filter(r => String(r[7] || '').trim() === status);
+  }
+
+  // Поиск по тексту
+  if (query) {
+    rows = rows.filter(r => r.some(c => String(c || '').toLowerCase().includes(query)));
+  }
+
+  STATE.sbordataFiltered = rows;
+  renderSborTable(rows);
+}
+
+function clearSborFilters() {
+  document.getElementById('searchSbor').value = '';
+  document.getElementById('sborStationFilter').value = '';
+  document.getElementById('sborStatusFilter').value = '';
+  document.getElementById('sborDateFrom').value = '';
+  document.getElementById('sborDateTo').value = '';
+  applySborFilters();
+}
+
+function renderSborTable(rows) {
+  document.getElementById('countSbor').textContent = rows.length;
+
+  if (!rows.length) {
+    document.getElementById('tableSbor').innerHTML =
+      '<div class="empty-state"><div class="icon">📭</div><div>Нет данных по фильтру</div></div>';
+    return;
+  }
+
+  const cols = [
+    { label: 'Время',       idx: 0, type: 'date' },
+    { label: 'ФИО',         idx: 1 },
+    { label: 'Станок',      idx: 2, type: 'station' },
+    { label: '№Сорр',       idx: 3 },
+    { label: 'Кол-во',      idx: 4, type: 'num' },
+    { label: 'Операция',    idx: 5, type: 'op' },
+    { label: 'Комментарий', idx: 6 },
+    { label: 'Статус',      idx: 7, type: 'status' },
+    { label: 'Наименование',idx: 9 },
+    { label: 'Чертёж',      idx: 10 },
+    { label: 'Годные',      idx: 11, type: 'num' },
+    { label: 'Брак',        idx: 12, type: 'num' },
+  ];
+
+  let html = '<table><thead><tr>';
+  cols.forEach(c => html += '<th>' + c.label + '</th>');
+  html += '</tr></thead><tbody>';
+
+  // Показываем последние 500 строк (новые сверху)
+  const displayRows = rows.slice().reverse().slice(0, 500);
+
+  displayRows.forEach(r => {
+    html += '<tr>';
+    cols.forEach(c => {
+      const raw = String(r[c.idx] || '');
+      if (c.type === 'date') {
+        const d = r[c.idx] ? new Date(r[c.idx]) : null;
+        const formatted = d && !isNaN(d)
+          ? d.toLocaleDateString('ru', {day:'2-digit',month:'2-digit',year:'2-digit'}) + ' ' +
+            d.toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit'})
+          : raw;
+        html += '<td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);white-space:nowrap">' + formatted + '</td>';
+      } else if (c.type === 'station') {
+        html += '<td><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;background:var(--surface2);border:1px solid var(--border);padding:2px 6px;border-radius:3px;color:var(--accent2)">' + raw + '</span></td>';
+      } else if (c.type === 'op') {
+        html += '<td><span class="status-badge status-new">' + raw + '</span></td>';
+      } else if (c.type === 'status') {
+        const cls = raw === 'Готово' ? 'status-ok' : (raw ? 'status-new' : '');
+        html += '<td><span class="status-badge ' + cls + '">' + raw + '</span></td>';
+      } else if (c.type === 'num') {
+        html += '<td style="font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--accent);text-align:center">' + raw + '</td>';
+      } else {
+        html += '<td title="' + raw.replace(/"/g,'&quot;') + '">' + raw + '</td>';
+      }
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  if (rows.length > 500) {
+    html += '<div style="text-align:center;padding:12px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3)">Показано последние 500 из ' + rows.length + ' записей</div>';
+  }
+  document.getElementById('tableSbor').innerHTML = html;
+}
+
 // ════════════════════════════════
 // PWA INSTALL
 // ════════════════════════════════
