@@ -513,6 +513,95 @@
 
   .empty-state .icon { font-size: 32px; opacity: .4; }
 
+  /* Subtabs */
+  .subtab {
+    padding: 8px 18px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: var(--text2);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .subtab:hover { color: var(--text); }
+  .subtab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* Attendance cards */
+  .att-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    cursor: default;
+    transition: all .15s;
+    position: relative;
+  }
+  .att-card.present {
+    border-color: rgba(61,220,132,.5);
+    background: rgba(61,220,132,.06);
+  }
+  .att-card.absent {
+    border-color: rgba(255,77,77,.3);
+    background: rgba(255,77,77,.04);
+  }
+  .att-card .att-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .att-card .att-status {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .att-card.present .att-status { color: var(--success); }
+  .att-card.absent  .att-status { color: var(--danger); }
+  .att-card .att-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+
+  /* Tooltip */
+  .att-card .att-tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 12px;
+    min-width: 200px;
+    max-width: 280px;
+    z-index: 100;
+    font-size: 11px;
+    color: var(--text);
+    box-shadow: 0 4px 16px rgba(0,0,0,.4);
+  }
+  .att-card:hover .att-tooltip { display: block; }
+  .att-tooltip .att-entry {
+    padding: 3px 0;
+    border-bottom: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text2);
+  }
+  .att-tooltip .att-entry:last-child { border-bottom: none; }
+  .att-tooltip .att-entry-time { color: var(--accent); font-weight: 600; }
+  .att-tooltip .att-entry-op   { color: var(--accent2); }
+
   .month-btn {
     padding: 3px 10px;
     border-radius: 3px;
@@ -810,6 +899,14 @@
 
 <!-- ════════════ TAB: СБОР ДАННЫХ ════════════ -->
 <div class="page" id="page-sbordata">
+  <!-- Подвкладки -->
+  <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;gap:4px;">
+    <button class="subtab active" id="subtab-journal" onclick="switchSubtab('journal')">📋 Журнал</button>
+    <button class="subtab" id="subtab-attendance" onclick="switchSubtab('attendance')">👥 Перекличка</button>
+  </div>
+
+  <!-- ПОДВКЛАДКА: ЖУРНАЛ -->
+  <div id="subpage-journal" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
   <div class="table-header" style="flex-wrap:wrap;gap:8px;padding:10px 20px;">
 
     <!-- Поиск -->
@@ -866,10 +963,40 @@
       <button class="btn btn-secondary" style="font-size:10px;padding:6px 14px;" onclick="loadSborData()">↻ Обновить</button>
     </div>
   </div>
-  <div class="table-wrap" id="tableSbor">
+  <div class="table-wrap" id="tableSbor" style="flex:1">
     <div class="empty-state"><div class="icon">📊</div><div>Нажмите «↻ Обновить»</div></div>
   </div>
-</div>
+  </div><!-- end subpage-journal -->
+
+  <!-- ПОДВКЛАДКА: ПЕРЕКЛИЧКА -->
+  <div id="subpage-attendance" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+    <div class="table-header" style="flex-wrap:wrap;gap:8px;padding:10px 20px;">
+      <!-- Выбор даты -->
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">Дата:</span>
+        <input type="date" id="attendanceDate" onchange="loadAttendance()" style="
+          background:var(--surface2);border:1px solid var(--border);color:var(--text);
+          padding:5px 10px;border-radius:4px;font-size:12px;font-family:'IBM Plex Mono',monospace;
+        ">
+        <button class="btn btn-secondary" style="font-size:10px;padding:5px 12px;" onclick="setAttendanceToday()">Сегодня</button>
+      </div>
+      <div class="count-badge">Отметились: <span id="attendanceCount" style="color:var(--success)">0</span> / <span id="attendanceTotal">0</span></div>
+      <button class="btn btn-secondary" style="font-size:10px;padding:5px 12px;margin-left:auto;" onclick="loadAttendance()">↻ Обновить</button>
+    </div>
+
+    <!-- Карточки сотрудников -->
+    <div style="flex:1;overflow-y:auto;padding:16px 20px;">
+      <div id="attendanceGrid" style="
+        display:grid;
+        grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+        gap:12px;
+      ">
+        <div class="empty-state"><div class="icon">👥</div><div>Выберите дату</div></div>
+      </div>
+    </div>
+  </div><!-- end subpage-attendance -->
+
+</div><!-- end page-sbordata -->
 
 <!-- ════════════ TAB: ИСТОРИЯ ════════════ -->
 <div class="page" id="page-history">
@@ -1765,6 +1892,150 @@ function renderSborTable(rows) {
     html += "<div style='text-align:center;padding:12px;font-family:monospace;font-size:11px;color:var(--text3)'>Показано последние 500 из " + rows.length + " записей</div>";
   }
   document.getElementById('tableSbor').innerHTML = html;
+}
+
+// ════════════════════════════════
+// SUBTABS (Сбор данных)
+// ════════════════════════════════
+function switchSubtab(name) {
+  ['journal','attendance'].forEach(n => {
+    document.getElementById('subpage-' + n).style.display = n === name ? 'flex' : 'none';
+    const btn = document.getElementById('subtab-' + n);
+    if (btn) btn.classList.toggle('active', n === name);
+  });
+  if (name === 'attendance') {
+    if (!document.getElementById('attendanceDate').value) setAttendanceToday();
+    else loadAttendance();
+  }
+}
+
+// ════════════════════════════════
+// ПЕРЕКЛИЧКА
+// ════════════════════════════════
+function setAttendanceToday() {
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('attendanceDate').value = today;
+  loadAttendance();
+}
+
+async function loadAttendance() {
+  const dateVal = document.getElementById('attendanceDate').value;
+  if (!dateVal) return;
+
+  const grid = document.getElementById('attendanceGrid');
+  grid.innerHTML = '<div class="loading"><div class="spinner"></div>Загрузка…</div>';
+
+  try {
+    // Загрузить список сотрудников из Справочник доступа (строки 7-35, колонка B)
+    const accessData = await apiCall({
+      action: 'read',
+      id: SBORDATA_ID,
+      sheet: 'Справочник доступа'
+    });
+
+    // Строки 7-35 (индексы 6-34), колонка B (индекс 1)
+    const allRows = accessData.data || [];
+    const employees = allRows.slice(6, 35)
+      .map(r => String(r[1] || '').trim())
+      .filter(Boolean);
+
+    document.getElementById('attendanceTotal').textContent = employees.length;
+
+    // Если данные сбора уже загружены — используем их, иначе грузим
+    let sborRows = STATE.sbordataRows;
+    if (!sborRows.length) {
+      const sborData = await apiCall({
+        action: 'read',
+        id: SBORDATA_ID,
+        sheet: SBORDATA_SHEET
+      });
+      sborRows = (sborData.data || []).slice(1).filter(r => r.some(c => String(c||'').trim()));
+      STATE.sbordataRows = sborRows;
+    }
+
+    // Фильтруем записи за выбранную дату
+    const selDate = new Date(dateVal + 'T00:00:00');
+    const dayRows = sborRows.filter(r => {
+      const d = r[0] ? new Date(r[0]) : null;
+      if (!d || isNaN(d)) return false;
+      return d.toDateString() === selDate.toDateString();
+    });
+
+    // Группируем по ФИО
+    const byName = {};
+    dayRows.forEach(r => {
+      const name = String(r[1] || '').trim();
+      if (!name) return;
+      if (!byName[name]) byName[name] = [];
+      byName[name].push(r);
+    });
+
+    // Считаем отметившихся
+    const presentCount = employees.filter(e => byName[e] && byName[e].length > 0).length;
+    document.getElementById('attendanceCount').textContent = presentCount;
+
+    // Рендерим карточки
+    renderAttendanceGrid(employees, byName, dateVal);
+
+  } catch(e) {
+    grid.innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><div>' + e.message + '</div></div>';
+  }
+}
+
+function renderAttendanceGrid(employees, byName, dateVal) {
+  const grid = document.getElementById('attendanceGrid');
+
+  const RU_MONTHS = ['января','февраля','марта','апреля','мая','июня',
+                     'июля','августа','сентября','октября','ноября','декабря'];
+  const d = new Date(dateVal);
+  const dateLabel = d.getDate() + ' ' + RU_MONTHS[d.getMonth()];
+
+  let html = '';
+
+  employees.forEach(name => {
+    const records = byName[name] || [];
+    const present = records.length > 0;
+    const cls = present ? 'present' : 'absent';
+    const statusText = present ? ('✓ ' + records.length + ' отм.') : '✗ нет';
+
+    // Собираем tooltip с деталями
+    let tooltipHtml = '<div style="font-weight:700;color:var(--text);margin-bottom:6px;font-size:11px">' + name + '</div>';
+    if (present) {
+      records.slice(0, 8).forEach(r => {
+        const dt = r[0] ? new Date(r[0]) : null;
+        const time = dt ? dt.toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit'}) : '';
+        const station = String(r[2] || '');
+        const op = String(r[5] || '');
+        const qty = String(r[4] || '');
+        tooltipHtml += '<div class="att-entry">'
+          + '<span class="att-entry-time">' + time + '</span>'
+          + (station ? ' · <b>' + station + '</b>' : '')
+          + '<div class="att-entry-op">' + op + (qty ? ' · ' + qty + ' шт' : '') + '</div>'
+          + '</div>';
+      });
+      if (records.length > 8) {
+        tooltipHtml += '<div style="color:var(--text3);font-size:10px;padding-top:4px">ещё ' + (records.length - 8) + ' записей…</div>';
+      }
+    } else {
+      tooltipHtml += '<div style="color:var(--danger);font-size:11px">Нет отметок за ' + dateLabel + '</div>';
+    }
+
+    // Краткое имя (Фамилия И.О.)
+    const parts = name.split(' ');
+    const shortName = parts[0] + (parts[1] ? ' ' + parts[1][0] + '.' : '') + (parts[2] ? parts[2][0] + '.' : '');
+
+    html += '<div class="att-card ' + cls + '">'
+      + '<div class="att-name">' + shortName + '</div>'
+      + '<div class="att-status">' + statusText + '</div>'
+      + (present ? '<div class="att-count">' + records.map(r => {
+          const dt = r[0] ? new Date(r[0]) : null;
+          return dt ? dt.toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}) : '';
+        }).filter(Boolean).slice(0,3).join(', ') + '</div>' : '')
+      + '<div class="att-tooltip">' + tooltipHtml + '</div>'
+      + '</div>';
+  });
+
+  grid.innerHTML = html;
 }
 
 // ════════════════════════════════
