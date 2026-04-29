@@ -1762,7 +1762,7 @@ function renderSborTable(rows) {
 
   html += '</tbody></table>';
   if (rows.length > 500) {
-    html += '<div style="text-align:center;padding:12px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3)">Показано последние 500 из ' + rows.length + ' записей</div>';
+    html += "<div style='text-align:center;padding:12px;font-family:monospace;font-size:11px;color:var(--text3)'>Показано последние 500 из " + rows.length + " записей</div>";
   }
   document.getElementById('tableSbor').innerHTML = html;
 }
