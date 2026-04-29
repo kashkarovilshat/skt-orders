@@ -6,633 +6,623 @@
 <title>Заказы на производство</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-  <!-- PWA -->
-  <meta name="theme-color" content="#0f1117">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="СКТ Заказы">
-  <link rel="manifest" id="manifestLink">
+<meta name="theme-color" content="#0f1117">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="СКТ Заказы">
+<link rel="manifest" id="manifestLink">
 
-  <script>
-    // Inline manifest (работает с file://)
-    const manifest = {
-      name: "СКТ · Заказы на производство",
-      short_name: "СКТ Заказы",
-      description: "Система управления заказами на производство",
-      start_url: location.href,
-      display: "standalone",
-      background_color: "#0f1117",
-      theme_color: "#0f1117",
-      orientation: "landscape",
-      icons: [
-        {
-          src: "data:image/svg+xml," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='24' fill='%230f1117'/><rect x='8' y='8' width='176' height='176' rx='20' fill='none' stroke='%23e8c840' stroke-width='4'/><text x='96' y='72' text-anchor='middle' font-family='Arial Black' font-size='36' font-weight='900' fill='%23e8c840'>СКТ</text><text x='96' y='118' text-anchor='middle' font-family='Arial' font-size='18' fill='%23e8eaf0'>ЗАКАЗЫ</text><rect x='32' y='132' width='128' height='3' fill='%23e8c840' rx='2'/><text x='96' y='164' text-anchor='middle' font-family='Arial' font-size='13' fill='%234a9eff'>ПРОИЗВОДСТВО</text></svg>`),
-          sizes: "192x192",
-          type: "image/svg+xml",
-          purpose: "any maskable"
-        },
-        {
-          src: "data:image/svg+xml," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='64' fill='%230f1117'/><rect x='16' y='16' width='480' height='480' rx='56' fill='none' stroke='%23e8c840' stroke-width='8'/><text x='256' y='200' text-anchor='middle' font-family='Arial Black' font-size='100' font-weight='900' fill='%23e8c840'>СКТ</text><text x='256' y='310' text-anchor='middle' font-family='Arial' font-size='52' fill='%23e8eaf0'>ЗАКАЗЫ</text><rect x='80' y='340' width='352' height='8' fill='%23e8c840' rx='4'/><text x='256' y='420' text-anchor='middle' font-family='Arial' font-size='36' fill='%234a9eff'>ПРОИЗВОДСТВО</text></svg>`),
-          sizes: "512x512",
-          type: "image/svg+xml",
-          purpose: "any maskable"
-        }
-      ]
-    };
+<script>
+const manifest = {
+  name: "СКТ · Заказы на производство",
+  short_name: "СКТ Заказы",
+  description: "Система управления заказами на производство",
+  start_url: location.href,
+  display: "standalone",
+  background_color: "#0f1117",
+  theme_color: "#0f1117",
+  orientation: "landscape",
+  icons: [
+    {
+      src: "data:image/svg+xml," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='24' fill='%230f1117'/><rect x='8' y='8' width='176' height='176' rx='20' fill='none' stroke='%23e8c840' stroke-width='4'/><text x='96' y='72' text-anchor='middle' font-family='Arial Black' font-size='36' font-weight='900' fill='%23e8c840'>СКТ</text><text x='96' y='118' text-anchor='middle' font-family='Arial' font-size='18' fill='%23e8eaf0'>ЗАКАЗЫ</text><rect x='32' y='132' width='128' height='3' fill='%23e8c840' rx='2'/><text x='96' y='164' text-anchor='middle' font-family='Arial' font-size='13' fill='%234a9eff'>ПРОИЗВОДСТВО</text></svg>`),
+      sizes: "192x192",
+      type: "image/svg+xml",
+      purpose: "any maskable"
+    },
+    {
+      src: "data:image/svg+xml," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='64' fill='%230f1117'/><rect x='16' y='16' width='480' height='480' rx='56' fill='none' stroke='%23e8c840' stroke-width='8'/><text x='256' y='200' text-anchor='middle' font-family='Arial Black' font-size='100' font-weight='900' fill='%23e8c840'>СКТ</text><text x='256' y='310' text-anchor='middle' font-family='Arial' font-size='52' fill='%23e8eaf0'>ЗАКАЗЫ</text><rect x='80' y='340' width='352' height='8' fill='%23e8c840' rx='4'/><text x='256' y='420' text-anchor='middle' font-family='Arial' font-size='36' fill='%234a9eff'>ПРОИЗВОДСТВО</text></svg>`),
+      sizes: "512x512",
+      type: "image/svg+xml",
+      purpose: "any maskable"
+    }
+  ]
+};
 
-    const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-    const manifestUrl = URL.createObjectURL(blob);
-    document.getElementById('manifestLink') && (document.getElementById('manifestLink').href = manifestUrl);
+const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+const manifestUrl = URL.createObjectURL(blob);
 
-    // Set manifest after DOM loaded
-    document.addEventListener('DOMContentLoaded', () => {
-      const link = document.getElementById('manifestLink');
-      if (link) link.href = manifestUrl;
-    });
-  </script>
+document.addEventListener('DOMContentLoaded', () => {
+  const link = document.getElementById('manifestLink');
+  if (link) link.href = manifestUrl;
+});
+</script>
+
 <style>
-  :root {
-    --bg: #0f1117;
-    --surface: #181c27;
-    --surface2: #1e2435;
-    --border: #2a3045;
-    --accent: #e8c840;
-    --accent2: #4a9eff;
-    --danger: #ff4d4d;
-    --success: #3ddc84;
-    --text: #e8eaf0;
-    --text2: #8892a4;
-    --text3: #4a5568;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 13px;
-    min-height: 100vh;
-  }
-
-  /* ── HEADER ── */
-  .header {
-    background: var(--surface);
-    border-bottom: 2px solid var(--accent);
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    gap: 32px;
-    height: 56px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 3px;
-    color: var(--accent);
-    white-space: nowrap;
-  }
-
-  .tabs {
-    display: flex;
-    gap: 4px;
-    flex: 1;
-  }
-
-  .tab {
-    padding: 6px 20px;
-    border-radius: 4px 4px 0 0;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--text2);
-    border: 1px solid transparent;
-    border-bottom: none;
-    transition: all .15s;
-    background: transparent;
-    font-family: 'IBM Plex Mono', monospace;
-  }
-
-  .tab:hover { color: var(--text); background: var(--surface2); }
-  .tab.active {
-    color: var(--accent);
-    background: var(--bg);
-    border-color: var(--border);
-    border-bottom-color: var(--bg);
-  }
-
-  .sheet-id-badge {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    color: var(--text3);
-    background: var(--bg);
-    border: 1px solid var(--border);
-    padding: 3px 8px;
-    border-radius: 3px;
-  }
-
-  /* ── LAYOUT ── */
-  .main {
-    display: flex;
-    height: calc(100vh - 56px);
-  }
-
-  /* ── LEFT PANEL: FORM ── */
-  .panel-form {
-    width: 420px;
-    min-width: 380px;
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .panel-title {
-    padding: 16px 20px 12px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 16px;
-    letter-spacing: 2px;
-    color: var(--accent);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .panel-title .dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--accent);
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%,100% { opacity: 1; }
-    50% { opacity: .3; }
-  }
-
-  .form-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-
-  .form-body::-webkit-scrollbar { width: 4px; }
-  .form-body::-webkit-scrollbar-track { background: transparent; }
-  .form-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    position: relative;
-  }
-
-  .field label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--text2);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .field label .col-badge {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    padding: 1px 5px;
-    border-radius: 2px;
-    font-size: 9px;
-    color: var(--accent2);
-  }
-
-  .field label .required { color: var(--danger); }
-
-  input, select, textarea {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 9px 12px;
-    border-radius: 4px;
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 13px;
-    outline: none;
-    transition: border-color .15s, box-shadow .15s;
-    width: 100%;
-  }
-
-  input:focus, select:focus, textarea:focus {
-    border-color: var(--accent2);
-    box-shadow: 0 0 0 2px rgba(74,158,255,.12);
-  }
-
-  select option { background: var(--surface2); }
-
-  .auto-hint {
-    font-size: 10px;
-    color: var(--text3);
-    font-family: 'IBM Plex Mono', monospace;
-    padding: 2px 4px;
-  }
-
-  /* autocomplete dropdown */
-  .autocomplete-list {
-    position: absolute;
-    top: 100%;
-    left: 0; right: 0;
-    background: var(--surface2);
-    border: 1px solid var(--accent2);
-    border-top: none;
-    border-radius: 0 0 4px 4px;
-    max-height: 160px;
-    overflow-y: auto;
-    z-index: 200;
-    display: none;
-  }
-
-  .autocomplete-list.show { display: block; }
-
-  .autocomplete-item {
-    padding: 7px 12px;
-    cursor: pointer;
-    font-size: 12px;
-    border-bottom: 1px solid var(--border);
-    transition: background .1s;
-  }
-
-  .autocomplete-item:hover { background: var(--border); color: var(--accent); }
-  .autocomplete-item:last-child { border-bottom: none; }
-
-  .autocomplete-item .match { color: var(--accent); font-weight: 600; }
-
-  .form-footer {
-    padding: 16px 20px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    gap: 10px;
-  }
-
-  .btn {
-    padding: 10px 20px;
-    border-radius: 4px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    cursor: pointer;
-    border: none;
-    transition: all .15s;
-  }
-
-  .btn-primary {
-    background: var(--accent);
-    color: #0f1117;
-    flex: 1;
-  }
-
-  .btn-primary:hover { background: #f5d84a; transform: translateY(-1px); }
-  .btn-primary:active { transform: translateY(0); }
-
-  .btn-secondary {
-    background: transparent;
-    color: var(--text2);
-    border: 1px solid var(--border);
-  }
-
-  .btn-secondary:hover { border-color: var(--text2); color: var(--text); }
-
-  /* ── RIGHT PANEL: TABLE ── */
-  .panel-table {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .table-header {
-    padding: 12px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    background: var(--surface);
-  }
-
-  .search-box {
-    flex: 1;
-    max-width: 320px;
-    position: relative;
-  }
-
-  .search-box input {
-    padding-left: 32px;
-    font-size: 12px;
-  }
-
-  .search-box::before {
-    content: '⌕';
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text3);
-    font-size: 16px;
-    z-index: 1;
-  }
-
-  .count-badge {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    color: var(--text2);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    padding: 4px 10px;
-    border-radius: 3px;
-  }
-
-  .count-badge span { color: var(--accent); font-weight: 600; }
-
-  .table-wrap {
-    flex: 1;
-    overflow: auto;
-  }
-
-  .table-wrap::-webkit-scrollbar { width: 6px; height: 6px; }
-  .table-wrap::-webkit-scrollbar-track { background: var(--bg); }
-  .table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-  }
-
-  thead {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-
-  thead th {
-    background: var(--surface);
-    padding: 9px 12px;
-    text-align: left;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--text2);
-    border-bottom: 2px solid var(--border);
-    white-space: nowrap;
-  }
-
-  thead th:first-child { width: 50px; }
-
-  tbody tr {
-    border-bottom: 1px solid var(--border);
-    transition: background .1s;
-  }
-
-  tbody tr:hover { background: var(--surface2); }
-
-  tbody td {
-    padding: 8px 12px;
-    color: var(--text);
-    vertical-align: middle;
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .cell-num {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    color: var(--accent2);
-    font-weight: 600;
-  }
-
-  .cell-zakazchik {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 3px;
-    font-size: 11px;
-    font-weight: 500;
-    font-family: 'IBM Plex Mono', monospace;
-  }
-
-  .badge-rsk { background: rgba(74,158,255,.15); color: var(--accent2); border: 1px solid rgba(74,158,255,.3); }
-  .badge-sct { background: rgba(61,220,132,.12); color: var(--success); border: 1px solid rgba(61,220,132,.3); }
-  .badge-vez { background: rgba(232,200,64,.12); color: var(--accent); border: 1px solid rgba(232,200,64,.3); }
-  .badge-other { background: rgba(255,77,77,.1); color: var(--danger); border: 1px solid rgba(255,77,77,.3); }
-
-  .status-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 10px;
-    font-family: 'IBM Plex Mono', monospace;
-    white-space: nowrap;
-  }
-
-  .status-new { background: rgba(232,200,64,.15); color: var(--accent); }
-  .status-ok { background: rgba(61,220,132,.12); color: var(--success); }
-  .status-no { background: rgba(255,77,77,.1); color: var(--danger); }
-
-  /* TOAST */
-  .toast {
-    position: fixed;
-    bottom: 28px;
-    right: 28px;
-    background: var(--success);
-    color: #0f1117;
-    padding: 12px 20px;
-    border-radius: 6px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    font-weight: 600;
-    z-index: 999;
-    transform: translateY(60px);
-    opacity: 0;
-    transition: all .3s cubic-bezier(.34,1.56,.64,1);
-    pointer-events: none;
-  }
-
-  .toast.show { transform: translateY(0); opacity: 1; }
-  .toast.error { background: var(--danger); color: #fff; }
-
-  /* LOADING */
-  .loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 60px;
-    color: var(--text3);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    gap: 10px;
-  }
-
-  .spinner {
-    width: 16px; height: 16px;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent2);
-    border-radius: 50%;
-    animation: spin .6s linear infinite;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 80px 40px;
-    color: var(--text3);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    gap: 8px;
-  }
-
-  .empty-state .icon { font-size: 32px; opacity: .4; }
-
-  .month-btn {
-    padding: 3px 10px;
-    border-radius: 3px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text2);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    letter-spacing: .5px;
-    transition: all .15s;
-    white-space: nowrap;
-  }
-
-  .month-btn:hover { border-color: var(--accent2); color: var(--text); }
-  .month-btn.active { background: var(--accent); color: #0f1117; border-color: var(--accent); }
-
-  .repeat-cell { width: 36px; text-align: center; padding: 4px !important; }
-
-  .btn-repeat {
-    display: none;
-    background: var(--accent);
-    color: #0f1117;
-    border: none;
-    border-radius: 3px;
-    width: 26px; height: 26px;
-    font-size: 15px;
-    cursor: pointer;
-    font-weight: bold;
-    line-height: 1;
-    transition: background .15s, transform .15s;
-  }
-
-  .btn-repeat:hover { background: #f5d84a; transform: scale(1.15); }
-
-  .btn-delete {
-    display: none;
-    background: rgba(255,77,77,.15);
-    color: var(--danger);
-    border: 1px solid rgba(255,77,77,.3);
-    border-radius: 3px;
-    width: 26px; height: 26px;
-    font-size: 13px;
-    cursor: pointer;
-    font-weight: bold;
-    line-height: 1;
-    margin-left: 4px;
-    transition: background .15s, transform .15s;
-  }
-
-  .btn-delete:hover { background: var(--danger); color: #fff; transform: scale(1.15); }
-  .btn-delete:disabled { opacity: .5; cursor: not-allowed; }
-
-  tbody tr:hover .btn-repeat,
-  tbody tr:hover .btn-delete { display: inline-flex; align-items: center; justify-content: center; }
-
-  /* PAGE HIDDEN */
-  .page { display: none; }
-  .page.active { display: flex; flex-direction: column; height: calc(100vh - 56px); }
-
-  /* CONFIG PAGE */
-  .config-page {
-    padding: 32px;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    max-width: 600px;
-  }
-
-  .config-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 3px;
-    color: var(--accent);
-  }
-
-  .config-field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .config-field label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    color: var(--text2);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-
-  .api-note {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--accent);
-    padding: 12px 16px;
-    border-radius: 0 4px 4px 0;
-    font-size: 12px;
-    color: var(--text2);
-    line-height: 1.6;
-    font-family: 'IBM Plex Mono', monospace;
-  }
-
-  .api-note a { color: var(--accent2); }
-
-  .row-2 { display: flex; gap: 10px; }
-
-  /* archive tab indicator */
-  .archive-indicator {
-    display: inline-block;
-    width: 6px; height: 6px;
-    background: var(--text3);
-    border-radius: 50%;
-    margin-left: 6px;
-    vertical-align: middle;
-  }
+:root {
+  --bg: #0f1117;
+  --surface: #181c27;
+  --surface2: #1e2435;
+  --border: #2a3045;
+  --accent: #e8c840;
+  --accent2: #4a9eff;
+  --danger: #ff4d4d;
+  --success: #3ddc84;
+  --text: #e8eaf0;
+  --text2: #8892a4;
+  --text3: #4a5568;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  min-height: 100vh;
+}
+
+.header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--accent);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 3px;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.tabs { display: flex; gap: 4px; flex: 1; }
+
+.tab {
+  padding: 6px 20px;
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text2);
+  border: 1px solid transparent;
+  border-bottom: none;
+  transition: all .15s;
+  background: transparent;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.tab:hover { color: var(--text); background: var(--surface2); }
+
+.tab.active {
+  color: var(--accent);
+  background: var(--bg);
+  border-color: var(--border);
+  border-bottom-color: var(--bg);
+}
+
+.sheet-id-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text3);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 3px 8px;
+  border-radius: 3px;
+}
+
+.main { display: flex; height: calc(100vh - 56px); }
+
+.panel-form {
+  width: 420px;
+  min-width: 380px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-title {
+  padding: 16px 20px 12px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 2px;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panel-title .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: .3; }
+}
+
+.form-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-body::-webkit-scrollbar { width: 4px; }
+.form-body::-webkit-scrollbar-track { background: transparent; }
+.form-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  position: relative;
+}
+
+.field label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.field label .col-badge {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 1px 5px;
+  border-radius: 2px;
+  font-size: 9px;
+  color: var(--accent2);
+}
+
+.field label .required { color: var(--danger); }
+
+input, select, textarea {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 9px 12px;
+  border-radius: 4px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  width: 100%;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent2);
+  box-shadow: 0 0 0 2px rgba(74,158,255,.12);
+}
+
+select option { background: var(--surface2); }
+
+.auto-hint {
+  font-size: 10px;
+  color: var(--text3);
+  font-family: 'IBM Plex Mono', monospace;
+  padding: 2px 4px;
+}
+
+.autocomplete-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--surface2);
+  border: 1px solid var(--accent2);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  max-height: 160px;
+  overflow-y: auto;
+  z-index: 200;
+  display: none;
+}
+
+.autocomplete-list.show { display: block; }
+
+.autocomplete-item {
+  padding: 7px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  border-bottom: 1px solid var(--border);
+  transition: background .1s;
+}
+
+.autocomplete-item:hover { background: var(--border); color: var(--accent); }
+.autocomplete-item:last-child { border-bottom: none; }
+.autocomplete-item .match { color: var(--accent); font-weight: 600; }
+
+.form-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  transition: all .15s;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #0f1117;
+  flex: 1;
+}
+
+.btn-primary:hover { background: #f5d84a; transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover { border-color: var(--text2); color: var(--text); }
+
+.panel-table {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.table-header {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--surface);
+}
+
+.search-box {
+  flex: 1;
+  max-width: 320px;
+  position: relative;
+}
+
+.search-box input {
+  padding-left: 32px;
+  font-size: 12px;
+}
+
+.search-box::before {
+  content: '⌕';
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text3);
+  font-size: 16px;
+  z-index: 1;
+}
+
+.count-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text2);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 3px;
+}
+
+.count-badge span { color: var(--accent); font-weight: 600; }
+
+.table-wrap {
+  flex: 1;
+  overflow: auto;
+}
+
+.table-wrap::-webkit-scrollbar { width: 6px; height: 6px; }
+.table-wrap::-webkit-scrollbar-track { background: var(--bg); }
+.table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+thead th {
+  background: var(--surface);
+  padding: 9px 12px;
+  text-align: left;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text2);
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+
+thead th:first-child { width: 50px; }
+
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background .1s;
+}
+
+tbody tr:hover { background: var(--surface2); }
+
+tbody td {
+  padding: 8px 12px;
+  color: var(--text);
+  vertical-align: middle;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cell-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--accent2);
+  font-weight: 600;
+}
+
+.cell-zakazchik {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.badge-rsk { background: rgba(74,158,255,.15); color: var(--accent2); border: 1px solid rgba(74,158,255,.3); }
+.badge-sct { background: rgba(61,220,132,.12); color: var(--success); border: 1px solid rgba(61,220,132,.3); }
+.badge-vez { background: rgba(232,200,64,.12); color: var(--accent); border: 1px solid rgba(232,200,64,.3); }
+.badge-other { background: rgba(255,77,77,.1); color: var(--danger); border: 1px solid rgba(255,77,77,.3); }
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  white-space: nowrap;
+}
+
+.status-new { background: rgba(232,200,64,.15); color: var(--accent); }
+.status-ok { background: rgba(61,220,132,.12); color: var(--success); }
+.status-no { background: rgba(255,77,77,.1); color: var(--danger); }
+
+.toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  background: var(--success);
+  color: #0f1117;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 999;
+  transform: translateY(60px);
+  opacity: 0;
+  transition: all .3s cubic-bezier(.34,1.56,.64,1);
+  pointer-events: none;
+}
+
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.error { background: var(--danger); color: #fff; }
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  color: var(--text3);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  gap: 10px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent2);
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 40px;
+  color: var(--text3);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  gap: 8px;
+}
+
+.empty-state .icon { font-size: 32px; opacity: .4; }
+
+.month-btn {
+  padding: 3px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text2);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: .5px;
+  transition: all .15s;
+  white-space: nowrap;
+}
+
+.month-btn:hover { border-color: var(--accent2); color: var(--text); }
+.month-btn.active { background: var(--accent); color: #0f1117; border-color: var(--accent); }
+
+.repeat-cell { width: 36px; text-align: center; padding: 4px !important; }
+
+.btn-repeat {
+  display: none;
+  background: var(--accent);
+  color: #0f1117;
+  border: none;
+  border-radius: 3px;
+  width: 26px;
+  height: 26px;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: bold;
+  line-height: 1;
+  transition: background .15s, transform .15s;
+}
+
+.btn-repeat:hover { background: #f5d84a; transform: scale(1.15); }
+
+.btn-delete {
+  display: none;
+  background: rgba(255,77,77,.15);
+  color: var(--danger);
+  border: 1px solid rgba(255,77,77,.3);
+  border-radius: 3px;
+  width: 26px;
+  height: 26px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: bold;
+  line-height: 1;
+  margin-left: 4px;
+  transition: background .15s, transform .15s;
+}
+
+.btn-delete:hover { background: var(--danger); color: #fff; transform: scale(1.15); }
+.btn-delete:disabled { opacity: .5; cursor: not-allowed; }
+
+tbody tr:hover .btn-repeat,
+tbody tr:hover .btn-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page { display: none; }
+.page.active { display: flex; flex-direction: column; height: calc(100vh - 56px); }
+
+.config-page {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 600px;
+}
+
+.config-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 3px;
+  color: var(--accent);
+}
+
+.config-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.config-field label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text2);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.api-note {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  padding: 12px 16px;
+  border-radius: 0 4px 4px 0;
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.6;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.api-note a { color: var(--accent2); }
+
+.row-2 { display: flex; gap: 10px; }
+
+.archive-indicator {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--text3);
+  border-radius: 50%;
+  margin-left: 6px;
+  vertical-align: middle;
+}
 </style>
 </head>
-<body>
 
+<body>
 <div class="header">
   <div class="logo">СКТ · ЗАКАЗЫ</div>
   <div class="tabs">
@@ -643,33 +633,20 @@
     <button class="tab" onclick="switchTab('history')">История</button>
     <button class="tab" onclick="switchTab('config')">Настройки</button>
   </div>
+
   <div id="userBar" style="display:none;align-items:center;gap:8px;margin-left:auto;">
-  <span id="userBadge" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--success);"></span>
-</div>
-<button id="installBtn" onclick="installApp()" style="
-  display:none;
-  background:var(--accent);color:#0f1117;border:none;
-  padding:6px 16px;border-radius:4px;
-  font-family:'IBM Plex Mono',monospace;font-size:11px;
-  font-weight:700;letter-spacing:1px;cursor:pointer;
-  text-transform:uppercase;white-space:nowrap;
-  animation: pulse 2s infinite;
-">⬇ Установить</button>
-<div class="sheet-id-badge" id="sheetBadge">не подключено</div>
+    <span id="userBadge" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--success);"></span>
+  </div>
+
+  <button id="installBtn" onclick="installApp()" style="display:none;background:var(--accent);color:#0f1117;border:none;padding:6px 16px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;text-transform:uppercase;white-space:nowrap;animation:pulse 2s infinite;">⬇ Установить</button>
+  <div class="sheet-id-badge" id="sheetBadge">не подключено</div>
 </div>
 
-<!-- ════════════ TAB: НОВЫЙ ЗАКАЗ ════════════ -->
 <div class="page active" id="page-new" style="flex-direction:row;">
-
   <div class="panel-form">
-    <div class="panel-title">
-      <span class="dot"></span>
-      Новый заказ
-    </div>
+    <div class="panel-title"><span class="dot"></span>Новый заказ</div>
 
     <div class="form-body">
-
-      <!-- B: Заказ -->
       <div class="field">
         <label><span class="col-badge">B</span> Заказ <span class="required">*</span></label>
         <select id="f_zakazB">
@@ -682,27 +659,23 @@
         </select>
       </div>
 
-      <!-- C: Заказчик -->
       <div class="field">
         <label><span class="col-badge">C</span> Заказчик <span class="required">*</span></label>
         <input type="text" id="f_zakazchikC" placeholder="Введите заказчика">
       </div>
 
-      <!-- D: Номер договора -->
       <div class="field">
         <label><span class="col-badge">D</span> Номер договора / спецификация</label>
         <input type="text" id="f_dogovorD" placeholder="Если пусто — будет «на склад»">
         <span class="auto-hint">↳ пусто → автоматически «на склад»</span>
       </div>
 
-      <!-- E: Дата внесения -->
       <div class="field">
         <label><span class="col-badge">E</span> Дата внесения в заказы</label>
         <input type="text" id="f_dateE" readonly placeholder="Авто: сегодня">
         <span class="auto-hint">↳ заполняется автоматически</span>
       </div>
 
-      <!-- F: Куратор -->
       <div class="field">
         <label><span class="col-badge">F</span> Куратор <span class="required">*</span></label>
         <select id="f_kuratorF">
@@ -713,25 +686,18 @@
         </select>
       </div>
 
-      <!-- G: Чертежный номер -->
       <div class="field" id="field_drawing">
         <label><span class="col-badge">G</span> Чертежный номер</label>
-        <input type="text" id="f_drawingG" placeholder="Начните вводить…" autocomplete="off"
-               oninput="handleAutocomplete(this,'drawingList','G')"
-               onblur="hideList('drawingList')" onfocus="handleAutocomplete(this,'drawingList','G')">
+        <input type="text" id="f_drawingG" placeholder="Начните вводить…" autocomplete="off" oninput="handleAutocomplete(this,'drawingList','G')" onblur="hideList('drawingList')" onfocus="handleAutocomplete(this,'drawingList','G')">
         <div class="autocomplete-list" id="drawingList"></div>
       </div>
 
-      <!-- H: Название детали -->
       <div class="field" id="field_detail">
         <label><span class="col-badge">H</span> Название детали</label>
-        <input type="text" id="f_detailH" placeholder="Начните вводить…" autocomplete="off"
-               oninput="handleAutocomplete(this,'detailList','H')"
-               onblur="hideList('detailList')" onfocus="handleAutocomplete(this,'detailList','H')">
+        <input type="text" id="f_detailH" placeholder="Начните вводить…" autocomplete="off" oninput="handleAutocomplete(this,'detailList','H')" onblur="hideList('detailList')" onfocus="handleAutocomplete(this,'detailList','H')">
         <div class="autocomplete-list" id="detailList"></div>
       </div>
 
-      <!-- I: Статус -->
       <div class="field">
         <label><span class="col-badge">I</span> Статус</label>
         <select id="f_statusI">
@@ -745,12 +711,10 @@
         </select>
       </div>
 
-      <!-- J: Кол-во -->
       <div class="field">
         <label><span class="col-badge">K</span> Кол-во <span class="required">*</span></label>
         <input type="number" id="f_qtyK" placeholder="0" min="1">
       </div>
-
     </div>
 
     <div class="form-footer">
@@ -759,7 +723,6 @@
     </div>
   </div>
 
-  <!-- RIGHT: preview of current orders -->
   <div class="panel-table">
     <div class="table-header">
       <div class="search-box">
@@ -774,7 +737,6 @@
   </div>
 </div>
 
-<!-- ════════════ TAB: ТЕКУЩИЕ ЗАКАЗЫ ════════════ -->
 <div class="page" id="page-current">
   <div class="table-header">
     <div class="search-box">
@@ -788,7 +750,6 @@
   </div>
 </div>
 
-<!-- ════════════ TAB: АРХИВ ════════════ -->
 <div class="page" id="page-archive">
   <div class="table-header" style="flex-wrap:wrap;gap:10px;padding:10px 20px;">
     <div class="search-box">
@@ -808,58 +769,38 @@
   </div>
 </div>
 
-<!-- ════════════ TAB: СБОР ДАННЫХ ════════════ -->
 <div class="page" id="page-sbordata">
   <div class="table-header" style="flex-wrap:wrap;gap:8px;padding:10px 20px;">
-
-    <!-- Поиск -->
     <div class="search-box">
       <input type="text" id="searchSbor" placeholder="Поиск по ФИО, операции…" oninput="applySborFilters()">
     </div>
 
-    <!-- Фильтр по станку -->
     <div style="display:flex;align-items:center;gap:6px;">
       <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">Станок:</span>
-      <select id="sborStationFilter" onchange="applySborFilters()" style="
-        background:var(--surface2);border:1px solid var(--border);color:var(--text);
-        padding:4px 10px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace;
-      ">
+      <select id="sborStationFilter" onchange="applySborFilters()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace;">
         <option value="">Все</option>
       </select>
     </div>
 
-    <!-- Фильтр по дате от -->
     <div style="display:flex;align-items:center;gap:6px;">
       <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">С:</span>
-      <input type="date" id="sborDateFrom" onchange="applySborFilters()" style="
-        background:var(--surface2);border:1px solid var(--border);color:var(--text);
-        padding:4px 8px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace;
-      ">
+      <input type="date" id="sborDateFrom" onchange="applySborFilters()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace;">
     </div>
 
-    <!-- Фильтр по дате до -->
     <div style="display:flex;align-items:center;gap:6px;">
       <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">По:</span>
-      <input type="date" id="sborDateTo" onchange="applySborFilters()" style="
-        background:var(--surface2);border:1px solid var(--border);color:var(--text);
-        padding:4px 8px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace;
-      ">
+      <input type="date" id="sborDateTo" onchange="applySborFilters()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace;">
     </div>
 
-    <!-- Фильтр по статусу -->
     <div style="display:flex;align-items:center;gap:6px;">
       <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">Статус:</span>
-      <select id="sborStatusFilter" onchange="applySborFilters()" style="
-        background:var(--surface2);border:1px solid var(--border);color:var(--text);
-        padding:4px 10px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace;
-      ">
+      <select id="sborStatusFilter" onchange="applySborFilters()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace;">
         <option value="">Все</option>
         <option value="Готово">Готово</option>
         <option value="В работе">В работе</option>
       </select>
     </div>
 
-    <!-- Кнопки справа -->
     <div style="display:flex;gap:8px;align-items:center;margin-left:auto;">
       <button class="btn btn-secondary" style="font-size:10px;padding:4px 10px;" onclick="clearSborFilters()">✕ Сбросить</button>
       <div class="count-badge">Записей: <span id="countSbor">0</span></div>
@@ -871,7 +812,6 @@
   </div>
 </div>
 
-<!-- ════════════ TAB: ИСТОРИЯ ════════════ -->
 <div class="page" id="page-history">
   <div class="table-header">
     <div class="search-box">
@@ -885,7 +825,6 @@
   </div>
 </div>
 
-<!-- ════════════ TAB: НАСТРОЙКИ ════════════ -->
 <div class="page" id="page-config" style="overflow-y:auto;">
   <div class="config-page">
     <div class="config-title">Настройки подключения</div>
@@ -933,7 +872,7 @@ function doGet(e) {
     const sh = ss.getSheetByName(e.parameter.sheet);
     const data = sh.getDataRange().getValues();
     return ContentService
-      .createTextOutput(JSON.stringify(data))
+      .createTextOutput(JSON.stringify({data:data}))
       .setMimeType(ContentService.MimeType.JSON);
   }
 
@@ -946,21 +885,14 @@ function doGet(e) {
       .setMimeType(ContentService.MimeType.JSON);
   }
 }
-
-// После публикации: Развернуть → Новое развертывание
-// Тип: Веб-приложение, Доступ: Все
       </div>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ════════════════════════════════
-// STATE
-// ════════════════════════════════
 const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbxPYaouf6QVOhBma9NH5peMVcRv8pTkDfPtLrbvbZaHmWi_xSy50TGE3P91CnS9iItM3A/exec';
 
 const STATE = {
@@ -977,14 +909,10 @@ const STATE = {
   sbordataStations: [],
   appsScriptUrl: localStorage.getItem('appsScriptUrl') || DEFAULT_URL,
   srcId: localStorage.getItem('srcId') || '1F25NFAp_Ghu1A-JsLwotNmOqeKzYdFV_t1KrqrMjUCA',
-  user: null,  // { email, name, role, token }
+  user: null
 };
 
-// ════════════════════════════════
-// INIT
-// ════════════════════════════════
 window.onload = () => {
-  // Всегда используем захардкоженный URL
   STATE.appsScriptUrl = DEFAULT_URL;
   localStorage.setItem('appsScriptUrl', DEFAULT_URL);
 
@@ -994,17 +922,10 @@ window.onload = () => {
   loadCuratorsFromConfig();
   loadOrderTypesFromConfig();
 
-  // Автовход без авторизации — роль admin по умолчанию
   STATE.user = { email: 'local', name: 'Пользователь', role: 'admin', token: '' };
   showApp();
-
-  // Автозагрузка данных при открытии
   loadCurrentOrders();
 };
-
-// ════════════════════════════════
-// AUTH
-// ════════════════════════════════
 
 function doLogout() {
   STATE.user = { email: 'local', name: 'Пользователь', role: 'admin', token: '' };
@@ -1013,13 +934,9 @@ function doLogout() {
 function showApp() {
   const bar = document.getElementById('userBar');
   if (bar) bar.style.display = 'flex';
-}
 
-
-// Inject auth params into every API call
-function getAuthParams() {
-  if (!STATE.user) return {};
-  return { email: STATE.user.email, token: STATE.user.token };
+  const badge = document.getElementById('userBadge');
+  if (badge && STATE.user) badge.textContent = STATE.user.name || STATE.user.email || '';
 }
 
 function setTodayDate() {
@@ -1031,34 +948,31 @@ function setTodayDate() {
 }
 
 function loadConfig() {
-  const url = localStorage.getItem('appsScriptUrl') || DEFAULT_URL;
   const srcId = localStorage.getItem('srcId') || STATE.srcId;
   const curators = localStorage.getItem('curators') || 'Галимьянов 3,Федотов А,Галимьянов З.Р.';
   const orders = localStorage.getItem('orderTypes') || 'РСК,Везерфорд,SCT,ВН заказы,ГПН-Шельф';
 
-  document.getElementById('cfg_url').value = url;
+  document.getElementById('cfg_url').value = DEFAULT_URL;
   document.getElementById('cfg_srcId').value = srcId;
   document.getElementById('cfg_curators').value = curators;
   document.getElementById('cfg_orders').value = orders;
 
-  // Always use hardcoded DEFAULT_URL — ignore localStorage
   STATE.appsScriptUrl = DEFAULT_URL;
   STATE.srcId = srcId;
   localStorage.setItem('appsScriptUrl', DEFAULT_URL);
 }
 
 function saveConfig() {
-  const url = document.getElementById('cfg_url').value.trim();
   const srcId = document.getElementById('cfg_srcId').value.trim();
   const curators = document.getElementById('cfg_curators').value.trim();
   const orders = document.getElementById('cfg_orders').value.trim();
 
-  localStorage.setItem('appsScriptUrl', url);
+  localStorage.setItem('appsScriptUrl', DEFAULT_URL);
   localStorage.setItem('srcId', srcId);
   localStorage.setItem('curators', curators);
   localStorage.setItem('orderTypes', orders);
 
-  STATE.appsScriptUrl = url;
+  STATE.appsScriptUrl = DEFAULT_URL;
   STATE.srcId = srcId;
 
   loadCuratorsFromConfig();
@@ -1068,26 +982,30 @@ function saveConfig() {
 }
 
 function loadCuratorsFromConfig() {
-  const curators = (localStorage.getItem('curators') || 'Галимьянов 3,Федотов А').split(',').map(s => s.trim());
+  const curators = (localStorage.getItem('curators') || 'Галимьянов 3,Федотов А,Галимьянов З.Р.').split(',').map(s => s.trim()).filter(Boolean);
   const sel = document.getElementById('f_kuratorF');
   const cur = sel.value;
   sel.innerHTML = '<option value="">— выберите —</option>';
+
   curators.forEach(c => {
     const o = document.createElement('option');
-    o.value = c; o.textContent = c;
+    o.value = c;
+    o.textContent = c;
     if (c === cur) o.selected = true;
     sel.appendChild(o);
   });
 }
 
 function loadOrderTypesFromConfig() {
-  const types = (localStorage.getItem('orderTypes') || 'РСК,SCT').split(',').map(s => s.trim());
+  const types = (localStorage.getItem('orderTypes') || 'РСК,Везерфорд,SCT,ВН заказы,ГПН-Шельф').split(',').map(s => s.trim()).filter(Boolean);
   const sel = document.getElementById('f_zakazB');
   const cur = sel.value;
   sel.innerHTML = '<option value="">— выберите —</option>';
+
   types.forEach(t => {
     const o = document.createElement('option');
-    o.value = t; o.textContent = t;
+    o.value = t;
+    o.textContent = t;
     if (t === cur) o.selected = true;
     sel.appendChild(o);
   });
@@ -1095,83 +1013,78 @@ function loadOrderTypesFromConfig() {
 
 function updateSheetBadge() {
   const badge = document.getElementById('sheetBadge');
-  // Always connected — URL is hardcoded
   badge.textContent = '✓ подключено';
   badge.style.color = 'var(--success)';
   badge.style.borderColor = 'rgba(61,220,132,.4)';
 }
 
-// ════════════════════════════════
-// TABS
-// ════════════════════════════════
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t,i) => {
     const names = ['new','current','archive','sbordata','history','config'];
     t.classList.toggle('active', names[i] === name);
   });
+
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
 }
 
-// ════════════════════════════════
-// API CALLS (GET + JSONP для file://)
-// ════════════════════════════════
 function apiCall(params) {
   return new Promise((resolve, reject) => {
-    const cbName = 'cb_' + Date.now();
-    // Always use DEFAULT_URL
+    const cbName = 'cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
     const url = DEFAULT_URL;
-    STATE.appsScriptUrl = url;
-    if (!url) { reject(new Error('URL Apps Script не настроен')); return; }
 
-    // Auth injection (если пользователь авторизован)
+    if (!url) {
+      reject(new Error('URL Apps Script не настроен'));
+      return;
+    }
+
     if (STATE.user && STATE.user.email && STATE.user.email !== 'local' && params.action !== 'login') {
       params.email = STATE.user.email;
       params.token = STATE.user.token;
     }
 
     params.callback = cbName;
+
     const qs = Object.entries(params).map(([k,v]) =>
       encodeURIComponent(k) + '=' + encodeURIComponent(v)
     ).join('&');
+
+    const script = document.createElement('script');
 
     window[cbName] = (data) => {
       delete window[cbName];
       if (script.parentNode) document.head.removeChild(script);
 
-      // Auth error handling
-      if (data.error === 'auth') {
+      if (data && data.error === 'auth') {
         doLogout();
         reject(new Error('Сессия истекла, войдите снова'));
         return;
       }
 
-      if (data.error) reject(new Error(data.error));
+      if (data && data.error) reject(new Error(data.error));
       else resolve(data);
     };
 
-    const script = document.createElement('script');
     script.src = url + '?' + qs;
     script.onerror = () => {
       delete window[cbName];
+      if (script.parentNode) document.head.removeChild(script);
       reject(new Error('Ошибка загрузки скрипта'));
     };
+
     document.head.appendChild(script);
   });
 }
 
 async function apiRead(sheetName) {
   const data = await apiCall({ action: 'read', id: STATE.srcId, sheet: sheetName });
-  return data.data;
+  return data.data || [];
 }
 
 async function apiAppend(sheetName, row) {
   return await apiCall({ action: 'append', id: STATE.srcId, sheet: sheetName, row: JSON.stringify(row) });
 }
 
-// ════════════════════════════════
-// LOAD CURRENT ORDERS
-// ════════════════════════════════
 async function loadCurrentOrders() {
   const containers = ['tableNew', 'tableCurrent'];
   containers.forEach(id => {
@@ -1180,34 +1093,28 @@ async function loadCurrentOrders() {
 
   try {
     const data = await apiRead('Заказы на производство новый');
-
-    // Skip header rows (first 3), hide rows where B,C,G all empty
     const rows = data.slice(3).filter(r => String(r[1]||'').trim() || String(r[2]||'').trim() || String(r[6]||'').trim());
+
     STATE.currentRows = rows;
     STATE.filteredCurrent = rows;
-
-    // Extract suggestions
     STATE.drawingSuggestions = [...new Set(rows.map(r => String(r[6]||'').trim()).filter(Boolean))];
     STATE.detailSuggestions = [...new Set(rows.map(r => String(r[7]||'').trim()).filter(Boolean))];
 
     renderOrdersTable('tableNew', rows, 'countNew');
     renderOrdersTable('tableCurrent', rows, 'countCurrent');
-
   } catch(e) {
-    const msg = `<div class="empty-state"><div class="icon">⚠️</div><div>${e.message}</div><div style="color:var(--text3);margin-top:8px">Настройте Apps Script URL во вкладке «Настройки»</div></div>`;
+    const msg = `<div class="empty-state"><div class="icon">⚠️</div><div>${escapeHtml(e.message)}</div><div style="color:var(--text3);margin-top:8px">Настройте Apps Script URL во вкладке «Настройки»</div></div>`;
     containers.forEach(id => document.getElementById(id).innerHTML = msg);
   }
 }
 
-// ════════════════════════════════
-// LOAD ARCHIVE
-// ════════════════════════════════
 async function loadArchive() {
   document.getElementById('tableArchive').innerHTML = '<div class="loading"><div class="spinner"></div>Загрузка архива…</div>';
 
   try {
     const data = await apiRead('Архив Заказы на производство');
     const rows = data.slice(3).filter(r => String(r[1]||'').trim() || String(r[2]||'').trim() || String(r[6]||'').trim());
+
     STATE.archiveRows = rows;
     STATE.filteredArchive = rows;
     STATE.archiveMonthFilter = 'all';
@@ -1215,31 +1122,30 @@ async function loadArchive() {
     buildMonthButtons(rows);
     renderArchiveTable(rows);
   } catch(e) {
-    document.getElementById('tableArchive').innerHTML =
-      `<div class="empty-state"><div class="icon">⚠️</div><div>${e.message}</div></div>`;
+    document.getElementById('tableArchive').innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><div>${escapeHtml(e.message)}</div></div>`;
   }
 }
 
 function buildMonthButtons(rows) {
   const RU_MONTHS = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
-  const monthSet = new Map(); // 'YYYY-MM' -> label
+  const monthSet = new Map();
 
   rows.forEach(r => {
-    // col O = index 14 (дата окончания)
     const raw = r[14];
     if (!raw) return;
+
     const d = new Date(raw);
     if (isNaN(d)) return;
+
     const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
     if (!monthSet.has(key)) {
       monthSet.set(key, `${RU_MONTHS[d.getMonth()]} ${d.getFullYear()}`);
     }
   });
 
-  // Sort descending
   const sorted = [...monthSet.entries()].sort((a,b) => b[0].localeCompare(a[0]));
-
   const container = document.getElementById('filterMonths');
+
   container.innerHTML = `<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">Месяц:</span>
     <button class="month-btn active" data-month="all" onclick="setMonthFilter(this,'all')">Все</button>`;
 
@@ -1266,7 +1172,6 @@ function applyArchiveFilters() {
 
   let rows = STATE.archiveRows;
 
-  // Filter by month (col O = index 14)
   if (month !== 'all') {
     rows = rows.filter(r => {
       const d = new Date(r[14]);
@@ -1276,7 +1181,6 @@ function applyArchiveFilters() {
     });
   }
 
-  // Filter by search
   if (query) {
     rows = rows.filter(r => r.some(cell => String(cell).toLowerCase().includes(query)));
   }
@@ -1288,13 +1192,12 @@ function renderArchiveTable(rows) {
   document.getElementById('countArchive').textContent = rows.length;
 
   if (!rows.length) {
-    document.getElementById('tableArchive').innerHTML =
-      '<div class="empty-state"><div class="icon">📭</div><div>Нет данных</div></div>';
+    document.getElementById('tableArchive').innerHTML = '<div class="empty-state"><div class="icon">📭</div><div>Нет данных</div></div>';
     return;
   }
 
   const cols = [
-    {label:'№',   key:0},
+    {label:'№', key:0},
     {label:'Заказ', key:1},
     {label:'Заказчик', key:2},
     {label:'Договор', key:3},
@@ -1304,42 +1207,45 @@ function renderArchiveTable(rows) {
     {label:'Наименование', key:7},
     {label:'Статус', key:8},
     {label:'Кол-во', key:10},
-    {label:'Дата окончания', key:14},
+    {label:'Дата окончания', key:14}
   ];
 
   let html = '<table><thead><tr>';
   cols.forEach(c => {
     const accent = c.key === 14 ? ' style="color:var(--accent)"' : '';
-    html += `<th${accent}>${c.label}</th>`;
+    html += `<th${accent}>${escapeHtml(c.label)}</th>`;
   });
   html += '<th style="width:36px"></th></tr></thead><tbody>';
 
   rows.forEach(r => {
     html += '<tr class="data-row">';
+
     cols.forEach(c => {
-      let val = String(r[c.key] ?? '');
+      const val = String(r[c.key] ?? '');
+
       if (c.key === 0) {
-        html += `<td class="cell-num">${val}</td>`;
+        html += `<td class="cell-num">${escapeHtml(val)}</td>`;
       } else if (c.key === 1) {
-        const cls = getZakazClass(val);
-        html += `<td><span class="cell-zakazchik ${cls}">${val}</span></td>`;
+        html += `<td><span class="cell-zakazchik ${getZakazClass(val)}">${escapeHtml(val)}</span></td>`;
       } else if (c.key === 4 || c.key === 14) {
         const formatted = formatDate(val);
         const style = c.key === 14 && formatted ? ' style="color:var(--accent);font-weight:600"' : '';
-        html += `<td${style}>${formatted}</td>`;
+        html += `<td${style}>${escapeHtml(formatted)}</td>`;
       } else if (c.key === 8) {
-        const cls = getStatusClass(val);
-        html += `<td><span class="status-badge ${cls}">${val}</span></td>`;
+        html += `<td><span class="status-badge ${getStatusClass(val)}">${escapeHtml(val)}</span></td>`;
       } else {
-        html += `<td title="${val}">${val}</td>`;
+        html += `<td title="${escapeAttr(val)}">${escapeHtml(val)}</td>`;
       }
     });
+
     const isAdminA = STATE.user && STATE.user.role === 'admin';
-    const sheetRowA = rows.indexOf(r) + 4;
+    const sheetRowA = STATE.archiveRows.indexOf(r) + 4;
     let btnsA = `<button class="btn-repeat" title="Повторить заказ" onclick='repeatOrder(${JSON.stringify(r)})'>↺</button>`;
-    if (isAdminA) {
+
+    if (isAdminA && sheetRowA >= 4) {
       btnsA += `<button class="btn-delete" title="Удалить" onclick="deleteOrder('Архив Заказы на производство',${sheetRowA},this)">✕</button>`;
     }
+
     html += `<td class="repeat-cell" style="min-width:56px">${btnsA}</td>`;
     html += '</tr>';
   });
@@ -1348,16 +1254,16 @@ function renderArchiveTable(rows) {
   document.getElementById('tableArchive').innerHTML = html;
 }
 
-// ════════════════════════════════
-// RENDER TABLE
-// ════════════════════════════════
 function formatDate(val) {
   if (!val) return '';
+
   const d = new Date(val);
   if (isNaN(d)) return String(val);
+
   const dd = String(d.getDate()).padStart(2,'0');
   const mm = String(d.getMonth()+1).padStart(2,'0');
   const yy = String(d.getFullYear()).slice(-2);
+
   return `${dd}.${mm}.${yy}`;
 }
 
@@ -1365,8 +1271,7 @@ function renderOrdersTable(containerId, rows, countId) {
   document.getElementById(countId).textContent = rows.length;
 
   if (!rows.length) {
-    document.getElementById(containerId).innerHTML =
-      '<div class="empty-state"><div class="icon">📭</div><div>Нет данных</div></div>';
+    document.getElementById(containerId).innerHTML = '<div class="empty-state"><div class="icon">📭</div><div>Нет данных</div></div>';
     return;
   }
 
@@ -1380,41 +1285,40 @@ function renderOrdersTable(containerId, rows, countId) {
     {label:'Чертёж', key:6},
     {label:'Наименование', key:7},
     {label:'Статус', key:8},
-    {label:'Кол-во', key:10},
+    {label:'Кол-во', key:10}
   ];
 
   let html = '<table><thead><tr>';
-  cols.forEach(c => html += `<th>${c.label}</th>`);
-  html += '<th style="width:36px"></th>';
-  html += '</tr></thead><tbody>';
+  cols.forEach(c => html += `<th>${escapeHtml(c.label)}</th>`);
+  html += '<th style="width:36px"></th></tr></thead><tbody>';
 
   rows.forEach((r, idx) => {
-    const rowJson = encodeURIComponent(JSON.stringify(r));
     html += `<tr class="data-row" data-idx="${idx}">`;
+
     cols.forEach(c => {
-      let val = String(r[c.key] ?? '');
+      const val = String(r[c.key] ?? '');
+
       if (c.key === 0) {
-        html += `<td class="cell-num">${val}</td>`;
+        html += `<td class="cell-num">${escapeHtml(val)}</td>`;
       } else if (c.key === 1) {
-        const cls = getZakazClass(val);
-        html += `<td><span class="cell-zakazchik ${cls}">${val}</span></td>`;
+        html += `<td><span class="cell-zakazchik ${getZakazClass(val)}">${escapeHtml(val)}</span></td>`;
       } else if (c.key === 4) {
-        html += `<td>${formatDate(val)}</td>`;
+        html += `<td>${escapeHtml(formatDate(val))}</td>`;
       } else if (c.key === 8) {
-        const cls = getStatusClass(val);
-        html += `<td><span class="status-badge ${cls}">${val}</span></td>`;
+        html += `<td><span class="status-badge ${getStatusClass(val)}">${escapeHtml(val)}</span></td>`;
       } else {
-        html += `<td title="${val}">${val}</td>`;
+        html += `<td title="${escapeAttr(val)}">${escapeHtml(val)}</td>`;
       }
     });
+
     const isAdmin = STATE.user && STATE.user.role === 'admin';
-    const sheetForContainer = containerId === 'tableArchive' ? 'Архив Заказы на производство' : 'Заказы на производство новый';
-    // rowNum in sheet = idx + 4 (3 header rows + 1-based)
-    const sheetRowNum = idx + 4;
+    const sheetRowNum = STATE.currentRows.indexOf(r) + 4;
     let actionBtns = `<button class="btn-repeat" title="Повторить заказ" onclick='repeatOrder(${JSON.stringify(r)})'>↺</button>`;
-    if (isAdmin) {
-      actionBtns += `<button class="btn-delete" title="Удалить заказ" onclick="deleteOrder('${sheetForContainer}',${sheetRowNum},this)">✕</button>`;
+
+    if (isAdmin && sheetRowNum >= 4) {
+      actionBtns += `<button class="btn-delete" title="Удалить заказ" onclick="deleteOrder('Заказы на производство новый',${sheetRowNum},this)">✕</button>`;
     }
+
     html += `<td class="repeat-cell" style="min-width:56px">${actionBtns}</td>`;
     html += '</tr>';
   });
@@ -1424,10 +1328,8 @@ function renderOrdersTable(containerId, rows, countId) {
 }
 
 function repeatOrder(r) {
-  // Switch to new order tab
   switchTab('new');
 
-  // Fill form fields from row
   const setVal = (id, val) => {
     const el = document.getElementById(id);
     if (el) el.value = val || '';
@@ -1442,14 +1344,12 @@ function repeatOrder(r) {
   setVal('f_statusI', r[8]);
   setVal('f_qtyK', r[10] || 1);
 
-  // Keep today's date
   setTodayDate();
-
   showToast('Заказ скопирован — проверьте и нажмите «Добавить»');
 }
 
 function getZakazClass(val) {
-  const v = val.toLowerCase();
+  const v = String(val).toLowerCase();
   if (v.includes('рск')) return 'badge-rsk';
   if (v.includes('sct') || v.includes('скт')) return 'badge-sct';
   if (v.includes('везер')) return 'badge-vez';
@@ -1457,15 +1357,12 @@ function getZakazClass(val) {
 }
 
 function getStatusClass(val) {
-  const v = val.toLowerCase();
+  const v = String(val).toLowerCase();
   if (v.includes('не запущ')) return 'status-no';
   if (v.includes('заготов')) return 'status-ok';
   return 'status-new';
 }
 
-// ════════════════════════════════
-// FILTER / SEARCH
-// ════════════════════════════════
 function filterTable(tab) {
   const query = document.getElementById('search' + capitalize(tab)).value.toLowerCase();
 
@@ -1473,21 +1370,23 @@ function filterTable(tab) {
     const filtered = STATE.currentRows.filter(r =>
       r.some(cell => String(cell).toLowerCase().includes(query))
     );
+
     STATE.filteredCurrent = filtered;
-    renderOrdersTable(tab === 'new' ? 'tableNew' : 'tableCurrent', filtered,
-      tab === 'new' ? 'countNew' : 'countCurrent');
+
+    renderOrdersTable(
+      tab === 'new' ? 'tableNew' : 'tableCurrent',
+      filtered,
+      tab === 'new' ? 'countNew' : 'countCurrent'
+    );
   }
 
-  if (tab === 'archive') {
-    applyArchiveFilters();
-  }
+  if (tab === 'archive') applyArchiveFilters();
 }
 
-function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function capitalize(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
 
-// ════════════════════════════════
-// AUTOCOMPLETE
-// ════════════════════════════════
 function handleAutocomplete(input, listId, colType) {
   const val = input.value.trim().toLowerCase();
   const list = document.getElementById(listId);
@@ -1498,18 +1397,20 @@ function handleAutocomplete(input, listId, colType) {
     return;
   }
 
-  const matches = suggestions.filter(s =>
-    s.toLowerCase().includes(val)
-  ).slice(0, 10);
+  const matches = suggestions.filter(s => s.toLowerCase().includes(val)).slice(0, 10);
 
-  if (!matches.length) { list.classList.remove('show'); return; }
+  if (!matches.length) {
+    list.classList.remove('show');
+    return;
+  }
 
   list.innerHTML = matches.map(m => {
     const idx = m.toLowerCase().indexOf(val);
     const highlighted = idx >= 0
-      ? m.slice(0,idx) + `<span class="match">${m.slice(idx, idx+val.length)}</span>` + m.slice(idx+val.length)
-      : m;
-    return `<div class="autocomplete-item" onmousedown="selectSuggestion('${listId}','${colType}',this)" data-val="${m.replace(/"/g,'&quot;')}">${highlighted}</div>`;
+      ? escapeHtml(m.slice(0,idx)) + `<span class="match">${escapeHtml(m.slice(idx, idx+val.length))}</span>` + escapeHtml(m.slice(idx+val.length))
+      : escapeHtml(m);
+
+    return `<div class="autocomplete-item" onmousedown="selectSuggestion('${listId}','${colType}',this)" data-val="${escapeAttr(m)}">${highlighted}</div>`;
   }).join('');
 
   list.classList.add('show');
@@ -1518,6 +1419,7 @@ function handleAutocomplete(input, listId, colType) {
 function selectSuggestion(listId, colType, el) {
   const value = typeof el === 'string' ? el : el.dataset.val;
   const inputId = colType === 'G' ? 'f_drawingG' : 'f_detailH';
+
   document.getElementById(inputId).value = value;
   document.getElementById(listId).classList.remove('show');
 }
@@ -1526,41 +1428,34 @@ function hideList(listId) {
   setTimeout(() => document.getElementById(listId).classList.remove('show'), 200);
 }
 
-// ════════════════════════════════
-// SUBMIT ORDER
-// ════════════════════════════════
 async function submitOrder() {
-  const zakazB   = document.getElementById('f_zakazB').value;
+  const zakazB = document.getElementById('f_zakazB').value;
   const zakazchikC = document.getElementById('f_zakazchikC').value.trim();
   const dogovorD = document.getElementById('f_dogovorD').value.trim() || 'на склад';
-  const dateE    = document.getElementById('f_dateE').value;
+  const dateE = document.getElementById('f_dateE').value;
   const kuratorF = document.getElementById('f_kuratorF').value;
   const drawingG = document.getElementById('f_drawingG').value.trim();
-  const detailH  = document.getElementById('f_detailH').value.trim();
-  const statusI  = document.getElementById('f_statusI').value;
-  const qtyK     = document.getElementById('f_qtyK').value;
+  const detailH = document.getElementById('f_detailH').value.trim();
+  const statusI = document.getElementById('f_statusI').value;
+  const qtyK = document.getElementById('f_qtyK').value;
 
-  // Validation
-  if (!zakazB)      { showToast('Выберите Заказ (B)', true); return; }
-  if (!zakazchikC)  { showToast('Заполните Заказчик (C)', true); return; }
-  if (!kuratorF)    { showToast('Выберите Куратора (F)', true); return; }
+  if (!zakazB) { showToast('Выберите Заказ (B)', true); return; }
+  if (!zakazchikC) { showToast('Заполните Заказчик (C)', true); return; }
+  if (!kuratorF) { showToast('Выберите Куратора (F)', true); return; }
   if (!qtyK || +qtyK <= 0) { showToast('Укажите Кол-во (K)', true); return; }
 
-  // Build row matching sheet columns A..K
-  // A=№(auto), B=Заказ, C=Заказчик, D=Договор, E=Дата, F=Куратор,
-  // G=Чертёж, H=Название, I=Статус, J=пусто, K=Кол-во
   const row = [
-    '',           // A: № — авто в таблице
-    zakazB,       // B
-    zakazchikC,   // C
-    dogovorD,     // D
-    dateE,        // E
-    kuratorF,     // F
-    drawingG,     // G
-    detailH,      // H
-    statusI,      // I
-    '',           // J
-    +qtyK,        // K
+    '',
+    zakazB,
+    zakazchikC,
+    dogovorD,
+    dateE,
+    kuratorF,
+    drawingG,
+    detailH,
+    statusI,
+    '',
+    +qtyK
   ];
 
   const btn = document.querySelector('.btn-primary');
@@ -1586,9 +1481,6 @@ function clearForm() {
   setTodayDate();
 }
 
-// ════════════════════════════════
-// TOAST
-// ════════════════════════════════
 function showToast(msg, isError = false) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -1597,97 +1489,75 @@ function showToast(msg, isError = false) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// ════════════════════════════════
-// SCRIPT HELPER
-// ════════════════════════════════
-// ════════════════════════════════
-// СБОР ДАННЫХ
-// ════════════════════════════════
-const SBORDATA_ID    = '1hYTxpzs5P1QFgZ9VoiQpkjuqb27uz_Up3hSRn6uRxtQ';
+const SBORDATA_ID = '1hYTxpzs5P1QFgZ9VoiQpkjuqb27uz_Up3hSRn6uRxtQ';
 const SBORDATA_SHEET = 'Сбор данных';
 
-// Колонки: A=Отметка времени, B=ФИО, C=Станок, D=№Сорр-ID, E=Кол-во, F=Операция, G=Комментарий, H=Статус
-// I=№Сорр, J=Наименование, K=Чертёж, L=Годные, M=Брак
-
 async function loadSborData() {
-  document.getElementById('tableSbor').innerHTML =
-    '<div class="loading"><div class="spinner"></div>Загрузка данных…</div>';
+  document.getElementById('tableSbor').innerHTML = '<div class="loading"><div class="spinner"></div>Загрузка данных…</div>';
 
   try {
     const data = await apiCall({ action: 'read', id: SBORDATA_ID, sheet: SBORDATA_SHEET });
-    const rows = (data.data || []).slice(1).filter(r =>
-      r.some(c => String(c || '').trim())
-    );
+    const rows = (data.data || []).slice(1).filter(r => r.some(c => String(c || '').trim()));
+
     STATE.sbordataRows = rows;
 
-    // Собрать уникальные станки
     const stations = [...new Set(rows.map(r => String(r[2] || '').trim()).filter(Boolean))].sort();
     STATE.sbordataStations = stations;
     buildSborStationFilter(stations);
 
-    // Установить даты по умолчанию — последние 30 дней
     const today = new Date();
     const month = new Date(today);
     month.setDate(month.getDate() - 30);
-    document.getElementById('sborDateTo').value   = today.toISOString().slice(0,10);
+
+    document.getElementById('sborDateTo').value = today.toISOString().slice(0,10);
     document.getElementById('sborDateFrom').value = month.toISOString().slice(0,10);
 
     applySborFilters();
   } catch(e) {
-    document.getElementById('tableSbor').innerHTML =
-      '<div class="empty-state"><div class="icon">⚠️</div><div>' + e.message + '</div></div>';
+    document.getElementById('tableSbor').innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><div>' + escapeHtml(e.message) + '</div></div>';
   }
 }
 
 function buildSborStationFilter(stations) {
   const sel = document.getElementById('sborStationFilter');
   const cur = sel.value;
+
   sel.innerHTML = '<option value="">Все</option>';
+
   stations.forEach(s => {
     const o = document.createElement('option');
-    o.value = s; o.textContent = s;
+    o.value = s;
+    o.textContent = s;
     if (s === cur) o.selected = true;
     sel.appendChild(o);
   });
 }
 
 function applySborFilters() {
-  const query      = (document.getElementById('searchSbor').value || '').toLowerCase();
-  const station    = document.getElementById('sborStationFilter').value;
+  const query = (document.getElementById('searchSbor').value || '').toLowerCase();
+  const station = document.getElementById('sborStationFilter').value;
   const dateFromEl = document.getElementById('sborDateFrom').value;
-  const dateToEl   = document.getElementById('sborDateTo').value;
-  const status     = document.getElementById('sborStatusFilter').value;
+  const dateToEl = document.getElementById('sborDateTo').value;
+  const status = document.getElementById('sborStatusFilter').value;
 
   const dateFrom = dateFromEl ? new Date(dateFromEl + 'T00:00:00') : null;
-  const dateTo   = dateToEl   ? new Date(dateToEl   + 'T23:59:59') : null;
+  const dateTo = dateToEl ? new Date(dateToEl + 'T23:59:59') : null;
 
   let rows = STATE.sbordataRows;
 
-  // Фильтр по дате (колонка A)
   if (dateFrom || dateTo) {
     rows = rows.filter(r => {
       const d = r[0] ? new Date(r[0]) : null;
       if (!d || isNaN(d)) return true;
       if (dateFrom && d < dateFrom) return false;
-      if (dateTo   && d > dateTo)   return false;
+      if (dateTo && d > dateTo) return false;
       return true;
     });
   }
 
-  // Фильтр по станку (колонка C)
-  if (station) {
-    rows = rows.filter(r => String(r[2] || '').trim() === station);
-  }
-
-  // Фильтр по статусу (колонка H)
-  if (status) {
-    rows = rows.filter(r => String(r[7] || '').trim() === status);
-  }
-
-  // Поиск по тексту
-  if (query) {
-    rows = rows.filter(r => r.some(c => String(c || '').toLowerCase().includes(query)));
-  }
+  if (station) rows = rows.filter(r => String(r[2] || '').trim() === station);
+  if (status) rows = rows.filter(r => String(r[7] || '').trim() === status);
+  if (query) rows = rows.filter(r => r.some(c => String(c || '').toLowerCase().includes(query)));
 
   STATE.sbordataFiltered = rows;
   renderSborTable(rows);
@@ -1706,70 +1576,70 @@ function renderSborTable(rows) {
   document.getElementById('countSbor').textContent = rows.length;
 
   if (!rows.length) {
-    document.getElementById('tableSbor').innerHTML =
-      '<div class="empty-state"><div class="icon">📭</div><div>Нет данных по фильтру</div></div>';
+    document.getElementById('tableSbor').innerHTML = '<div class="empty-state"><div class="icon">📭</div><div>Нет данных по фильтру</div></div>';
     return;
   }
 
   const cols = [
-    { label: 'Время',       idx: 0, type: 'date' },
-    { label: 'ФИО',         idx: 1 },
-    { label: 'Станок',      idx: 2, type: 'station' },
-    { label: '№Сорр',       idx: 3 },
-    { label: 'Кол-во',      idx: 4, type: 'num' },
-    { label: 'Операция',    idx: 5, type: 'op' },
+    { label: 'Время', idx: 0, type: 'date' },
+    { label: 'ФИО', idx: 1 },
+    { label: 'Станок', idx: 2, type: 'station' },
+    { label: '№Сорр', idx: 3 },
+    { label: 'Кол-во', idx: 4, type: 'num' },
+    { label: 'Операция', idx: 5, type: 'op' },
     { label: 'Комментарий', idx: 6 },
-    { label: 'Статус',      idx: 7, type: 'status' },
-    { label: 'Наименование',idx: 9 },
-    { label: 'Чертёж',      idx: 10 },
-    { label: 'Годные',      idx: 11, type: 'num' },
-    { label: 'Брак',        idx: 12, type: 'num' },
+    { label: 'Статус', idx: 7, type: 'status' },
+    { label: 'Наименование', idx: 9 },
+    { label: 'Чертёж', idx: 10 },
+    { label: 'Годные', idx: 11, type: 'num' },
+    { label: 'Брак', idx: 12, type: 'num' }
   ];
 
   let html = '<table><thead><tr>';
-  cols.forEach(c => html += '<th>' + c.label + '</th>');
+  cols.forEach(c => html += '<th>' + escapeHtml(c.label) + '</th>');
   html += '</tr></thead><tbody>';
 
-  // Показываем последние 500 строк (новые сверху)
   const displayRows = rows.slice().reverse().slice(0, 500);
 
   displayRows.forEach(r => {
     html += '<tr>';
+
     cols.forEach(c => {
       const raw = String(r[c.idx] || '');
+
       if (c.type === 'date') {
         const d = r[c.idx] ? new Date(r[c.idx]) : null;
         const formatted = d && !isNaN(d)
-          ? d.toLocaleDateString('ru', {day:'2-digit',month:'2-digit',year:'2-digit'}) + ' ' +
-            d.toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit'})
+          ? d.toLocaleDateString('ru', {day:'2-digit',month:'2-digit',year:'2-digit'}) + ' ' + d.toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit'})
           : raw;
-        html += "<td style='font-family:monospace;font-size:11px;color:var(--text2);white-space:nowrap'>" + formatted + "</td>";
+
+        html += "<td style='font-family:monospace;font-size:11px;color:var(--text2);white-space:nowrap'>" + escapeHtml(formatted) + "</td>";
       } else if (c.type === 'station') {
-        html += "<td><span style='font-family:monospace;font-size:11px;background:var(--surface2);border:1px solid var(--border);padding:2px 6px;border-radius:3px;color:var(--accent2)'>" + raw + "</span></td>";
+        html += "<td><span style='font-family:monospace;font-size:11px;background:var(--surface2);border:1px solid var(--border);padding:2px 6px;border-radius:3px;color:var(--accent2)'>" + escapeHtml(raw) + "</span></td>";
       } else if (c.type === 'op') {
-        html += '<td><span class="status-badge status-new">' + raw + '</span></td>';
+        html += '<td><span class="status-badge status-new">' + escapeHtml(raw) + '</span></td>';
       } else if (c.type === 'status') {
         const cls = raw === 'Готово' ? 'status-ok' : (raw ? 'status-new' : '');
-        html += '<td><span class="status-badge ' + cls + '">' + raw + '</span></td>';
+        html += '<td><span class="status-badge ' + cls + '">' + escapeHtml(raw) + '</span></td>';
       } else if (c.type === 'num') {
-        html += "<td style='font-family:monospace;font-weight:600;color:var(--accent);text-align:center'>" + raw + "</td>";
+        html += "<td style='font-family:monospace;font-weight:600;color:var(--accent);text-align:center'>" + escapeHtml(raw) + "</td>";
       } else {
-        html += '<td title="' + raw.replace(/"/g,'&quot;') + '">' + raw + '</td>';
+        html += '<td title="' + escapeAttr(raw) + '">' + escapeHtml(raw) + '</td>';
       }
     });
+
     html += '</tr>';
   });
 
   html += '</tbody></table>';
+
   if (rows.length > 500) {
-    html += '<div style="text-align:center;padding:12px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3)">Показано последние 500 из ' + rows.length + ' записей</div>';
+    html += '<div style="text-align:center;padding:12px;font-family:&quot;IBM Plex Mono&quot;,monospace;font-size:11px;color:var(--text3)">Показано последние 500 из ' + rows.length + ' записей</div>';
   }
+
   document.getElementById('tableSbor').innerHTML = html;
 }
 
-// ════════════════════════════════
-// PWA INSTALL
-// ════════════════════════════════
 let _installPrompt = null;
 
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -1786,13 +1656,13 @@ window.addEventListener('appinstalled', () => {
 async function installApp() {
   if (_installPrompt) {
     _installPrompt.prompt();
+
     const result = await _installPrompt.userChoice;
     if (result.outcome === 'accepted') {
       _installPrompt = null;
       document.getElementById('installBtn').style.display = 'none';
     }
   } else {
-    // Fallback: показать инструкцию
     showInstallGuide();
   }
 }
@@ -1809,20 +1679,17 @@ function showInstallGuide() {
     + 'Меню (⋮) → «Сохранить и поделиться» → «Создать ярлык»<br>'
     + '✓ Отметьте «Открывать в отдельном окне»'
     + '</div>'
-    + '<button onclick="this.closest(\'div\').parentElement.remove()" style="margin-top:20px;background:var(--accent);color:#0f1117;border:none;padding:10px 24px;border-radius:4px;font-family:IBM Plex Mono,monospace;font-size:11px;font-weight:700;cursor:pointer;text-transform:uppercase;">Понятно</button>'
+    + '<button onclick="this.closest(\\'div\\').parentElement.remove()" style="margin-top:20px;background:var(--accent);color:#0f1117;border:none;padding:10px 24px;border-radius:4px;font-family:IBM Plex Mono,monospace;font-size:11px;font-weight:700;cursor:pointer;text-transform:uppercase;">Понятно</button>'
     + '</div>';
+
   document.body.appendChild(guide);
 }
-
 
 function showScriptHelper() {
   const el = document.getElementById('scriptHelperBlock');
   el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
-// ════════════════════════════════
-// DELETE ORDER
-// ════════════════════════════════
 async function deleteOrder(sheetName, rowNum, btnEl) {
   if (!confirm('Удалить этот заказ? Действие записывается в историю.')) return;
 
@@ -1830,22 +1697,22 @@ async function deleteOrder(sheetName, rowNum, btnEl) {
   btnEl.textContent = '…';
 
   try {
-    await apiCall({ action: 'delete', sheet: sheetName, rowNum: String(rowNum) });
+    await apiCall({ action: 'delete', id: STATE.srcId, sheet: sheetName, rowNum: String(rowNum) });
+
     showToast('✓ Заказ удалён');
-    // Remove row from DOM immediately
-    btnEl.closest('tr').style.opacity = '0';
-    btnEl.closest('tr').style.transition = 'opacity .3s';
+
+    const tr = btnEl.closest('tr');
+    tr.style.opacity = '0';
+    tr.style.transition = 'opacity .3s';
+
     setTimeout(() => {
-      btnEl.closest('tr').remove();
-      // Update counter
+      tr.remove();
+
       if (sheetName.includes('Архив')) {
-        document.getElementById('countArchive').textContent =
-          parseInt(document.getElementById('countArchive').textContent) - 1;
+        document.getElementById('countArchive').textContent = Math.max(0, parseInt(document.getElementById('countArchive').textContent, 10) - 1);
       } else {
-        document.getElementById('countNew').textContent =
-          parseInt(document.getElementById('countNew').textContent) - 1;
-        document.getElementById('countCurrent').textContent =
-          parseInt(document.getElementById('countCurrent').textContent) - 1;
+        document.getElementById('countNew').textContent = Math.max(0, parseInt(document.getElementById('countNew').textContent, 10) - 1);
+        document.getElementById('countCurrent').textContent = Math.max(0, parseInt(document.getElementById('countCurrent').textContent, 10) - 1);
       }
     }, 300);
   } catch(e) {
@@ -1855,21 +1722,17 @@ async function deleteOrder(sheetName, rowNum, btnEl) {
   }
 }
 
-// ════════════════════════════════
-// HISTORY
-// ════════════════════════════════
 async function loadHistory() {
-  document.getElementById('tableHistory').innerHTML =
-    '<div class="loading"><div class="spinner"></div>Загрузка истории…</div>';
+  document.getElementById('tableHistory').innerHTML = '<div class="loading"><div class="spinner"></div>Загрузка истории…</div>';
 
   try {
     const data = await apiCall({ action: 'history' });
-    const rows = (data.data || []).slice(1).reverse(); // newest first, skip header
+    const rows = (data.data || []).slice(1).reverse();
+
     STATE.historyRows = rows;
     renderHistoryTable(rows);
   } catch(e) {
-    document.getElementById('tableHistory').innerHTML =
-      `<div class="empty-state"><div class="icon">⚠️</div><div>${e.message}</div></div>`;
+    document.getElementById('tableHistory').innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><div>${escapeHtml(e.message)}</div></div>`;
   }
 }
 
@@ -1878,6 +1741,7 @@ function filterHistory() {
   const filtered = q
     ? STATE.historyRows.filter(r => r.some(c => String(c).toLowerCase().includes(q)))
     : STATE.historyRows;
+
   renderHistoryTable(filtered);
 }
 
@@ -1885,15 +1749,14 @@ function renderHistoryTable(rows) {
   document.getElementById('countHistory').textContent = rows.length;
 
   if (!rows.length) {
-    document.getElementById('tableHistory').innerHTML =
-      '<div class="empty-state"><div class="icon">📭</div><div>История пуста</div></div>';
+    document.getElementById('tableHistory').innerHTML = '<div class="empty-state"><div class="icon">📭</div><div>История пуста</div></div>';
     return;
   }
 
   const ACTION_COLORS = {
     'УДАЛИЛ': 'var(--danger)',
     'ДОБАВИЛ': 'var(--success)',
-    'ВХОД': 'var(--accent2)',
+    'ВХОД': 'var(--accent2)'
   };
 
   let html = `<table><thead><tr>
@@ -1906,23 +1769,39 @@ function renderHistoryTable(rows) {
   </tr></thead><tbody>`;
 
   rows.forEach(r => {
-    const dt = r[0] ? formatDate(r[0]) + ' ' + (new Date(r[0])).toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}) : '';
+    const dt = r[0]
+      ? formatDate(r[0]) + ' ' + (new Date(r[0])).toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'})
+      : '';
+
     const action = String(r[3] || '');
     const color = ACTION_COLORS[action] || 'var(--text2)';
+
     html += `<tr>
-      <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2)">${dt}</td>
-      <td style="font-weight:600">${r[2] || ''}</td>
-      <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3)">${r[1] || ''}</td>
-      <td><span style="color:${color};font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700">${action}</span></td>
-      <td style="color:var(--text2);font-size:11px">${r[4] || ''}</td>
-      <td title="${r[5] || ''}">${r[5] || ''}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2)">${escapeHtml(dt)}</td>
+      <td style="font-weight:600">${escapeHtml(r[2] || '')}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3)">${escapeHtml(r[1] || '')}</td>
+      <td><span style="color:${color};font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700">${escapeHtml(action)}</span></td>
+      <td style="color:var(--text2);font-size:11px">${escapeHtml(r[4] || '')}</td>
+      <td title="${escapeAttr(r[5] || '')}">${escapeHtml(r[5] || '')}</td>
     </tr>`;
   });
 
   html += '</tbody></table>';
   document.getElementById('tableHistory').innerHTML = html;
 }
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function escapeAttr(value) {
+  return escapeHtml(value);
+}
 </script>
 </body>
 </html>
-```
