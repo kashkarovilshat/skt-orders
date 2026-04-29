@@ -1954,11 +1954,39 @@ async function loadAttendance() {
     }
 
     // Фильтруем записи за выбранную дату
-    const selDate = new Date(dateVal + 'T00:00:00');
+    // Сравниваем даты как строки dd.mm.yyyy чтобы избежать проблем с таймзонами
+    const [yyyy, mm, dd] = dateVal.split('-');
+    const selDateStr = dd + '.' + mm + '.' + yyyy; // формат таблицы
+
     const dayRows = sborRows.filter(r => {
-      const d = r[0] ? new Date(r[0]) : null;
-      if (!d || isNaN(d)) return false;
-      return d.toDateString() === selDate.toDateString();
+      const raw = r[0];
+      if (!raw) return false;
+
+      let rowDateStr = '';
+      if (raw instanceof Date || (typeof raw === 'object' && raw.getTime)) {
+        // Объект Date из Google Sheets
+        const d = new Date(raw);
+        if (isNaN(d)) return false;
+        const rd = String(d.getDate()).padStart(2,'0');
+        const rm = String(d.getMonth()+1).padStart(2,'0');
+        const ry = d.getFullYear();
+        rowDateStr = rd + '.' + rm + '.' + ry;
+      } else {
+        // Строка типа "29.04.2026 15:43:05" или "2026-04-29T..."
+        const s = String(raw);
+        if (s.includes('T') || s.includes('-')) {
+          const d = new Date(s);
+          if (isNaN(d)) return false;
+          const rd = String(d.getDate()).padStart(2,'0');
+          const rm = String(d.getMonth()+1).padStart(2,'0');
+          const ry = d.getFullYear();
+          rowDateStr = rd + '.' + rm + '.' + ry;
+        } else {
+          // "29.04.2026 15:43:05" — берём первые 10 символов
+          rowDateStr = s.slice(0, 10);
+        }
+      }
+      return rowDateStr === selDateStr;
     });
 
     // Группируем по ФИО
