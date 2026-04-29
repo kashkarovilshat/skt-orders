@@ -1743,16 +1743,16 @@ function renderSborTable(rows) {
           ? d.toLocaleDateString('ru', {day:'2-digit',month:'2-digit',year:'2-digit'}) + ' ' +
             d.toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit'})
           : raw;
-        html += '<td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);white-space:nowrap">' + formatted + '</td>';
+        html += "<td style='font-family:monospace;font-size:11px;color:var(--text2);white-space:nowrap'>" + formatted + "</td>";
       } else if (c.type === 'station') {
-        html += '<td><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;background:var(--surface2);border:1px solid var(--border);padding:2px 6px;border-radius:3px;color:var(--accent2)">' + raw + '</span></td>';
+        html += "<td><span style='font-family:monospace;font-size:11px;background:var(--surface2);border:1px solid var(--border);padding:2px 6px;border-radius:3px;color:var(--accent2)'>" + raw + "</span></td>";
       } else if (c.type === 'op') {
         html += '<td><span class="status-badge status-new">' + raw + '</span></td>';
       } else if (c.type === 'status') {
         const cls = raw === 'Готово' ? 'status-ok' : (raw ? 'status-new' : '');
         html += '<td><span class="status-badge ' + cls + '">' + raw + '</span></td>';
       } else if (c.type === 'num') {
-        html += '<td style="font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--accent);text-align:center">' + raw + '</td>';
+        html += "<td style='font-family:monospace;font-weight:600;color:var(--accent);text-align:center'>" + raw + "</td>";
       } else {
         html += '<td title="' + raw.replace(/"/g,'&quot;') + '">' + raw + '</td>';
       }
