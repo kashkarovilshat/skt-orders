@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Заказы на производство</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
@@ -284,6 +284,15 @@
     border-top: 1px solid var(--border);
     display: flex;
     gap: 10px;
+  }
+
+  /* Touch targets */
+  @media (pointer: coarse) {
+    .btn { min-height: 44px; }
+    select, input[type="text"], input[type="number"], input[type="email"], input[type="date"] { min-height: 44px; }
+    .tab { min-height: 40px; display: flex; align-items: center; }
+    .month-btn { min-height: 36px; }
+    .btn-repeat, .btn-delete { width: 36px; height: 36px; display: inline-flex !important; }
   }
 
   .btn {
@@ -2430,28 +2439,80 @@ function saveConfigFab() {
 <!-- МОБИЛЬНАЯ АДАПТАЦИЯ -->
 <style>
 @media (max-width: 768px) {
-  .header { padding: 0 12px; gap: 12px; height: 50px; }
-  .logo   { font-size: 16px; }
-  .tabs   { gap: 2px; overflow-x: auto; }
-  .tab    { padding: 5px 10px; font-size: 10px; white-space: nowrap; }
-  .main   { flex-direction: column; }
-  .panel-form { width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid var(--border); max-height: 50vh; }
-  .panel-table { flex: 1; }
-  #attGrid, #attendanceGrid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+  /* Header */
+  .header { padding: 0 10px; gap: 8px; height: 48px; }
+  .logo   { font-size: 14px; letter-spacing: 2px; }
+  .tabs   { gap: 2px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; flex: 1; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab    { padding: 5px 10px; font-size: 10px; white-space: nowrap; flex-shrink: 0; }
+  #userBar { display: none !important; }
+  #sheetBadge { display: none; }
+  #installBtn { display: none !important; }
+
+  /* Main layout - stack vertically */
+  .main { flex-direction: column; height: auto; min-height: calc(100vh - 48px); }
+
+  /* Form panel - scrollable, not fixed height */
+  .panel-form {
+    width: 100%;
+    min-width: unset;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    max-height: none;
+    overflow: visible;
+  }
+  .form-body { max-height: 60vh; overflow-y: auto; }
+
+  /* Table panel */
+  .panel-table { flex: 1; min-height: 300px; }
+
+  /* Pages */
+  .page { height: auto; min-height: calc(100vh - 48px); }
+  #page-new { flex-direction: column; }
+
+  /* Tables */
+  table { font-size: 11px; }
+  thead th { padding: 6px 6px; font-size: 9px; white-space: nowrap; }
+  tbody td { padding: 5px 6px; max-width: 100px; }
+  .table-header { padding: 8px 10px; flex-wrap: wrap; gap: 6px; }
+  .search-box { width: 100%; max-width: none; }
+  .count-badge { font-size: 10px; padding: 3px 6px; }
+
+  /* Attendance grid */
+  #attendanceGrid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 8px;
+    padding: 10px;
+  }
   .att-card { padding: 8px 10px; }
   .att-card .att-name { font-size: 11px; }
-  #settingsFab { bottom: 16px; right: 16px; width: 40px; height: 40px; font-size: 18px; }
-  #settingsPanel { right: 10px; width: calc(100vw - 20px); max-width: 320px; }
-  table { font-size: 11px; }
-  thead th { padding: 6px 8px; font-size: 9px; }
-  tbody td { padding: 5px 8px; max-width: 120px; }
-  .count-badge { display: none; }
-  .table-header { padding: 8px 12px; }
+  .att-card .att-status { font-size: 9px; }
+  .att-card .att-count { font-size: 9px; }
+
+  /* Month filter buttons */
+  .filter-months { overflow-x: auto; flex-wrap: nowrap !important; }
+
+  /* FAB */
+  #settingsFab { bottom: 16px; right: 16px; width: 42px; height: 42px; font-size: 18px; }
+  #settingsPanel { right: 10px; bottom: 68px; width: calc(100vw - 20px); max-width: 320px; }
+
+  /* Buttons */
+  /* Touch targets */
+  @media (pointer: coarse) {
+    .btn { min-height: 44px; }
+    select, input[type="text"], input[type="number"], input[type="email"], input[type="date"] { min-height: 44px; }
+    .tab { min-height: 40px; display: flex; align-items: center; }
+    .month-btn { min-height: 36px; }
+    .btn-repeat, .btn-delete { width: 36px; height: 36px; display: inline-flex !important; }
+  }
+
+  .btn { padding: 8px 12px; font-size: 10px; }
+  .form-footer { padding: 12px; }
 }
 @media (max-width: 480px) {
-  .tabs .tab:not(.active) { display: none; }
-  .tabs .tab.active { display: block; border-radius: 4px; }
-  .tabs::before { content: '☰ '; color: var(--accent2); font-size: 14px; align-self: center; }
+  .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { padding: 5px 8px; font-size: 9px; white-space: nowrap; flex-shrink: 0; }
 }
 </style>
 </body>
