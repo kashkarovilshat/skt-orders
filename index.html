@@ -2440,17 +2440,40 @@ function saveConfigFab() {
 <style>
 @media (max-width: 768px) {
   /* Header */
-  .header { padding: 0 10px; gap: 8px; height: 48px; }
-  .logo   { font-size: 14px; letter-spacing: 2px; }
-  .tabs   { gap: 2px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; flex: 1; }
+  .header {
+    padding: 0 10px;
+    gap: 6px;
+    height: auto;
+    flex-wrap: wrap;
+    min-height: 48px;
+  }
+  .logo { font-size: 15px; letter-spacing: 2px; flex-shrink: 0; }
+  .tabs {
+    order: 10;
+    width: 100%;
+    gap: 2px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    flex: none;
+    padding: 4px 0 6px;
+    border-top: 1px solid var(--border);
+    margin-top: 2px;
+  }
   .tabs::-webkit-scrollbar { display: none; }
-  .tab    { padding: 5px 10px; font-size: 10px; white-space: nowrap; flex-shrink: 0; }
+  .tab {
+    padding: 6px 12px;
+    font-size: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    border-radius: 4px;
+  }
   #userBar { display: none !important; }
   #sheetBadge { display: none; }
   #installBtn { display: none !important; }
 
   /* Main layout - stack vertically */
-  .main { flex-direction: column; height: auto; min-height: calc(100vh - 48px); }
+  .main { flex-direction: column; height: auto; min-height: calc(100vh - 90px); }
 
   /* Form panel - scrollable, not fixed height */
   .panel-form {
@@ -2467,7 +2490,7 @@ function saveConfigFab() {
   .panel-table { flex: 1; min-height: 300px; }
 
   /* Pages */
-  .page { height: auto; min-height: calc(100vh - 48px); }
+  .page { height: auto; min-height: calc(100vh - 90px); }
   #page-new { flex-direction: column; }
 
   /* Tables */
