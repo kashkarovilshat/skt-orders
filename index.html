@@ -575,22 +575,19 @@
   /* Tooltip */
   .att-card .att-tooltip {
     display: none;
-    position: absolute;
-    bottom: calc(100% + 6px);
-    left: 50%;
-    transform: translateX(-50%);
+    position: fixed;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 8px 12px;
-    min-width: 200px;
-    max-width: 280px;
-    z-index: 100;
+    border-radius: 6px;
+    padding: 10px 14px;
+    min-width: 220px;
+    max-width: 300px;
+    z-index: 9999;
     font-size: 11px;
     color: var(--text);
-    box-shadow: 0 4px 16px rgba(0,0,0,.4);
+    box-shadow: 0 8px 24px rgba(0,0,0,.6);
+    pointer-events: none;
   }
-  .att-card:hover .att-tooltip { display: block; }
   .att-tooltip .att-entry {
     padding: 3px 0;
     border-bottom: 1px solid var(--border);
@@ -730,7 +727,7 @@
     <button class="tab" onclick="switchTab('archive')">Архив<span class="archive-indicator"></span></button>
     <button class="tab" onclick="switchTab('sbordata')">Сбор данных</button>
     <button class="tab" onclick="switchTab('history')">История</button>
-    <button class="tab" onclick="switchTab('config')">Настройки</button>
+    <!-- Настройки перенесены в FAB (правый нижний угол) -->
   </div>
   <div id="userBar" style="display:none;align-items:center;gap:8px;margin-left:auto;">
   <span id="userBadge" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--success);"></span>
@@ -1081,6 +1078,15 @@ function doGet(e) {
   </div>
 </div>
 
+<!-- TOOLTIP -->
+<div id="attTooltipEl" style="
+  display:none;position:fixed;z-index:9999;
+  background:var(--surface);border:1px solid var(--border);border-radius:6px;
+  padding:10px 14px;min-width:220px;max-width:300px;
+  font-size:11px;color:var(--text);box-shadow:0 8px 24px rgba(0,0,0,.6);
+  pointer-events:none;
+"></div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -1124,6 +1130,8 @@ window.onload = () => {
   // Автовход без авторизации — роль admin по умолчанию
   STATE.user = { email: 'local', name: 'Пользователь', role: 'admin', token: '' };
   showApp();
+
+  initTheme();
 
   // Автозагрузка данных при открытии
   loadCurrentOrders();
@@ -2052,18 +2060,120 @@ function renderAttendanceGrid(employees, byName, dateVal) {
     const parts = name.split(' ');
     const shortName = parts[0] + (parts[1] ? ' ' + parts[1][0] + '.' : '') + (parts[2] ? parts[2][0] + '.' : '');
 
-    html += '<div class="att-card ' + cls + '">'
+    const cardId = 'att_' + name.replace(/\s+/g,'_') + '_' + dateVal;
+    const timesStr = present ? records.map(r => {
+        const dt = r[0] ? new Date(r[0]) : null;
+        return dt ? dt.toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}) : '';
+      }).filter(Boolean).slice(0,3).join(', ') : '';
+
+    html += '<div class="att-card ' + cls + '" '
+      + 'onmouseenter="showAttTooltip(event,\'tt_' + cardId + '\')" '
+      + 'onmouseleave="hideAttTooltip()" '
+      + 'onmousemove="moveAttTooltip(event)">'
       + '<div class="att-name">' + shortName + '</div>'
       + '<div class="att-status">' + statusText + '</div>'
-      + (present ? '<div class="att-count">' + records.map(r => {
-          const dt = r[0] ? new Date(r[0]) : null;
-          return dt ? dt.toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}) : '';
-        }).filter(Boolean).slice(0,3).join(', ') + '</div>' : '')
-      + '<div class="att-tooltip">' + tooltipHtml + '</div>'
+      + (present ? '<div class="att-count">' + timesStr + '</div>' : '')
       + '</div>';
+
+    // Tooltip as separate element in body
+    window._attTooltips = window._attTooltips || {};
+    window._attTooltips['tt_' + cardId] = tooltipHtml;
   });
 
   grid.innerHTML = html;
+}
+
+// ════════════════════════════════
+// TOOLTIP для перекличка
+// ════════════════════════════════
+window._attTooltips = {};
+let _tooltipVisible = false;
+
+function showAttTooltip(e, id) {
+  const el = document.getElementById('attTooltipEl');
+  const html = window._attTooltips[id];
+  if (!html || !el) return;
+  el.innerHTML = html;
+  el.style.display = 'block';
+  _tooltipVisible = true;
+  positionTooltip(e, el);
+}
+
+function moveAttTooltip(e) {
+  if (!_tooltipVisible) return;
+  const el = document.getElementById('attTooltipEl');
+  if (el) positionTooltip(e, el);
+}
+
+function hideAttTooltip() {
+  const el = document.getElementById('attTooltipEl');
+  if (el) el.style.display = 'none';
+  _tooltipVisible = false;
+}
+
+function positionTooltip(e, el) {
+  const margin = 12;
+  const w = el.offsetWidth  || 240;
+  const h = el.offsetHeight || 120;
+  let x = e.clientX + margin;
+  let y = e.clientY + margin;
+  if (x + w > window.innerWidth  - margin) x = e.clientX - w - margin;
+  if (y + h > window.innerHeight - margin) y = e.clientY - h - margin;
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
+}
+
+// ════════════════════════════════
+// ТЕМА (светлая/тёмная)
+// ════════════════════════════════
+function initTheme() {
+  const saved = localStorage.getItem('sktTheme') || 'dark';
+  applyTheme(saved);
+}
+
+function applyTheme(theme) {
+  const root = document.documentElement;
+  if (theme === 'light') {
+    root.style.setProperty('--bg',      '#f0f2f5');
+    root.style.setProperty('--surface', '#ffffff');
+    root.style.setProperty('--surface2','#f5f7fa');
+    root.style.setProperty('--border',  '#d0d5dd');
+    root.style.setProperty('--text',    '#111827');
+    root.style.setProperty('--text2',   '#4b5563');
+    root.style.setProperty('--text3',   '#9ca3af');
+  } else {
+    root.style.setProperty('--bg',      '#0f1117');
+    root.style.setProperty('--surface', '#181c27');
+    root.style.setProperty('--surface2','#1e2435');
+    root.style.setProperty('--border',  '#2a3045');
+    root.style.setProperty('--text',    '#e8eaf0');
+    root.style.setProperty('--text2',   '#8892a4');
+    root.style.setProperty('--text3',   '#4a5568');
+  }
+  localStorage.setItem('sktTheme', theme);
+  const btn = document.getElementById('themeToggleBtn');
+  if (btn) btn.textContent = theme === 'light' ? '🌙' : '☀️';
+}
+
+function toggleTheme() {
+  const cur = localStorage.getItem('sktTheme') || 'dark';
+  applyTheme(cur === 'dark' ? 'light' : 'dark');
+}
+
+// ════════════════════════════════
+// НАСТРОЙКИ (всплывающее меню)
+// ════════════════════════════════
+function toggleSettingsPanel() {
+  const panel = document.getElementById('settingsPanel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function closeSettingsPanelOutside(e) {
+  const panel = document.getElementById('settingsPanel');
+  const btn   = document.getElementById('settingsFab');
+  if (panel && !panel.contains(e.target) && !btn.contains(e.target)) {
+    panel.style.display = 'none';
+  }
 }
 
 // ════════════════════════════════
@@ -2222,6 +2332,128 @@ function renderHistoryTable(rows) {
   document.getElementById('tableHistory').innerHTML = html;
 }
 </script>
+<!-- SETTINGS FAB (правый нижний угол) -->
+<button id="settingsFab" onclick="toggleSettingsPanel()" style="
+  position:fixed;bottom:20px;right:20px;z-index:500;
+  width:44px;height:44px;border-radius:50%;
+  background:var(--surface);border:1px solid var(--border);
+  font-size:20px;cursor:pointer;
+  box-shadow:0 4px 16px rgba(0,0,0,.4);
+  transition:transform .2s;
+" title="Настройки">⚙️</button>
+
+<!-- SETTINGS PANEL -->
+<div id="settingsPanel" style="
+  display:none;position:fixed;bottom:72px;right:20px;z-index:501;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:16px;width:260px;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+">
+  <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;
+    letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:14px;">
+    Настройки
+  </div>
+
+  <!-- Тема -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <span style="font-size:12px;color:var(--text2);">Тема оформления</span>
+    <button id="themeToggleBtn" onclick="toggleTheme()" style="
+      background:var(--surface2);border:1px solid var(--border);
+      border-radius:20px;padding:4px 12px;cursor:pointer;
+      font-size:16px;transition:all .15s;
+    ">☀️</button>
+  </div>
+
+  <!-- Apps Script URL -->
+  <div style="margin-bottom:12px;">
+    <div style="font-size:11px;color:var(--text2);margin-bottom:6px;font-family:'IBM Plex Mono',monospace;">Apps Script URL</div>
+    <input type="text" id="cfg_url_fab" placeholder="https://script.google.com/…"
+      style="width:100%;background:var(--surface2);border:1px solid var(--border);
+             color:var(--text);padding:6px 8px;border-radius:4px;font-size:11px;outline:none;">
+  </div>
+
+  <!-- Кураторы -->
+  <div style="margin-bottom:12px;">
+    <div style="font-size:11px;color:var(--text2);margin-bottom:6px;font-family:'IBM Plex Mono',monospace;">Кураторы (через запятую)</div>
+    <input type="text" id="cfg_curators_fab"
+      style="width:100%;background:var(--surface2);border:1px solid var(--border);
+             color:var(--text);padding:6px 8px;border-radius:4px;font-size:11px;outline:none;">
+  </div>
+
+  <!-- Заказы -->
+  <div style="margin-bottom:14px;">
+    <div style="font-size:11px;color:var(--text2);margin-bottom:6px;font-family:'IBM Plex Mono',monospace;">Типы заказов (через запятую)</div>
+    <input type="text" id="cfg_orders_fab"
+      style="width:100%;background:var(--surface2);border:1px solid var(--border);
+             color:var(--text);padding:6px 8px;border-radius:4px;font-size:11px;outline:none;">
+  </div>
+
+  <div style="display:flex;gap:8px;">
+    <button onclick="saveConfigFab()" style="
+      flex:1;background:var(--accent);color:#0f1117;border:none;
+      padding:8px;border-radius:4px;font-family:'IBM Plex Mono',monospace;
+      font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1px;
+    ">Сохранить</button>
+    <button onclick="document.getElementById('settingsPanel').style.display='none'" style="
+      background:transparent;border:1px solid var(--border);color:var(--text2);
+      padding:8px 12px;border-radius:4px;cursor:pointer;font-size:11px;
+    ">✕</button>
+  </div>
+</div>
+
+<script>
+// Init FAB settings panel
+document.addEventListener('DOMContentLoaded', function() {
+  initTheme();
+  // Fill FAB settings from localStorage
+  const cfgUrl = document.getElementById('cfg_url_fab');
+  const cfgCur = document.getElementById('cfg_curators_fab');
+  const cfgOrd = document.getElementById('cfg_orders_fab');
+  if (cfgUrl) cfgUrl.value = DEFAULT_URL;
+  if (cfgCur) cfgCur.value = localStorage.getItem('curators') || 'Галимьянов 3,Федотов А';
+  if (cfgOrd) cfgOrd.value = localStorage.getItem('orderTypes') || 'РСК,Везерфорд,SCT,ВН заказы,ГПН-Шельф';
+  document.addEventListener('click', closeSettingsPanelOutside);
+});
+
+function saveConfigFab() {
+  const url = document.getElementById('cfg_url_fab').value.trim();
+  const cur = document.getElementById('cfg_curators_fab').value.trim();
+  const ord = document.getElementById('cfg_orders_fab').value.trim();
+  if (url) { localStorage.setItem('appsScriptUrl', url); STATE.appsScriptUrl = url; }
+  if (cur) { localStorage.setItem('curators', cur); loadCuratorsFromConfig(); }
+  if (ord) { localStorage.setItem('orderTypes', ord); loadOrderTypesFromConfig(); }
+  document.getElementById('settingsPanel').style.display = 'none';
+  showToast('✓ Настройки сохранены');
+}
+</script>
+
+<!-- МОБИЛЬНАЯ АДАПТАЦИЯ -->
+<style>
+@media (max-width: 768px) {
+  .header { padding: 0 12px; gap: 12px; height: 50px; }
+  .logo   { font-size: 16px; }
+  .tabs   { gap: 2px; overflow-x: auto; }
+  .tab    { padding: 5px 10px; font-size: 10px; white-space: nowrap; }
+  .main   { flex-direction: column; }
+  .panel-form { width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid var(--border); max-height: 50vh; }
+  .panel-table { flex: 1; }
+  #attGrid, #attendanceGrid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+  .att-card { padding: 8px 10px; }
+  .att-card .att-name { font-size: 11px; }
+  #settingsFab { bottom: 16px; right: 16px; width: 40px; height: 40px; font-size: 18px; }
+  #settingsPanel { right: 10px; width: calc(100vw - 20px); max-width: 320px; }
+  table { font-size: 11px; }
+  thead th { padding: 6px 8px; font-size: 9px; }
+  tbody td { padding: 5px 8px; max-width: 120px; }
+  .count-badge { display: none; }
+  .table-header { padding: 8px 12px; }
+}
+@media (max-width: 480px) {
+  .tabs .tab:not(.active) { display: none; }
+  .tabs .tab.active { display: block; border-radius: 4px; }
+  .tabs::before { content: '☰ '; color: var(--accent2); font-size: 14px; align-self: center; }
+}
+</style>
 </body>
 </html>
 ```
