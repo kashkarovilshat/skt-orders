@@ -735,6 +735,7 @@
     <button class="tab" onclick="switchTab('current')">Текущие заказы</button>
     <button class="tab" onclick="switchTab('archive')">Архив<span class="archive-indicator"></span></button>
     <button class="tab" onclick="switchTab('tech')">Технологии</button>
+    <button class="tab" onclick="switchTab('tehkarty')">Тех Карты</button>
     <button class="tab" onclick="switchTab('sbordata')">Сбор данных</button>
     <button class="tab" onclick="switchTab('history')">История</button>
     <!-- Настройки перенесены в FAB (правый нижний угол) -->
@@ -910,11 +911,25 @@
 
     <!-- LEFT: список без технологий -->
     <div style="width:320px;min-width:280px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;">
-      <div class="panel-title" style="padding:12px 16px;">
-        <span class="dot"></span> Без технологий
-        <span id="techMissingCount" style="margin-left:auto;font-size:11px;color:var(--danger);font-family:'IBM Plex Mono',monospace;"></span>
+      <div class="panel-title" style="padding:10px 12px;flex-direction:column;align-items:flex-start;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;width:100%">
+          <span class="dot"></span>
+          <span id="techListTitle">Технологии</span>
+          <span id="techMissingCount" style="margin-left:auto;font-size:10px;font-family:'IBM Plex Mono',monospace;"></span>
+        </div>
+        <!-- Переключатель: все / без технологий -->
+        <div style="display:flex;gap:4px;width:100%;">
+          <button id="techModeAll" onclick="setTechMode('all')"
+            style="flex:1;padding:4px 6px;border-radius:3px;border:1px solid var(--accent);
+                   background:var(--accent);color:#0f1117;font-family:'IBM Plex Mono',monospace;
+                   font-size:9px;font-weight:700;cursor:pointer;letter-spacing:.5px;">ВСЕ</button>
+          <button id="techModeMissing" onclick="setTechMode('missing')"
+            style="flex:1;padding:4px 6px;border-radius:3px;border:1px solid var(--border);
+                   background:transparent;color:var(--text2);font-family:'IBM Plex Mono',monospace;
+                   font-size:9px;font-weight:700;cursor:pointer;letter-spacing:.5px;">БЕЗ ТЕХ.</button>
+        </div>
       </div>
-      <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px;">
+      <div style="padding:6px 10px;border-bottom:1px solid var(--border);display:flex;gap:6px;">
         <input type="text" id="searchTechMissing" placeholder="Поиск чертежа…"
           oninput="filterTechMissing()"
           style="flex:1;background:var(--surface2);border:1px solid var(--border);
@@ -1063,6 +1078,38 @@
       </div>
 
     </div><!-- end right -->
+  </div>
+</div>
+
+<!-- ════════════ TAB: ТЕХ КАРТЫ ════════════ -->
+<div class="page" id="page-tehkarty">
+  <div class="table-header" style="flex-wrap:wrap;gap:8px;padding:10px 20px;">
+
+    <!-- Поиск -->
+    <div class="search-box">
+      <input type="text" id="searchTehKarty" placeholder="Поиск по чертежу, наименованию…" oninput="filterTehKarty()">
+    </div>
+
+    <!-- Фильтр по ТП -->
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;">ТП:</span>
+      <select id="tehKartyTpFilter" onchange="filterTehKarty()" style="
+        background:var(--surface2);border:1px solid var(--border);color:var(--text);
+        padding:4px 10px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace;">
+        <option value="">Все</option>
+        <option value="1">№1 (основной)</option>
+        <option value="2">№2</option>
+        <option value="3">№3</option>
+      </select>
+    </div>
+
+    <div style="display:flex;gap:8px;align-items:center;margin-left:auto;">
+      <div class="count-badge">Записей: <span id="countTehKarty">0</span></div>
+      <button class="btn btn-secondary" style="font-size:10px;padding:6px 14px;" onclick="loadTehKartyData()">↻ Обновить</button>
+    </div>
+  </div>
+  <div class="table-wrap" id="tableTehKarty">
+    <div class="empty-state"><div class="icon">📋</div><div>Нажмите «↻ Обновить»</div></div>
   </div>
 </div>
 
@@ -1266,7 +1313,7 @@ function doGet(e) {
 // ════════════════════════════════
 // STATE
 // ════════════════════════════════
-const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbyJ1Rutu2qDCkzNckyQDhB5g1ihJHLTTWHDZo70zXkHMsWHAbGRAuA9RyhUhllLjjQFkQ/exec';
+const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbxPYaouf6QVOhBma9NH5peMVcRv8pTkDfPtLrbvbZaHmWi_xSy50TGE3P91CnS9iItM3A/exec';
 
 const STATE = {
   currentRows: [],
@@ -1415,7 +1462,7 @@ function updateSheetBadge() {
 // ════════════════════════════════
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t,i) => {
-    const names = ['new','current','archive','tech','sbordata','history','config'];
+    const names = ['new','current','archive','tech','tehkarty','sbordata','history','config'];
     t.classList.toggle('active', names[i] === name);
   });
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1910,6 +1957,133 @@ function showToast(msg, isError = false) {
 // SCRIPT HELPER
 // ════════════════════════════════
 // ════════════════════════════════
+// ТЕХ КАРТЫ
+// ════════════════════════════════
+const TEH_KARTY_SHEET_WEB = 'Тех Карты '; // с пробелом
+
+async function loadTehKartyData() {
+  document.getElementById('tableTehKarty').innerHTML =
+    '<div class="loading"><div class="spinner"></div>Загрузка тех карт…</div>';
+  try {
+    const data = await apiCall({ action: 'read', id: TECH_SPREAD_ID_WEB, sheet: 'Тех Карты ' });
+    const rows = (data.data || []);
+    // Строка 1 — шапка (номера операций), строка 2+ — данные
+    const header = rows[0] || [];
+    const dataRows = rows.slice(1).filter(r =>
+      String(r[2] || '').trim() // есть чертёж в колонке C
+    );
+    STATE.tehKartyRows = dataRows;
+    STATE.tehKartyHeader = header;
+    filterTehKarty();
+  } catch(e) {
+    document.getElementById('tableTehKarty').innerHTML =
+      '<div class="empty-state"><div class="icon">⚠️</div><div>' + e.message + '</div></div>';
+  }
+}
+
+function filterTehKarty() {
+  const q   = (document.getElementById('searchTehKarty').value || '').toLowerCase();
+  const tp  = document.getElementById('tehKartyTpFilter').value;
+  let rows  = STATE.tehKartyRows || [];
+
+  if (tp) rows = rows.filter(r => String(r[0] || '').trim() === tp);
+  if (q)  rows = rows.filter(r =>
+    String(r[2] || '').toLowerCase().includes(q) ||
+    String(r[3] || '').toLowerCase().includes(q) ||
+    String(r[1] || '').toLowerCase().includes(q)
+  );
+
+  renderTehKartyTable(rows);
+}
+
+function renderTehKartyTable(rows) {
+  document.getElementById('countTehKarty').textContent = rows.length;
+
+  if (!rows.length) {
+    document.getElementById('tableTehKarty').innerHTML =
+      '<div class="empty-state"><div class="icon">📭</div><div>Нет данных</div></div>';
+    return;
+  }
+
+  const header = STATE.tehKartyHeader || [];
+
+  // Найти колонки операций (с 5-й по конец, попарно)
+  // В шапке: индекс 4+ = операции (номер|объем работы)
+  const opCols = [];
+  for (let i = 4; i < header.length; i += 2) {
+    const num = String(header[i] || '').trim();
+    if (num) opCols.push({ idx: i, num });
+  }
+
+  let html = '<table><thead><tr>';
+  html += '<th>№ТП</th><th>Чертёж</th><th>Наименование</th>';
+  opCols.forEach(c => html += '<th style="text-align:center;min-width:60px">' + c.num + '<br><span style="color:var(--text3);font-size:9px">опер.</span></th>');
+  html += '</tr></thead><tbody>';
+
+  rows.forEach(r => {
+    html += '<tr>';
+    const tp = String(r[0] || '');
+    const drawing = String(r[2] || '');
+    const name = String(r[3] || '');
+
+    html += '<td><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent2)">ТП' + tp + '</span></td>';
+    html += '<td style="font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--accent);font-size:11px">' + drawing + '</td>';
+    html += '<td>' + name + '</td>';
+
+    opCols.forEach(c => {
+      const opNum  = String(r[c.idx]     || '').trim(); // номер операции
+      const opTime = String(r[c.idx + 1] || '').trim(); // время
+
+      if (opNum) {
+        html += '<td style="text-align:center;">'
+          + '<span style="font-size:12px;font-weight:700;color:var(--text)">' + opNum + '</span>'
+          + (opTime ? '<br><span style="font-size:10px;color:var(--text3)">' + opTime + '</span>' : '')
+          + '</td>';
+      } else {
+        html += '<td></td>';
+      }
+    });
+
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('tableTehKarty').innerHTML = html;
+}
+
+// Режим списка технологий: 'all' | 'missing'
+STATE.techMode = 'all';
+STATE.techAllRows = [];
+
+function setTechMode(mode) {
+  STATE.techMode = mode;
+  const btnAll     = document.getElementById('techModeAll');
+  const btnMissing = document.getElementById('techModeMissing');
+
+  if (mode === 'all') {
+    btnAll.style.background     = 'var(--accent)';
+    btnAll.style.color          = '#0f1117';
+    btnAll.style.borderColor    = 'var(--accent)';
+    btnMissing.style.background = 'transparent';
+    btnMissing.style.color      = 'var(--text2)';
+    btnMissing.style.borderColor= 'var(--border)';
+    document.getElementById('techListTitle').textContent = 'Все технологии';
+    renderTechMissingList(STATE.techAllRows);
+    document.getElementById('techMissingCount').textContent = STATE.techAllRows.length + ' шт.';
+  } else {
+    btnMissing.style.background = 'var(--danger)';
+    btnMissing.style.color      = '#fff';
+    btnMissing.style.borderColor= 'var(--danger)';
+    btnAll.style.background     = 'transparent';
+    btnAll.style.color          = 'var(--text2)';
+    btnAll.style.borderColor    = 'var(--border)';
+    document.getElementById('techListTitle').textContent = 'Без технологий';
+    renderTechMissingList(STATE.techMissing);
+    document.getElementById('techMissingCount').textContent = STATE.techMissing.length + ' шт.';
+  }
+}
+
+// ════════════════════════════════
 // ТЕХНОЛОГИИ
 // ════════════════════════════════
 const TECH_SPREAD_ID_WEB = '1WmecRxVDWdmWEzRrgnOTmI5hTdOXvyJyY9KKW4g0yJw';
@@ -1949,9 +2123,18 @@ async function loadTechData() {
     // Чертежи в Технологиях (с 3-й строки, колонка C=2)
     const techRows = (techData.data || []).slice(TECH_DATA_ROW_WEB - 1);
     const techSet = new Set();
+    const allTechItems = [];
     techRows.forEach(r => {
       const d = String(r[2] || '').trim();
-      if (d) techSet.add(d);
+      if (d) {
+        techSet.add(d);
+        allTechItems.push({
+          drawing:   d,
+          name:      String(r[3] || '').trim(),
+          firm:      String(r[1] || '').trim(),
+          zakazchik: String(r[0] || '').trim()
+        });
+      }
     });
 
     // Найти отсутствующие
@@ -1959,11 +2142,19 @@ async function loadTechData() {
       .filter(m => !techSet.has(m.drawing))
       .sort((a, b) => a.drawing.localeCompare(b.drawing));
 
-    STATE.techMissing = missing;
-    STATE.techRows = techRows;
+    STATE.techMissing  = missing;
+    STATE.techAllRows  = allTechItems;
+    STATE.techRows     = techRows;
 
-    document.getElementById('techMissingCount').textContent = missing.length + ' шт.';
-    renderTechMissingList(missing);
+    // Показать согласно текущему режиму
+    const mode = STATE.techMode || 'all';
+    if (mode === 'all') {
+      document.getElementById('techMissingCount').textContent = allTechItems.length + ' шт.';
+      renderTechMissingList(allTechItems);
+    } else {
+      document.getElementById('techMissingCount').textContent = missing.length + ' шт.';
+      renderTechMissingList(missing);
+    }
 
   } catch(e) {
     document.getElementById('techMissingList').innerHTML =
@@ -1973,10 +2164,11 @@ async function loadTechData() {
 
 function filterTechMissing() {
   const q = document.getElementById('searchTechMissing').value.toLowerCase();
+  const source = (STATE.techMode === 'missing') ? STATE.techMissing : (STATE.techAllRows || []);
   const filtered = q
-    ? STATE.techMissing.filter(m =>
-        m.drawing.toLowerCase().includes(q) || m.name.toLowerCase().includes(q))
-    : STATE.techMissing;
+    ? source.filter(m =>
+        m.drawing.toLowerCase().includes(q) || (m.name || '').toLowerCase().includes(q))
+    : source;
   renderTechMissingList(filtered);
 }
 
@@ -1987,20 +2179,25 @@ function renderTechMissingList(items) {
     return;
   }
 
-  el.innerHTML = items.map(m => `
-    <div onclick="selectTechItem(${JSON.stringify(m).replace(/"/g,'&quot;')})"
-      style="padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;
-             transition:background .1s;"
-      onmouseover="this.style.background='var(--surface2)'"
-      onmouseout="this.style.background=''">
-      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--accent)">${m.drawing}</div>
-      <div style="font-size:11px;color:var(--text2);margin-top:2px">${m.name || '—'}</div>
-      <div style="font-size:10px;color:var(--text3)">${m.firm || ''}</div>
-    </div>
-  `).join('');
+  el.innerHTML = items.map(m => {
+    const isExisting = STATE.techAllRows && STATE.techAllRows.some(r => r.drawing === m.drawing);
+    const badge = isExisting
+      ? '<span style="float:right;font-size:9px;color:var(--success);font-family:'IBM Plex Mono',monospace;">✓ есть</span>'
+      : '<span style="float:right;font-size:9px;color:var(--danger);font-family:'IBM Plex Mono',monospace;">нет</span>';
+    return '<div onclick="selectTechItem(' + JSON.stringify(JSON.stringify(m)) + ')"'
+      + ' style="padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;"'
+      + ' onmouseover="this.style.background='var(--surface2)'"'
+      + ' onmouseout="this.style.background=''">'
+      + '<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--accent)">'
+      + m.drawing + badge + '</div>'
+      + '<div style="font-size:11px;color:var(--text2);margin-top:2px">' + (m.name || '—') + '</div>'
+      + '<div style="font-size:10px;color:var(--text3)">' + (m.firm || '') + '</div>'
+      + '</div>';
+  }).join('');
 }
 
-function selectTechItem(item) {
+function selectTechItem(itemJson) {
+  const item = typeof itemJson === 'string' ? JSON.parse(itemJson) : itemJson;
   // Заполнить форму
   document.getElementById('tf_drawing').value    = item.drawing;
   document.getElementById('tf_name').value       = item.name || '';
