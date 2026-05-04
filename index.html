@@ -734,6 +734,7 @@
     <button class="tab active" onclick="switchTab('new')">Новый заказ</button>
     <button class="tab" onclick="switchTab('current')">Текущие заказы</button>
     <button class="tab" onclick="switchTab('archive')">Архив<span class="archive-indicator"></span></button>
+    <button class="tab" onclick="switchTab('tech')">Технологии</button>
     <button class="tab" onclick="switchTab('sbordata')">Сбор данных</button>
     <button class="tab" onclick="switchTab('history')">История</button>
     <!-- Настройки перенесены в FAB (правый нижний угол) -->
@@ -900,6 +901,168 @@
   </div>
   <div class="table-wrap" id="tableArchive">
     <div class="empty-state"><div class="icon">🗄️</div><div>Нажмите «Загрузить архив»</div></div>
+  </div>
+</div>
+
+<!-- ════════════ TAB: ТЕХНОЛОГИИ ════════════ -->
+<div class="page" id="page-tech">
+  <div style="display:flex;height:100%;overflow:hidden;">
+
+    <!-- LEFT: список без технологий -->
+    <div style="width:320px;min-width:280px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;">
+      <div class="panel-title" style="padding:12px 16px;">
+        <span class="dot"></span> Без технологий
+        <span id="techMissingCount" style="margin-left:auto;font-size:11px;color:var(--danger);font-family:'IBM Plex Mono',monospace;"></span>
+      </div>
+      <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px;">
+        <input type="text" id="searchTechMissing" placeholder="Поиск чертежа…"
+          oninput="filterTechMissing()"
+          style="flex:1;background:var(--surface2);border:1px solid var(--border);
+                 color:var(--text);padding:5px 8px;border-radius:4px;font-size:11px;outline:none;">
+        <button class="btn btn-secondary" style="font-size:10px;padding:4px 10px;" onclick="loadTechData()">↻</button>
+      </div>
+      <div id="techMissingList" style="flex:1;overflow-y:auto;padding:4px 0;">
+        <div class="empty-state"><div class="icon">📐</div><div>Нажмите ↻</div></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: форма заполнения -->
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+      <div class="panel-title" style="padding:12px 16px;">
+        <span id="techFormTitle">Выберите чертёж слева</span>
+        <div id="techFormBtns" style="display:none;margin-left:auto;gap:8px;display:none;">
+          <button class="btn btn-secondary" style="font-size:10px;padding:5px 12px;" onclick="clearTechForm()">Очистить</button>
+          <button class="btn btn-primary" style="font-size:11px;padding:5px 16px;" onclick="saveTechnology()">💾 Сохранить</button>
+        </div>
+      </div>
+
+      <div id="techFormBody" style="flex:1;overflow-y:auto;padding:16px 20px;display:none;">
+
+        <!-- Скрытые поля -->
+        <input type="hidden" id="tf_drawing">
+        <input type="hidden" id="tf_name">
+        <input type="hidden" id="tf_firm">
+        <input type="hidden" id="tf_zakazchik">
+
+        <!-- Инфо о детали -->
+        <div id="techPartInfo" style="background:var(--surface2);border:1px solid var(--border);
+          border-radius:6px;padding:12px 16px;margin-bottom:16px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px;margin-bottom:6px;">ДЕТАЛЬ</div>
+          <div id="techPartDrawing" style="font-size:14px;font-weight:700;color:var(--accent);"></div>
+          <div id="techPartName" style="font-size:12px;color:var(--text2);margin-top:2px;"></div>
+        </div>
+
+        <!-- Материал -->
+        <div style="margin-bottom:16px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent2);
+            letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:6px;">
+            Материал (E-I)
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="field"><label><span class="col-badge">E</span> Наименование материала</label>
+              <input type="text" id="tf_matName" placeholder="например: 40Х, 12Х18Н10Т"></div>
+            <div class="field"><label><span class="col-badge">F</span> Размер (диаметр/мм)</label>
+              <input type="text" id="tf_matSize" placeholder="например: Ø60, 50х50"></div>
+            <div class="field"><label><span class="col-badge">G</span> Толщина</label>
+              <input type="text" id="tf_thick" placeholder="если есть"></div>
+            <div class="field"><label><span class="col-badge">H</span> Тип заготовки</label>
+              <input type="text" id="tf_type" placeholder="Круг, Лист, Шестигран…"></div>
+            <div class="field"><label><span class="col-badge">I</span> Толщина реза (мм)</label>
+              <input type="text" id="tf_cut" placeholder="например: 4"></div>
+            <div class="field"><label><span class="col-badge">K</span> Чистовая мм (пила)</label>
+              <input type="text" id="tf_clean" placeholder="например: 250"></div>
+          </div>
+        </div>
+
+        <!-- Доп параметры -->
+        <div style="margin-bottom:16px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent2);
+            letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:6px;">
+            Параметры (M-O)
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="field"><label><span class="col-badge">M</span> Для накладной</label>
+              <input type="text" id="tf_naklad" placeholder=""></div>
+            <div class="field"><label><span class="col-badge">N</span> Размеры чистовые</label>
+              <input type="text" id="tf_sizes" placeholder="например: Ø52Ø42Х240"></div>
+            <div class="field"><label><span class="col-badge">O</span> Твердость</label>
+              <input type="text" id="tf_hard" placeholder="например: 36…42 HRC"></div>
+          </div>
+        </div>
+
+        <!-- Размеры для ОТК -->
+        <div style="margin-bottom:16px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent2);
+            letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:6px;">
+            Размеры для ОТК (Р1–Р10)
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 80px 1fr 80px;gap:8px;align-items:end;">
+            <div class="field"><label style="color:var(--accent)">Р1 — Размер</label>
+              <input type="text" id="tf_r1" placeholder="Ø52 или 245 или М24"></div>
+            <div class="field"><label>±1</label><input type="text" id="tf_d1" placeholder="h7"></div>
+            <div class="field"><label style="color:var(--accent)">Р2 — Размер</label>
+              <input type="text" id="tf_r2" placeholder=""></div>
+            <div class="field"><label>±2</label><input type="text" id="tf_d2" placeholder=""></div>
+            <div class="field"><label style="color:var(--accent)">Р3 — Размер</label>
+              <input type="text" id="tf_r3" placeholder=""></div>
+            <div class="field"><label>±3</label><input type="text" id="tf_d3" placeholder=""></div>
+            <div class="field"><label style="color:var(--accent)">Р4 — Размер</label>
+              <input type="text" id="tf_r4" placeholder=""></div>
+            <div class="field"><label>±4</label><input type="text" id="tf_d4" placeholder=""></div>
+            <div class="field"><label style="color:var(--accent)">Р5 — Размер</label>
+              <input type="text" id="tf_r5" placeholder=""></div>
+            <div class="field"><label>±5</label><input type="text" id="tf_d5" placeholder=""></div>
+            <div class="field"><label style="color:var(--accent)">Р6 — Размер</label>
+              <input type="text" id="tf_r6" placeholder=""></div>
+            <div class="field"><label>±6</label><input type="text" id="tf_d6" placeholder=""></div>
+            <div class="field"><label style="color:var(--accent)">Р7 — Размер</label>
+              <input type="text" id="tf_r7" placeholder=""></div>
+            <div class="field"><label>±7</label><input type="text" id="tf_d7" placeholder=""></div>
+            <div class="field"><label style="color:var(--accent)">Р8 — Размер</label>
+              <input type="text" id="tf_r8" placeholder=""></div>
+            <div class="field"><label>±8</label><input type="text" id="tf_d8" placeholder=""></div>
+          </div>
+        </div>
+
+        <!-- Загрузка чертежа -->
+        <div style="margin-bottom:20px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent2);
+            letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:6px;">
+            Чертёж (PDF / JPEG)
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <label style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;
+              padding:8px 16px;cursor:pointer;font-size:12px;color:var(--text2);transition:all .15s;"
+              onmouseover="this.style.borderColor='var(--accent2)'" onmouseout="this.style.borderColor='var(--border)'">
+              📎 Выбрать файл
+              <input type="file" id="tf_file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="onFileSelect(this)">
+            </label>
+            <span id="tf_fileName" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">файл не выбран</span>
+          </div>
+          <div id="tf_filePreview" style="display:none;margin-top:10px;"></div>
+          <div style="font-size:10px;color:var(--text3);margin-top:6px;font-family:'IBM Plex Mono',monospace;">
+            Файл будет сохранён на Google Диск с именем = чертёжный номер
+          </div>
+        </div>
+
+        <!-- Кнопка сохранить внизу -->
+        <div style="display:flex;gap:10px;padding-bottom:20px;">
+          <button class="btn btn-secondary" onclick="clearTechForm()">Очистить</button>
+          <button class="btn btn-primary" style="flex:1;" onclick="saveTechnology()">💾 Сохранить технологию</button>
+        </div>
+
+      </div><!-- end techFormBody -->
+
+      <!-- Пустое состояние -->
+      <div id="techFormEmpty" style="flex:1;display:flex;align-items:center;justify-content:center;">
+        <div class="empty-state">
+          <div class="icon">📐</div>
+          <div>Выберите чертёж из списка слева</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px;">или нажмите ↻ для загрузки списка</div>
+        </div>
+      </div>
+
+    </div><!-- end right -->
   </div>
 </div>
 
@@ -1103,7 +1266,7 @@ function doGet(e) {
 // ════════════════════════════════
 // STATE
 // ════════════════════════════════
-const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbxaRheCPzdQLPYfr1G4BY4yoTr7dvhjE31qMEfdERDTqKjwhiQn6HAl2E87ZHaPlhA7EQ/exec';
+const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbxPYaouf6QVOhBma9NH5peMVcRv8pTkDfPtLrbvbZaHmWi_xSy50TGE3P91CnS9iItM3A/exec';
 
 const STATE = {
   currentRows: [],
@@ -1114,6 +1277,8 @@ const STATE = {
   drawingSuggestions: [],
   detailSuggestions: [],
   archiveMonthFilter: 'all',
+  techRows: [],
+  techMissing: [],
   sbordataRows: [],
   sbordataFiltered: [],
   sbordataStations: [],
@@ -1250,7 +1415,7 @@ function updateSheetBadge() {
 // ════════════════════════════════
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t,i) => {
-    const names = ['new','current','archive','sbordata','history','config'];
+    const names = ['new','current','archive','tech','sbordata','history','config'];
     t.classList.toggle('active', names[i] === name);
   });
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1744,6 +1909,252 @@ function showToast(msg, isError = false) {
 // ════════════════════════════════
 // SCRIPT HELPER
 // ════════════════════════════════
+// ════════════════════════════════
+// ТЕХНОЛОГИИ
+// ════════════════════════════════
+const TECH_SPREAD_ID_WEB = '1WmecRxVDWdmWEzRrgnOTmI5hTdOXvyJyY9KKW4g0yJw';
+const TECH_SHEET_WEB     = 'Технологии';
+const TECH_DATA_ROW_WEB  = 3; // данные с 3-й строки
+
+// Колонки для записи (0-based индекс в массиве строки)
+// A=0,B=1,C=2,D=3,E=4,F=5,G=6,H=7,I=8,J=9(формула),K=10,L=11(формула),M=12,N=13,O=14,P=15(формула)
+// Р1-Р10 начинаются с колонки Q=16 (попарно)
+
+async function loadTechData() {
+  document.getElementById('techMissingList').innerHTML =
+    '<div class="loading"><div class="spinner"></div>Загрузка…</div>';
+
+  try {
+    // Загрузить заказы и технологии параллельно
+    const [ordersData, techData] = await Promise.all([
+      apiRead('Заказы на производство новый'),
+      apiCall({ action: 'read', id: TECH_SPREAD_ID_WEB, sheet: TECH_SHEET_WEB })
+    ]);
+
+    // Чертежи из заказов (с 4-й строки, колонка G=6, H=7, B=1)
+    const ordersRows = (ordersData || []).slice(3);
+    const ordersMap = {};
+    ordersRows.forEach(r => {
+      const drawing = String(r[6] || '').trim();
+      if (drawing && drawing !== 'false') {
+        ordersMap[drawing] = {
+          drawing,
+          name:      String(r[7] || '').trim(),
+          firm:      String(r[1] || '').trim(),
+          zakazchik: String(r[2] || '').trim()
+        };
+      }
+    });
+
+    // Чертежи в Технологиях (с 3-й строки, колонка C=2)
+    const techRows = (techData.data || []).slice(TECH_DATA_ROW_WEB - 1);
+    const techSet = new Set();
+    techRows.forEach(r => {
+      const d = String(r[2] || '').trim();
+      if (d) techSet.add(d);
+    });
+
+    // Найти отсутствующие
+    const missing = Object.values(ordersMap)
+      .filter(m => !techSet.has(m.drawing))
+      .sort((a, b) => a.drawing.localeCompare(b.drawing));
+
+    STATE.techMissing = missing;
+    STATE.techRows = techRows;
+
+    document.getElementById('techMissingCount').textContent = missing.length + ' шт.';
+    renderTechMissingList(missing);
+
+  } catch(e) {
+    document.getElementById('techMissingList').innerHTML =
+      '<div class="empty-state"><div class="icon">⚠️</div><div>' + e.message + '</div></div>';
+  }
+}
+
+function filterTechMissing() {
+  const q = document.getElementById('searchTechMissing').value.toLowerCase();
+  const filtered = q
+    ? STATE.techMissing.filter(m =>
+        m.drawing.toLowerCase().includes(q) || m.name.toLowerCase().includes(q))
+    : STATE.techMissing;
+  renderTechMissingList(filtered);
+}
+
+function renderTechMissingList(items) {
+  const el = document.getElementById('techMissingList');
+  if (!items.length) {
+    el.innerHTML = '<div class="empty-state" style="padding:30px 16px"><div class="icon">✓</div><div style="font-size:12px">Все чертежи имеют технологии</div></div>';
+    return;
+  }
+
+  el.innerHTML = items.map(m => `
+    <div onclick="selectTechItem(${JSON.stringify(m).replace(/"/g,'&quot;')})"
+      style="padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;
+             transition:background .1s;"
+      onmouseover="this.style.background='var(--surface2)'"
+      onmouseout="this.style.background=''">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--accent)">${m.drawing}</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:2px">${m.name || '—'}</div>
+      <div style="font-size:10px;color:var(--text3)">${m.firm || ''}</div>
+    </div>
+  `).join('');
+}
+
+function selectTechItem(item) {
+  // Заполнить форму
+  document.getElementById('tf_drawing').value    = item.drawing;
+  document.getElementById('tf_name').value       = item.name || '';
+  document.getElementById('tf_firm').value       = item.firm || '';
+  document.getElementById('tf_zakazchik').value  = item.zakazchik || '';
+
+  document.getElementById('techFormTitle').textContent = item.drawing;
+  document.getElementById('techPartDrawing').textContent = item.drawing;
+  document.getElementById('techPartName').textContent    = (item.name || '') + (item.firm ? ' · ' + item.firm : '');
+
+  document.getElementById('techFormBody').style.display  = 'block';
+  document.getElementById('techFormEmpty').style.display = 'none';
+  document.getElementById('techFormBtns').style.display  = 'flex';
+
+  // Сбросить поля
+  ['matName','matSize','thick','type','cut','clean','naklad','sizes','hard',
+   'r1','d1','r2','d2','r3','d3','r4','d4','r5','d5','r6','d6','r7','d7','r8','d8']
+    .forEach(id => { const el = document.getElementById('tf_' + id); if(el) el.value = ''; });
+  document.getElementById('tf_fileName').textContent = 'файл не выбран';
+  document.getElementById('tf_filePreview').style.display = 'none';
+  document.getElementById('tf_file').value = '';
+  window._techFile = null;
+}
+
+function clearTechForm() {
+  ['matName','matSize','thick','type','cut','clean','naklad','sizes','hard',
+   'r1','d1','r2','d2','r3','d3','r4','d4','r5','d5','r6','d6','r7','d7','r8','d8']
+    .forEach(id => { const el = document.getElementById('tf_' + id); if(el) el.value = ''; });
+}
+
+function onFileSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+  window._techFile = file;
+  document.getElementById('tf_fileName').textContent = file.name + ' (' + (file.size/1024).toFixed(0) + ' KB)';
+
+  // Показать превью для изображений
+  if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const prev = document.getElementById('tf_filePreview');
+      prev.innerHTML = '<img src="' + e.target.result + '" style="max-width:100%;max-height:200px;border-radius:4px;border:1px solid var(--border);">';
+      prev.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+async function saveTechnology() {
+  const drawing = document.getElementById('tf_drawing').value;
+  if (!drawing) { showToast('Выберите чертёж', true); return; }
+
+  const matName = document.getElementById('tf_matName').value.trim();
+  if (!matName) { showToast('Укажите материал (E)', true); return; }
+
+  const btn = document.querySelector('#page-tech .btn-primary');
+  if (btn) { btn.textContent = '⏳ Сохранение…'; btn.disabled = true; }
+
+  try {
+    // Собрать строку данных
+    // A,B,C,D — из заказов
+    const row = [
+      document.getElementById('tf_zakazchik').value,  // A
+      document.getElementById('tf_firm').value,        // B
+      drawing,                                          // C
+      document.getElementById('tf_name').value,        // D
+      matName,                                          // E
+      document.getElementById('tf_matSize').value,     // F
+      document.getElementById('tf_thick').value,       // G
+      document.getElementById('tf_type').value,        // H
+      document.getElementById('tf_cut').value,         // I
+      '',                                               // J — формула (пропускаем)
+      document.getElementById('tf_clean').value,       // K
+      '',                                               // L — формула
+      document.getElementById('tf_naklad').value,      // M
+      document.getElementById('tf_sizes').value,       // N
+      document.getElementById('tf_hard').value,        // O
+      '',                                               // P — формула
+      document.getElementById('tf_r1').value,          // Q = Р1
+      document.getElementById('tf_d1').value,          // R = ±1
+      document.getElementById('tf_r2').value,          // S = Р2
+      document.getElementById('tf_d2').value,          // T = ±2
+      document.getElementById('tf_r3').value,          // U = Р3
+      document.getElementById('tf_d3').value,          // V = ±3
+      document.getElementById('tf_r4').value,          // W = Р4
+      document.getElementById('tf_d4').value,          // X = ±4
+      document.getElementById('tf_r5').value,          // Y = Р5
+      document.getElementById('tf_d5').value,          // Z = ±5
+      document.getElementById('tf_r6').value,          // AA = Р6
+      document.getElementById('tf_d6').value,          // AB = ±6
+      document.getElementById('tf_r7').value,          // AC = Р7
+      document.getElementById('tf_d7').value,          // AD = ±7
+      document.getElementById('tf_r8').value,          // AE = Р8
+      document.getElementById('tf_d8').value,          // AF = ±8
+    ];
+
+    await apiCall({
+      action: 'append',
+      id: TECH_SPREAD_ID_WEB,
+      sheet: TECH_SHEET_WEB,
+      row: JSON.stringify(row)
+    });
+
+    // Загрузить файл если выбран
+    if (window._techFile) {
+      await uploadDrawingFile(window._techFile, drawing);
+    }
+
+    showToast('✓ Технология сохранена: ' + drawing);
+
+    // Убрать из списка отсутствующих
+    STATE.techMissing = STATE.techMissing.filter(m => m.drawing !== drawing);
+    document.getElementById('techMissingCount').textContent = STATE.techMissing.length + ' шт.';
+    renderTechMissingList(STATE.techMissing);
+
+    // Сбросить форму
+    document.getElementById('techFormBody').style.display = 'none';
+    document.getElementById('techFormEmpty').style.display = 'flex';
+    document.getElementById('techFormTitle').textContent = 'Выберите чертёж слева';
+
+  } catch(e) {
+    showToast('Ошибка: ' + e.message, true);
+  } finally {
+    if (btn) { btn.textContent = '💾 Сохранить технологию'; btn.disabled = false; }
+  }
+}
+
+// Загрузка файла на Google Диск через Apps Script
+async function uploadDrawingFile(file, drawingNum) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const base64 = e.target.result.split(',')[1];
+        const ext = file.name.split('.').pop().toLowerCase();
+        const fileName = drawingNum + '.' + ext;
+        const mimeType = file.type || 'application/octet-stream';
+
+        await apiCall({
+          action:   'uploadFile',
+          fileName: fileName,
+          mimeType: mimeType,
+          base64:   base64
+        });
+        resolve();
+      } catch(err) {
+        console.warn('Файл не загружен на Диск:', err.message);
+        resolve(); // не блокируем сохранение если файл не загрузился
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 // ════════════════════════════════
 // СБОР ДАННЫХ
 // ════════════════════════════════
