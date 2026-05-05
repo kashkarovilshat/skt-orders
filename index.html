@@ -1313,7 +1313,7 @@ function doGet(e) {
 // ════════════════════════════════
 // STATE
 // ════════════════════════════════
-const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbyJ1Rutu2qDCkzNckyQDhB5g1ihJHLTTWHDZo70zXkHMsWHAbGRAuA9RyhUhllLjjQFkQ/exec';
+const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbyhXC3HK8I9dwWz75qSCkzHvdd7mFHxK52vL4Zaef40_6ecX4aqemerb7fkokegp0pWog/exec';
 
 const STATE = {
   currentRows: [],
@@ -1337,6 +1337,44 @@ const STATE = {
 // ════════════════════════════════
 // INIT
 // ════════════════════════════════
+// ════════════════════════════════
+// ТЕМА (светлая/тёмная)
+// ════════════════════════════════
+function initTheme() {
+  const saved = localStorage.getItem('sktTheme') || 'dark';
+  applyTheme(saved);
+}
+
+function applyTheme(theme) {
+  const root = document.documentElement;
+  if (theme === 'light') {
+    root.style.setProperty('--bg',      '#f0f2f5');
+    root.style.setProperty('--surface', '#ffffff');
+    root.style.setProperty('--surface2','#f5f7fa');
+    root.style.setProperty('--border',  '#d0d5dd');
+    root.style.setProperty('--text',    '#111827');
+    root.style.setProperty('--text2',   '#4b5563');
+    root.style.setProperty('--text3',   '#9ca3af');
+  } else {
+    root.style.setProperty('--bg',      '#0f1117');
+    root.style.setProperty('--surface', '#181c27');
+    root.style.setProperty('--surface2','#1e2435');
+    root.style.setProperty('--border',  '#2a3045');
+    root.style.setProperty('--text',    '#e8eaf0');
+    root.style.setProperty('--text2',   '#8892a4');
+    root.style.setProperty('--text3',   '#4a5568');
+  }
+  localStorage.setItem('sktTheme', theme);
+  const btn = document.getElementById('themeToggleBtn');
+  if (btn) btn.textContent = theme === 'light' ? '🌙' : '☀️';
+}
+
+function toggleTheme() {
+  const cur = localStorage.getItem('sktTheme') || 'dark';
+  applyTheme(cur === 'dark' ? 'light' : 'dark');
+}
+
+
 window.onload = () => {
   // Всегда используем захардкоженный URL
   STATE.appsScriptUrl = DEFAULT_URL;
@@ -2738,43 +2776,6 @@ function positionTooltip(e, el) {
   if (y + h > window.innerHeight - margin) y = e.clientY - h - margin;
   el.style.left = x + 'px';
   el.style.top  = y + 'px';
-}
-
-// ════════════════════════════════
-// ТЕМА (светлая/тёмная)
-// ════════════════════════════════
-function initTheme() {
-  const saved = localStorage.getItem('sktTheme') || 'dark';
-  applyTheme(saved);
-}
-
-function applyTheme(theme) {
-  const root = document.documentElement;
-  if (theme === 'light') {
-    root.style.setProperty('--bg',      '#f0f2f5');
-    root.style.setProperty('--surface', '#ffffff');
-    root.style.setProperty('--surface2','#f5f7fa');
-    root.style.setProperty('--border',  '#d0d5dd');
-    root.style.setProperty('--text',    '#111827');
-    root.style.setProperty('--text2',   '#4b5563');
-    root.style.setProperty('--text3',   '#9ca3af');
-  } else {
-    root.style.setProperty('--bg',      '#0f1117');
-    root.style.setProperty('--surface', '#181c27');
-    root.style.setProperty('--surface2','#1e2435');
-    root.style.setProperty('--border',  '#2a3045');
-    root.style.setProperty('--text',    '#e8eaf0');
-    root.style.setProperty('--text2',   '#8892a4');
-    root.style.setProperty('--text3',   '#4a5568');
-  }
-  localStorage.setItem('sktTheme', theme);
-  const btn = document.getElementById('themeToggleBtn');
-  if (btn) btn.textContent = theme === 'light' ? '🌙' : '☀️';
-}
-
-function toggleTheme() {
-  const cur = localStorage.getItem('sktTheme') || 'dark';
-  applyTheme(cur === 'dark' ? 'light' : 'dark');
 }
 
 // ════════════════════════════════
