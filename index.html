@@ -1634,7 +1634,7 @@ function buildMonthButtons(rows) {
   const sorted = [...monthSet.entries()].sort((a,b) => b[0].localeCompare(a[0]));
 
   const container = document.getElementById('filterMonths');
-  container.innerHTML = `<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">Месяц:</span>
+  container.innerHTML = `<span style="font-family:monospace;font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">Месяц:</span>
     <button class="month-btn active" data-month="all" onclick="setMonthFilter(this,'all')">Все</button>`;
 
   sorted.forEach(([key, label]) => {
@@ -2064,8 +2064,8 @@ function renderTehKartyTable(rows) {
     const drawing = String(r[2] || '');
     const name = String(r[3] || '');
 
-    html += '<td><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent2)">ТП' + tp + '</span></td>';
-    html += '<td style="font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--accent);font-size:11px">' + drawing + '</td>';
+    html += "<td><span style='font-family:monospace;font-size:11px;color:var(--accent2)'>ТП" + tp + "</span></td>";
+    html += '<td style="font-family:monospace,monospace;font-weight:600;color:var(--accent);font-size:11px">' + drawing + '</td>';
     html += '<td>' + name + '</td>';
 
     opCols.forEach(c => {
@@ -2217,25 +2217,27 @@ function renderTechMissingList(items) {
     return;
   }
 
-  el.innerHTML = items.map(m => {
-    const isExisting = STATE.techAllRows && STATE.techAllRows.some(r => r.drawing === m.drawing);
-    const badge = isExisting
-      ? '<span style="float:right;font-size:9px;color:var(--success);font-family:'IBM Plex Mono',monospace;">✓ есть</span>'
-      : '<span style="float:right;font-size:9px;color:var(--danger);font-family:'IBM Plex Mono',monospace;">нет</span>';
-    return '<div onclick="selectTechItem(' + JSON.stringify(JSON.stringify(m)) + ')"'
-      + ' style="padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;"'
-      + ' onmouseover="this.style.background='var(--surface2)'"'
-      + ' onmouseout="this.style.background=''">'
-      + '<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--accent)">'
+  el.innerHTML = items.map(function(m) {
+    var isExisting = STATE.techAllRows && STATE.techAllRows.some(function(r) { return r.drawing === m.drawing; });
+    var badge = isExisting
+      ? '<span style="float:right;font-size:9px;color:var(--success)">&#10003; есть</span>'
+      : '<span style="float:right;font-size:9px;color:var(--danger)">нет</span>';
+    var mJson = encodeURIComponent(JSON.stringify(m));
+    return '<div onclick="selectTechItem(decodeURIComponent(\'' + mJson + '\'))"'
+      + ' style="padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer"'
+      + ' onmouseover="this.style.background=\'var(--surface2)\'"'
+      + ' onmouseout="this.style.background=\'\'">'
+      + '<div style="font-family:monospace;font-size:12px;font-weight:600;color:var(--accent)">'
       + m.drawing + badge + '</div>'
-      + '<div style="font-size:11px;color:var(--text2);margin-top:2px">' + (m.name || '—') + '</div>'
+      + '<div style="font-size:11px;color:var(--text2)">' + (m.name || '—') + '</div>'
       + '<div style="font-size:10px;color:var(--text3)">' + (m.firm || '') + '</div>'
       + '</div>';
   }).join('');
 }
 
 function selectTechItem(itemJson) {
-  const item = typeof itemJson === 'string' ? JSON.parse(itemJson) : itemJson;
+  var item;
+  try { item = typeof itemJson === 'string' ? JSON.parse(itemJson) : itemJson; } catch(e) { item = itemJson; }
   // Заполнить форму
   document.getElementById('tf_drawing').value    = item.drawing;
   document.getElementById('tf_name').value       = item.name || '';
@@ -2937,10 +2939,10 @@ function renderHistoryTable(rows) {
     const action = String(r[3] || '');
     const color = ACTION_COLORS[action] || 'var(--text2)';
     html += `<tr>
-      <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2)">${dt}</td>
+      <td style="font-family:monospace;font-size:11px;color:var(--text2)">${dt}</td>
       <td style="font-weight:600">${r[2] || ''}</td>
-      <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3)">${r[1] || ''}</td>
-      <td><span style="color:${color};font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700">${action}</span></td>
+      <td style="font-family:monospace;font-size:11px;color:var(--text3)">${r[1] || ''}</td>
+      <td><span style="color:${color};font-family:monospace;font-size:11px;font-weight:700">${action}</span></td>
       <td style="color:var(--text2);font-size:11px">${r[4] || ''}</td>
       <td title="${r[5] || ''}">${r[5] || ''}</td>
     </tr>`;
