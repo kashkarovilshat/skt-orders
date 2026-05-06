@@ -742,6 +742,9 @@
   </div>
   <div id="userBar" style="display:none;align-items:center;gap:8px;margin-left:auto;">
   <span id="userBadge" style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--success);"></span>
+  <button id="logoutBtn" onclick="doLogout()" style="display:none;background:transparent;
+    border:1px solid var(--border);color:var(--text3);padding:3px 10px;border-radius:3px;
+    font-size:10px;cursor:pointer;font-family:'IBM Plex Mono',monospace;">Выйти</button>
 </div>
 <button id="installBtn" onclick="installApp()" style="
   display:none;
@@ -1083,33 +1086,132 @@
 
 <!-- ════════════ TAB: ТЕХ КАРТЫ ════════════ -->
 <div class="page" id="page-tehkarty">
-  <div class="table-header" style="flex-wrap:wrap;gap:8px;padding:10px 20px;">
+  <div style="display:flex;height:100%;overflow:hidden;">
 
-    <!-- Поиск -->
-    <div class="search-box">
-      <input type="text" id="searchTehKarty" placeholder="Поиск по чертежу, наименованию…" oninput="filterTehKarty()">
-    </div>
+    <!-- LEFT: список + форма создания -->
+    <div style="width:340px;min-width:300px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;">
 
-    <!-- Фильтр по ТП -->
-    <div style="display:flex;align-items:center;gap:6px;">
-      <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;">ТП:</span>
-      <select id="tehKartyTpFilter" onchange="filterTehKarty()" style="
-        background:var(--surface2);border:1px solid var(--border);color:var(--text);
-        padding:4px 10px;border-radius:4px;font-size:11px;font-family:'IBM Plex Mono',monospace;">
-        <option value="">Все</option>
-        <option value="1">№1 (основной)</option>
-        <option value="2">№2</option>
-        <option value="3">№3</option>
-      </select>
-    </div>
+      <!-- Переключатель: список / создать -->
+      <div style="display:flex;border-bottom:1px solid var(--border);">
+        <button id="tkTabList" onclick="switchTKTab('list')"
+          style="flex:1;padding:10px;border:none;background:var(--accent);color:#0f1117;
+                 font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;
+                 letter-spacing:1px;cursor:pointer;">📋 СПИСОК</button>
+        <button id="tkTabCreate" onclick="switchTKTab('create')"
+          style="flex:1;padding:10px;border:none;background:transparent;color:var(--text2);
+                 font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;
+                 letter-spacing:1px;cursor:pointer;" id="tkCreateBtn">➕ СОЗДАТЬ</button>
+      </div>
 
-    <div style="display:flex;gap:8px;align-items:center;margin-left:auto;">
-      <div class="count-badge">Записей: <span id="countTehKarty">0</span></div>
-      <button class="btn btn-secondary" style="font-size:10px;padding:6px 14px;" onclick="loadTehKartyData()">↻ Обновить</button>
-    </div>
-  </div>
-  <div class="table-wrap" id="tableTehKarty">
-    <div class="empty-state"><div class="icon">📋</div><div>Нажмите «↻ Обновить»</div></div>
+      <!-- СПИСОК тех карт -->
+      <div id="tkPanelList" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+        <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px;">
+          <input type="text" id="searchTehKarty" placeholder="Поиск…" oninput="filterTehKarty()"
+            style="flex:1;background:var(--surface2);border:1px solid var(--border);
+                   color:var(--text);padding:5px 8px;border-radius:4px;font-size:11px;outline:none;">
+          <select id="tehKartyTpFilter" onchange="filterTehKarty()"
+            style="background:var(--surface2);border:1px solid var(--border);color:var(--text);
+                   padding:4px 6px;border-radius:4px;font-size:11px;">
+            <option value="">Все ТП</option>
+            <option value="1">ТП №1</option>
+            <option value="2">ТП №2</option>
+          </select>
+          <button class="btn btn-secondary" style="font-size:10px;padding:4px 8px;" onclick="loadTehKartyData()">↻</button>
+        </div>
+        <div id="tkMissingList" style="flex:1;overflow-y:auto;padding:4px 0;">
+          <div class="empty-state"><div class="icon">📋</div><div>Нажмите ↻</div></div>
+        </div>
+      </div>
+
+      <!-- ФОРМА создания тех карты -->
+      <div id="tkPanelCreate" style="flex:1;display:none;flex-direction:column;overflow:hidden;">
+        <div style="padding:10px 14px;border-bottom:1px solid var(--border);">
+          <div style="font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;
+            letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Выбрать чертёж</div>
+          <input type="text" id="tkSearchDrawing" placeholder="Поиск по чертежу…"
+            oninput="filterTKDrawings()"
+            style="width:100%;background:var(--surface2);border:1px solid var(--border);
+                   color:var(--text);padding:6px 8px;border-radius:4px;font-size:11px;outline:none;">
+        </div>
+        <div id="tkDrawingList" style="flex:1;overflow-y:auto;padding:4px 0;">
+          <div class="empty-state" style="padding:20px"><div>Загрузка…</div></div>
+        </div>
+      </div>
+
+    </div><!-- end left -->
+
+    <!-- RIGHT: таблица / форма операций -->
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+
+      <!-- Таблица всех тех карт -->
+      <div id="tkRightTable" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+        <div class="table-header" style="padding:8px 16px;">
+          <div class="count-badge">Записей: <span id="countTehKarty">0</span></div>
+        </div>
+        <div class="table-wrap" id="tableTehKarty">
+          <div class="empty-state"><div class="icon">📋</div><div>Выберите чертёж или нажмите ↻</div></div>
+        </div>
+      </div>
+
+      <!-- Форма ввода операций (показывается при создании) -->
+      <div id="tkRightForm" style="flex:1;display:none;flex-direction:column;overflow:hidden;">
+        <div class="panel-title" style="padding:12px 16px;">
+          <span id="tkFormTitle">Новая тех карта</span>
+          <div style="margin-left:auto;display:flex;gap:8px;">
+            <button class="btn btn-secondary" style="font-size:10px;" onclick="cancelTKForm()">Отмена</button>
+            <button class="btn btn-primary" style="font-size:11px;" onclick="saveTehKarty()">💾 Сохранить</button>
+          </div>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:16px 20px;">
+
+          <input type="hidden" id="tkf_drawing">
+          <input type="hidden" id="tkf_name">
+          <input type="hidden" id="tkf_firm">
+
+          <!-- Инфо -->
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;
+            padding:12px 16px;margin-bottom:16px;">
+            <div style="font-size:14px;font-weight:700;color:var(--accent)" id="tkf_drawingLabel"></div>
+            <div style="font-size:12px;color:var(--text2)" id="tkf_nameLabel"></div>
+          </div>
+
+          <!-- № ТП -->
+          <div class="field" style="margin-bottom:16px;">
+            <label><span class="col-badge">A</span> № ТП</label>
+            <select id="tkf_tp" style="background:var(--surface2);border:1px solid var(--border);
+              color:var(--text);padding:8px;border-radius:4px;font-size:13px;">
+              <option value="1">1 — Основной маршрут</option>
+              <option value="2">2 — Альтернативный маршрут</option>
+              <option value="3">3 — Специальный</option>
+            </select>
+          </div>
+
+          <!-- Операции -->
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent2);
+            letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:6px;">
+            Операции (по порядку выполнения)
+          </div>
+
+          <div id="tkOpsContainer" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+            <!-- Операции добавляются динамически -->
+          </div>
+
+          <button onclick="addTKOperation()" style="
+            width:100%;padding:8px;border-radius:4px;border:1px dashed var(--border);
+            background:transparent;color:var(--text2);cursor:pointer;font-size:12px;
+            font-family:'IBM Plex Mono',monospace;transition:all .15s;margin-bottom:20px;
+          " onmouseover="this.style.borderColor='var(--accent2)'"
+             onmouseout="this.style.borderColor='var(--border)'">
+            ＋ Добавить операцию
+          </button>
+
+          <button class="btn btn-primary" style="width:100%;" onclick="saveTehKarty()">
+            💾 Сохранить тех карту
+          </button>
+        </div>
+      </div>
+
+    </div><!-- end right -->
   </div>
 </div>
 
@@ -1313,7 +1415,7 @@ function doGet(e) {
 // ════════════════════════════════
 // STATE
 // ════════════════════════════════
-const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbyhXC3HK8I9dwWz75qSCkzHvdd7mFHxK52vL4Zaef40_6ecX4aqemerb7fkokegp0pWog/exec';
+const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbz2fjsSwFKkWcfU3coSij5onhWU61SUdc24PAK3OJ9Ns-201gjvzv4ZubN6MP2iy442Fw/exec';
 
 const STATE = {
   currentRows: [],
@@ -1375,6 +1477,95 @@ function toggleTheme() {
 }
 
 
+
+// ════════════════════════════════
+// РОЛИ И ДОСТУП
+// ════════════════════════════════
+const ROLES = {
+  admin: {
+    label: 'Администратор',
+    color: 'var(--danger)',
+    tabs: ['new','current','archive','tech','tehkarty','sbordata','history','config'],
+    canDelete: true,
+    canAddTech: true,
+    canAddTehKarty: true,
+    canAddOrder: true,
+  },
+  manager: {
+    label: 'Менеджер',
+    color: 'var(--accent2)',
+    tabs: ['new','current','archive'],
+    canDelete: false,
+    canAddTech: false,
+    canAddTehKarty: false,
+    canAddOrder: true,
+  },
+  technolog: {
+    label: 'Технолог',
+    color: 'var(--success)',
+    tabs: ['current','tech','tehkarty'],
+    canDelete: false,
+    canAddTech: true,
+    canAddTehKarty: true,
+    canAddOrder: false,
+  },
+  master: {
+    label: 'Мастер',
+    color: '#ff9500',
+    tabs: ['current','sbordata'],
+    canDelete: false,
+    canAddTech: false,
+    canAddTehKarty: false,
+    canAddOrder: false,
+  },
+};
+
+function getUserRole() {
+  return STATE.user && STATE.user.role ? STATE.user.role : 'manager';
+}
+
+function hasAccess(tab) {
+  const role = ROLES[getUserRole()];
+  return role && role.tabs.includes(tab);
+}
+
+function canDo(action) {
+  const role = ROLES[getUserRole()];
+  return role && role[action] === true;
+}
+
+function applyRoleUI() {
+  const role = ROLES[getUserRole()];
+  if (!role) return;
+
+  // Show/hide tabs based on role
+  const tabNames = ['new','current','archive','tech','tehkarty','sbordata','history','config'];
+  document.querySelectorAll('.tab').forEach((btn, i) => {
+    if (i < tabNames.length) {
+      btn.style.display = role.tabs.includes(tabNames[i]) ? '' : 'none';
+    }
+  });
+
+  // Update user badge with role
+  const badge = document.getElementById('userBadge');
+  if (badge) {
+    badge.innerHTML = '<span style="color:' + role.color + '">● ' + role.label + '</span>';
+  }
+
+  // Show/hide delete buttons
+  document.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.style.display = role.canDelete ? '' : 'none';
+  });
+
+  // Show/hide add order button
+  const addOrderBtn = document.querySelector('.btn-primary[onclick="submitOrder()"]');
+  if (addOrderBtn) addOrderBtn.style.display = role.canAddOrder ? '' : 'none';
+
+  // Navigate to first allowed tab
+  const firstTab = role.tabs[0] || 'current';
+  switchTab(firstTab);
+}
+
 window.onload = () => {
   // Всегда используем захардкоженный URL
   STATE.appsScriptUrl = DEFAULT_URL;
@@ -1386,14 +1577,17 @@ window.onload = () => {
   loadCuratorsFromConfig();
   loadOrderTypesFromConfig();
 
-  // Автовход без авторизации — роль admin по умолчанию
-  STATE.user = { email: 'local', name: 'Пользователь', role: 'admin', token: '' };
-  showApp();
-
   initTheme();
 
-  // Автозагрузка данных при открытии
-  loadCurrentOrders();
+  // Проверить сохранённую сессию
+  const saved = JSON.parse(localStorage.getItem('sktUser') || 'null');
+  if (saved && saved.email && saved.role) {
+    STATE.user = saved;
+    showApp();
+    loadCurrentOrders();
+  } else {
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
 };
 
 // ════════════════════════════════
@@ -1994,6 +2188,232 @@ function showToast(msg, isError = false) {
 // ════════════════════════════════
 // SCRIPT HELPER
 // ════════════════════════════════
+
+// ════════════════════════════════
+// ТЕХ КАРТЫ — ФОРМА СОЗДАНИЯ
+// ════════════════════════════════
+var tkOpsCount = 0;
+var tkOpsSheet = []; // операции из справочника
+
+function switchTKTab(tab) {
+  const isList = tab === 'list';
+  document.getElementById('tkPanelList').style.display   = isList ? 'flex' : 'none';
+  document.getElementById('tkPanelCreate').style.display = isList ? 'none' : 'flex';
+  document.getElementById('tkRightTable').style.display  = isList ? 'flex' : 'none';
+  document.getElementById('tkRightForm').style.display   = isList ? 'none' : 'none';
+
+  document.getElementById('tkTabList').style.background   = isList ? 'var(--accent)' : 'transparent';
+  document.getElementById('tkTabList').style.color        = isList ? '#0f1117' : 'var(--text2)';
+  document.getElementById('tkTabCreate').style.background = isList ? 'transparent' : 'var(--accent)';
+  document.getElementById('tkTabCreate').style.color      = isList ? 'var(--text2)' : '#0f1117';
+
+  if (!isList && tkOpsSheet.length === 0) {
+    loadTKOperations();
+    loadTKDrawings();
+  }
+}
+
+async function loadTKOperations() {
+  try {
+    const data = await apiCall({ action: 'read', id: TECH_SPREAD_ID_WEB, sheet: 'Справочник операций' });
+    tkOpsSheet = (data.data || []).slice(1).filter(function(r) {
+      return String(r[0] || '').trim();
+    });
+  } catch(e) {
+    console.warn('Не удалось загрузить справочник операций:', e.message);
+  }
+}
+
+async function loadTKDrawings() {
+  document.getElementById('tkDrawingList').innerHTML =
+    '<div class="loading"><div class="spinner"></div>Загрузка…</div>';
+  try {
+    // Загрузить заказы и тех карты
+    const [ordersData, tkData] = await Promise.all([
+      apiRead('Заказы на производство новый'),
+      apiCall({ action: 'read', id: TECH_SPREAD_ID_WEB, sheet: 'Тех Карты ' })
+    ]);
+
+    const ordersRows = (ordersData || []).slice(3);
+    const tkRows = (tkData.data || []).slice(1);
+
+    // Все чертежи из заказов
+    var ordersMap = {};
+    ordersRows.forEach(function(r) {
+      var d = String(r[6] || '').trim();
+      if (d && d !== 'false') {
+        ordersMap[d] = { drawing: d, name: String(r[7]||'').trim(), firm: String(r[1]||'').trim() };
+      }
+    });
+
+    // Тех карты уже есть
+    var tkSet = {};
+    tkRows.forEach(function(r) {
+      var d = String(r[2] || '').trim();
+      var tp = String(r[0] || '').trim();
+      if (d) { tkSet[d] = tkSet[d] || []; tkSet[d].push(tp); }
+    });
+
+    STATE.tkAllDrawings = Object.values(ordersMap);
+    STATE.tkSet = tkSet;
+    filterTKDrawings();
+  } catch(e) {
+    document.getElementById('tkDrawingList').innerHTML =
+      '<div class="empty-state"><div class="icon">⚠️</div><div>' + e.message + '</div></div>';
+  }
+}
+
+function filterTKDrawings() {
+  var q = (document.getElementById('tkSearchDrawing').value || '').toLowerCase();
+  var items = STATE.tkAllDrawings || [];
+  if (q) items = items.filter(function(m) {
+    return m.drawing.toLowerCase().includes(q) || (m.name||'').toLowerCase().includes(q);
+  });
+  renderTKDrawingList(items);
+}
+
+function renderTKDrawingList(items) {
+  var el = document.getElementById('tkDrawingList');
+  if (!items.length) {
+    el.innerHTML = '<div class="empty-state" style="padding:20px"><div>Не найдено</div></div>';
+    return;
+  }
+  var tkSet = STATE.tkSet || {};
+  el.innerHTML = items.map(function(m) {
+    var tps = tkSet[m.drawing] ? tkSet[m.drawing].join(', ') : '';
+    var badge = tps
+      ? '<span style="font-size:9px;color:var(--success);float:right">ТП' + tps + '</span>'
+      : '<span style="font-size:9px;color:var(--danger);float:right">нет</span>';
+    return '<div onclick="selectTKDrawing(' + JSON.stringify(JSON.stringify(m)) + ')"'
+      + ' style="padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer"'
+      + ' onmouseover="this.style.background=\'#1e2435\'"'
+      + ' onmouseout="this.style.background="""'
+      + '<div style="font-family:monospace;font-size:12px;font-weight:600;color:var(--accent)">'
+      + m.drawing + badge + '</div>'
+      + '<div style="font-size:11px;color:var(--text2)">' + (m.name||'') + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function selectTKDrawing(mJson) {
+  var m = typeof mJson === 'string' ? JSON.parse(mJson) : mJson;
+  document.getElementById('tkf_drawing').value = m.drawing;
+  document.getElementById('tkf_name').value    = m.name || '';
+  document.getElementById('tkf_firm').value    = m.firm || '';
+  document.getElementById('tkf_drawingLabel').textContent = m.drawing;
+  document.getElementById('tkf_nameLabel').textContent    = m.name || '';
+  document.getElementById('tkFormTitle').textContent = 'Тех карта: ' + m.drawing;
+
+  // Определить следующий № ТП
+  var tkSet = STATE.tkSet || {};
+  var existing = tkSet[m.drawing] ? tkSet[m.drawing].map(Number) : [];
+  var nextTP = existing.length > 0 ? Math.max.apply(null, existing) + 1 : 1;
+  document.getElementById('tkf_tp').value = Math.min(nextTP, 3);
+
+  // Показать форму операций
+  document.getElementById('tkRightForm').style.display = 'flex';
+  document.getElementById('tkRightTable').style.display = 'none';
+
+  // Сбросить операции
+  tkOpsCount = 0;
+  document.getElementById('tkOpsContainer').innerHTML = '';
+  addTKOperation(); // добавить первую пустую
+}
+
+function addTKOperation() {
+  tkOpsCount++;
+  var num = tkOpsCount;
+  var ops = tkOpsSheet;
+
+  var opOptions = ops.map(function(r, i) {
+    return '<option value="' + String(r[0]||'').trim() + '">'
+      + '[' + String(r[0]||'').trim() + '] ' + String(r[1]||'').trim() + '</option>';
+  }).join('');
+
+  var html = '<div id="tkOp_' + num + '" style="display:flex;gap:8px;align-items:center;">'
+    + '<span style="font-family:monospace;font-size:11px;color:var(--text3);min-width:20px">' + num + '.</span>'
+    + '<select style="flex:2;background:var(--surface2);border:1px solid var(--border);'
+    + 'color:var(--text);padding:6px 8px;border-radius:4px;font-size:12px;"'
+    + ' id="tkOpNum_' + num + '">'
+    + '<option value="">— операция —</option>' + opOptions
+    + '</select>'
+    + '<input type="number" id="tkOpTime_' + num + '" placeholder="мин" min="0" step="0.1"'
+    + ' style="width:70px;background:var(--surface2);border:1px solid var(--border);'
+    + 'color:var(--text);padding:6px 8px;border-radius:4px;font-size:12px;">'
+    + '<button onclick="removeTKOp(' + num + ')"'
+    + ' style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0 4px;">✕</button>'
+    + '</div>';
+
+  document.getElementById('tkOpsContainer').insertAdjacentHTML('beforeend', html);
+}
+
+function removeTKOp(num) {
+  var el = document.getElementById('tkOp_' + num);
+  if (el) el.remove();
+}
+
+function cancelTKForm() {
+  document.getElementById('tkRightForm').style.display = 'none';
+  document.getElementById('tkRightTable').style.display = 'flex';
+}
+
+async function saveTehKarty() {
+  var drawing = document.getElementById('tkf_drawing').value;
+  if (!drawing) { showToast('Выберите чертёж', true); return; }
+
+  var tp   = document.getElementById('tkf_tp').value || '1';
+  var name = document.getElementById('tkf_name').value || '';
+  var firm = document.getElementById('tkf_firm').value || '';
+
+  // Собрать операции
+  var ops = [];
+  for (var i = 1; i <= tkOpsCount; i++) {
+    var selEl  = document.getElementById('tkOpNum_' + i);
+    var timeEl = document.getElementById('tkOpTime_' + i);
+    if (!selEl) continue;
+    var opNum  = selEl.value;
+    var opTime = timeEl ? (parseFloat(timeEl.value) || '') : '';
+    if (opNum) ops.push({ seq: ops.length + 1, opNum: opNum, time: opTime });
+  }
+
+  if (!ops.length) { showToast('Добавьте хотя бы одну операцию', true); return; }
+
+  // Строка для Тех Карты: A=ТП, B=Фирм, C=Чертёж, D=Наим, E+= попарно опер|время
+  var row = [tp, firm, drawing, name];
+  ops.forEach(function(op) {
+    row.push(op.opNum);
+    row.push(op.time);
+  });
+
+  var btn = document.querySelector('#tkRightForm .btn-primary');
+  if (btn) { btn.textContent = '⏳…'; btn.disabled = true; }
+
+  try {
+    await apiCall({
+      action: 'append',
+      id: TECH_SPREAD_ID_WEB,
+      sheet: 'Тех Карты ',
+      row: JSON.stringify(row)
+    });
+
+    showToast('✓ Тех карта сохранена: ' + drawing + ' (ТП' + tp + ')');
+    cancelTKForm();
+
+    // Обновить список
+    if (STATE.tkSet) {
+      STATE.tkSet[drawing] = STATE.tkSet[drawing] || [];
+      if (!STATE.tkSet[drawing].includes(tp)) STATE.tkSet[drawing].push(tp);
+      filterTKDrawings();
+    }
+    loadTehKartyData();
+
+  } catch(e) {
+    showToast('Ошибка: ' + e.message, true);
+  } finally {
+    if (btn) { btn.textContent = '💾 Сохранить тех карту'; btn.disabled = false; }
+  }
+}
+
 // ════════════════════════════════
 // ТЕХ КАРТЫ
 // ════════════════════════════════
@@ -2225,8 +2645,8 @@ function renderTechMissingList(items) {
     var mJson = encodeURIComponent(JSON.stringify(m));
     return '<div onclick="selectTechItem(decodeURIComponent(\'' + mJson + '\'))"'
       + ' style="padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer"'
-      + ' onmouseover="this.style.background=\'var(--surface2)\'"'
-      + ' onmouseout="this.style.background=\'\'">'
+      + ' onmouseover="this.style.background=\'#1e2435\'"'
+      + ' onmouseout="this.style.background=\'\'"'
       + '<div style="font-family:monospace;font-size:12px;font-weight:600;color:var(--accent)">'
       + m.drawing + badge + '</div>'
       + '<div style="font-size:11px;color:var(--text2)">' + (m.name || '—') + '</div>'
@@ -2557,6 +2977,69 @@ function renderSborTable(rows) {
     html += "<div style='text-align:center;padding:12px;font-family:monospace;font-size:11px;color:var(--text3)'>Показано последние 500 из " + rows.length + " записей</div>";
   }
   document.getElementById('tableSbor').innerHTML = html;
+}
+
+
+// ════════════════════════════════
+// АВТОРИЗАЦИЯ
+// ════════════════════════════════
+function doLogin() {
+  const email = (document.getElementById('loginEmail').value || '').trim().toLowerCase();
+  if (!email) { showLoginError('Введите email'); return; }
+
+  document.getElementById('loginSpinner').style.display = 'block';
+  document.getElementById('loginError').style.display = 'none';
+
+  // Запрос к Apps Script — проверить email в листе Доступ
+  apiCall({ action: 'login', email: email })
+    .then(data => {
+      document.getElementById('loginSpinner').style.display = 'none';
+      if (!data || data.error) {
+        showLoginError(data.message || data.error || 'Доступ запрещён');
+        return;
+      }
+      STATE.user = data.user;
+      localStorage.setItem('sktUser', JSON.stringify(data.user));
+      document.getElementById('loginScreen').style.display = 'none';
+      showApp();
+      loadCurrentOrders();
+    })
+    .catch(e => {
+      document.getElementById('loginSpinner').style.display = 'none';
+      showLoginError('Ошибка: ' + e.message);
+    });
+}
+
+function doLogout() {
+  STATE.user = null;
+  localStorage.removeItem('sktUser');
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginError').style.display = 'none';
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('loginError');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function showApp() {
+  const role = ROLES[STATE.user.role] || ROLES.manager;
+  // Update user badge
+  const bar = document.getElementById('userBar');
+  if (bar) {
+    bar.style.display = 'flex';
+    const badge = document.getElementById('userBadge');
+    if (badge) badge.innerHTML = STATE.user.name
+      + ' <span style="font-size:9px;color:' + role.color + ';margin-left:4px">'
+      + role.label.toUpperCase() + '</span>';
+  }
+  // Logout button in userBar
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) logoutBtn.style.display = 'inline-block';
+
+  applyRoleUI();
 }
 
 // ════════════════════════════════
@@ -2952,6 +3435,52 @@ function renderHistoryTable(rows) {
   document.getElementById('tableHistory').innerHTML = html;
 }
 </script>
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" style="
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+">
+  <div style="
+    background:var(--surface);border:1px solid var(--border);
+    border-top:3px solid var(--accent);border-radius:10px;
+    padding:40px;width:380px;display:flex;flex-direction:column;gap:18px;
+  ">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:4px;color:var(--accent);">
+      СКТ · ВХОД
+    </div>
+    <div style="font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;line-height:1.6;">
+      Введите email для входа в систему
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <label style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text2);
+        letter-spacing:1px;text-transform:uppercase;">Email</label>
+      <input type="email" id="loginEmail" placeholder="your@email.com"
+        onkeydown="if(event.key==='Enter')doLogin()"
+        style="background:var(--surface2);border:1px solid var(--border);color:var(--text);
+               padding:10px 14px;border-radius:4px;font-size:13px;outline:none;">
+    </div>
+
+    <div id="loginError" style="display:none;color:var(--danger);font-size:12px;
+      padding:8px 12px;background:rgba(255,77,77,.08);border-radius:4px;
+      border:1px solid rgba(255,77,77,.2);font-family:'IBM Plex Mono',monospace;"></div>
+
+    <button onclick="doLogin()" style="
+      background:var(--accent);color:#0f1117;border:none;border-radius:4px;
+      padding:12px;font-family:'IBM Plex Mono',monospace;font-size:12px;
+      font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;
+    ">Войти</button>
+
+    <div id="loginSpinner" style="display:none;text-align:center;color:var(--text3);
+      font-family:'IBM Plex Mono',monospace;font-size:11px;">
+      <span style="display:inline-block;width:14px;height:14px;border:2px solid var(--border);
+        border-top-color:var(--accent2);border-radius:50%;animation:spin .6s linear infinite;
+        vertical-align:middle;margin-right:8px;"></span>
+      Проверка…
+    </div>
+  </div>
+</div>
+
 <!-- SETTINGS FAB (правый нижний угол) -->
 <button id="settingsFab" onclick="toggleSettingsPanel()" style="
   position:fixed;bottom:20px;right:20px;z-index:500;
