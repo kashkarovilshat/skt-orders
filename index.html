@@ -1415,7 +1415,7 @@ function doGet(e) {
 // ════════════════════════════════
 // STATE
 // ════════════════════════════════
-const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbz2fjsSwFKkWcfU3coSij5onhWU61SUdc24PAK3OJ9Ns-201gjvzv4ZubN6MP2iy442Fw/exec';
+const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbwjTwgpWLtHkFVaFtspsZNKsfvRdJy9B_fHiU2iuqnMcQLlgk3wlPWpUjfwgNbwQOg9zQ/exec';
 
 const STATE = {
   currentRows: [],
@@ -2557,29 +2557,50 @@ async function loadTechData() {
     '<div class="loading"><div class="spinner"></div>Загрузка…</div>';
 
   try {
-    // Загрузить заказы и технологии параллельно
-    const [ordersData, techData] = await Promise.all([
-      apiRead('Заказы на производство новый'),
-      apiCall({ action: 'read', id: TECH_SPREAD_ID_WEB, sheet: TECH_SHEET_WEB })
-    ]);
+    // ── Шаг 1: Используем кэш заказов если есть ──
+    let ordersMap = {};
+    if (STATE.currentRows && STATE.currentRows.length > 0) {
+      // Данные уже загружены — используем кэш
+      STATE.currentRows.forEach(r => {
+        const drawing = String(r[6] || '').trim();
+        if (drawing && drawing !== 'false') {
+          ordersMap[drawing] = {
+            drawing,
+            name:      String(r[7] || '').trim(),
+            firm:      String(r[1] || '').trim(),
+            zakazchik: String(r[2] || '').trim()
+          };
+        }
+      });
+    } else {
+      // Грузим только нужные колонки (B,C,G,H = 1,2,6,7)
+      const ordersData = await apiRead('Заказы на производство новый');
+      (ordersData || []).slice(3).forEach(r => {
+        const drawing = String(r[6] || '').trim();
+        if (drawing && drawing !== 'false') {
+          ordersMap[drawing] = {
+            drawing,
+            name:      String(r[7] || '').trim(),
+            firm:      String(r[1] || '').trim(),
+            zakazchik: String(r[2] || '').trim()
+          };
+        }
+      });
+    }
 
-    // Чертежи из заказов (с 4-й строки, колонка G=6, H=7, B=1)
-    const ordersRows = (ordersData || []).slice(3);
-    const ordersMap = {};
-    ordersRows.forEach(r => {
-      const drawing = String(r[6] || '').trim();
-      if (drawing && drawing !== 'false') {
-        ordersMap[drawing] = {
-          drawing,
-          name:      String(r[7] || '').trim(),
-          firm:      String(r[1] || '').trim(),
-          zakazchik: String(r[2] || '').trim()
-        };
-      }
-    });
+    // ── Шаг 2: Грузим Технологии (только C,D = чертёж+наим) ──
+    // Показываем промежуточный результат пока грузится
+    if (STATE.techAllRows && STATE.techAllRows.length > 0) {
+      // Показать из кэша сразу
+      const mode = STATE.techMode || 'all';
+      const items = mode === 'all' ? STATE.techAllRows : STATE.techMissing;
+      renderTechMissingList(items);
+      document.getElementById('techMissingCount').textContent = items.length + ' шт.';
+    }
 
-    // Чертежи в Технологиях (с 3-й строки, колонка C=2)
+    const techData = await apiCall({ action: 'read', id: TECH_SPREAD_ID_WEB, sheet: TECH_SHEET_WEB });
     const techRows = (techData.data || []).slice(TECH_DATA_ROW_WEB - 1);
+
     const techSet = new Set();
     const allTechItems = [];
     techRows.forEach(r => {
@@ -2595,7 +2616,6 @@ async function loadTechData() {
       }
     });
 
-    // Найти отсутствующие
     const missing = Object.values(ordersMap)
       .filter(m => !techSet.has(m.drawing))
       .sort((a, b) => a.drawing.localeCompare(b.drawing));
@@ -2604,7 +2624,6 @@ async function loadTechData() {
     STATE.techAllRows  = allTechItems;
     STATE.techRows     = techRows;
 
-    // Показать согласно текущему режиму
     const mode = STATE.techMode || 'all';
     if (mode === 'all') {
       document.getElementById('techMissingCount').textContent = allTechItems.length + ' шт.';
