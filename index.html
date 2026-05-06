@@ -734,6 +734,7 @@
     <button class="tab active" onclick="switchTab('new')">Новый заказ</button>
     <button class="tab" onclick="switchTab('current')">Текущие заказы</button>
     <button class="tab" onclick="switchTab('archive')">Архив<span class="archive-indicator"></span></button>
+    <button class="tab" onclick="switchTab('launch')">🚀 Запуск</button>
     <button class="tab" onclick="switchTab('tech')">Технологии</button>
     <button class="tab" onclick="switchTab('tehkarty')">Тех Карты</button>
     <button class="tab" onclick="switchTab('sbordata')">Сбор данных</button>
@@ -905,6 +906,118 @@
   </div>
   <div class="table-wrap" id="tableArchive">
     <div class="empty-state"><div class="icon">🗄️</div><div>Нажмите «Загрузить архив»</div></div>
+  </div>
+</div>
+
+<!-- ════════════ TAB: ЗАПУСК ════════════ -->
+<div class="page" id="page-launch">
+  <div style="display:flex;height:100%;overflow:hidden;">
+
+    <!-- LEFT: список незапущенных заказов -->
+    <div style="width:380px;min-width:320px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;">
+      <div class="panel-title" style="padding:12px 16px;">
+        <span class="dot"></span> Не запущено
+        <span id="launchCount" style="margin-left:auto;font-size:11px;color:var(--danger);font-family:'IBM Plex Mono',monospace;"></span>
+      </div>
+      <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px;">
+        <input type="text" id="searchLaunch" placeholder="Поиск…" oninput="filterLaunchList()"
+          style="flex:1;background:var(--surface2);border:1px solid var(--border);
+                 color:var(--text);padding:5px 8px;border-radius:4px;font-size:11px;outline:none;">
+        <button class="btn btn-secondary" style="font-size:10px;padding:4px 10px;" onclick="loadLaunchData()">↻</button>
+      </div>
+      <!-- Массовый запуск -->
+      <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px;align-items:center;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);cursor:pointer;">
+          <input type="checkbox" id="launchSelectAll" onchange="toggleSelectAll(this)">
+          Выбрать все
+        </label>
+        <button class="btn btn-primary" style="font-size:10px;padding:4px 12px;margin-left:auto;"
+          onclick="launchSelected()">🚀 Запустить выбранные</button>
+      </div>
+      <div id="launchList" style="flex:1;overflow-y:auto;padding:4px 0;">
+        <div class="empty-state"><div class="icon">🚀</div><div>Нажмите ↻</div></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: детали и действия -->
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+
+      <!-- Пустое состояние -->
+      <div id="launchEmpty" style="flex:1;display:flex;align-items:center;justify-content:center;">
+        <div class="empty-state">
+          <div class="icon">🚀</div>
+          <div>Выберите заказ из списка слева</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px;">для просмотра деталей и запуска</div>
+        </div>
+      </div>
+
+      <!-- Карточка заказа -->
+      <div id="launchDetail" style="display:none;flex-direction:column;overflow:hidden;">
+
+        <!-- Шапка -->
+        <div style="padding:16px 20px;border-bottom:1px solid var(--border);background:var(--surface);">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <div>
+              <div id="ld_drawing" style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:700;color:var(--accent);"></div>
+              <div id="ld_name" style="font-size:13px;color:var(--text2);margin-top:2px;"></div>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-secondary" style="font-size:11px;" onclick="closeLaunchDetail()">← Назад</button>
+              <button id="btnLaunchOne" class="btn btn-primary" style="font-size:11px;" onclick="launchOne()">
+                🚀 Запустить
+              </button>
+            </div>
+          </div>
+
+          <!-- Статусы -->
+          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+            <div id="ld_statusTech" class="status-badge" style="font-size:11px;"></div>
+            <div id="ld_statusTK" class="status-badge" style="font-size:11px;"></div>
+            <div id="ld_statusMR" class="status-badge" style="font-size:11px;"></div>
+          </div>
+        </div>
+
+        <!-- Предупреждения -->
+        <div id="launchWarnings" style="padding:12px 20px;display:none;">
+          <div style="background:rgba(255,200,0,.1);border:1px solid rgba(255,200,0,.3);
+            border-radius:6px;padding:12px 16px;font-size:12px;color:var(--accent);
+            font-family:'IBM Plex Mono',monospace;line-height:1.8;" id="launchWarningText">
+          </div>
+        </div>
+
+        <!-- Секция сопроводительного листа -->
+        <div id="launchCoverSection" style="padding:16px 20px;border-bottom:1px solid var(--border);display:none;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent2);
+            letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">
+            📄 Сопроводительный лист
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <div>
+              <div style="font-size:11px;color:var(--text2);margin-bottom:4px;">№ заявки в Запуске:</div>
+              <div id="ld_launchNum" style="font-family:'IBM Plex Mono',monospace;font-size:18px;
+                font-weight:700;color:var(--success);"></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;margin-left:auto;">
+              <button class="btn btn-secondary" style="font-size:11px;" onclick="fillCoverSheet()">
+                📝 Заполнить маршрут
+              </button>
+              <button class="btn btn-primary" style="font-size:11px;" onclick="printCoverSheet()">
+                🖨️ Печать сопроводительного
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Лог действий -->
+        <div id="launchLog" style="flex:1;overflow-y:auto;padding:16px 20px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);
+            letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Лог действий</div>
+          <div id="launchLogItems" style="font-size:12px;color:var(--text2);line-height:2;
+            font-family:'IBM Plex Mono',monospace;"></div>
+        </div>
+
+      </div><!-- end launchDetail -->
+    </div><!-- end right -->
   </div>
 </div>
 
@@ -1415,7 +1528,7 @@ function doGet(e) {
 // ════════════════════════════════
 // STATE
 // ════════════════════════════════
-const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbwjTwgpWLtHkFVaFtspsZNKsfvRdJy9B_fHiU2iuqnMcQLlgk3wlPWpUjfwgNbwQOg9zQ/exec';
+const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbygrSnj0W3GyZeRfgKq8z7lXDNj2KkGDuJYNT9bMV07taaveOKHrOFP-r216rUjLbVcZQ/exec';
 
 const STATE = {
   currentRows: [],
@@ -1694,7 +1807,7 @@ function updateSheetBadge() {
 // ════════════════════════════════
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t,i) => {
-    const names = ['new','current','archive','tech','tehkarty','sbordata','history','config'];
+    const names = ['new','current','archive','launch','tech','tehkarty','sbordata','history','config'];
     t.classList.toggle('active', names[i] === name);
   });
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -2188,6 +2301,233 @@ function showToast(msg, isError = false) {
 // ════════════════════════════════
 // SCRIPT HELPER
 // ════════════════════════════════
+
+
+// ════════════════════════════════
+// ЗАПУСК
+// ════════════════════════════════
+var launchAllRows = [];
+var launchSelected_item = null;
+
+async function loadLaunchData() {
+  document.getElementById('launchList').innerHTML =
+    '<div class="loading"><div class="spinner"></div>Загрузка…</div>';
+  try {
+    const data = await apiCall({ action: 'unlaunched' });
+    launchAllRows = data.data || [];
+    document.getElementById('launchCount').textContent = launchAllRows.length + ' шт.';
+    filterLaunchList();
+  } catch(e) {
+    document.getElementById('launchList').innerHTML =
+      '<div class="empty-state"><div class="icon">⚠️</div><div>' + e.message + '</div></div>';
+  }
+}
+
+function filterLaunchList() {
+  var q = (document.getElementById('searchLaunch').value || '').toLowerCase();
+  var items = q ? launchAllRows.filter(function(r) {
+    return r.drawing.toLowerCase().includes(q) || (r.name||'').toLowerCase().includes(q)
+      || String(r.orderNum).includes(q);
+  }) : launchAllRows;
+  renderLaunchList(items);
+}
+
+function renderLaunchList(items) {
+  var el = document.getElementById('launchList');
+  if (!items.length) {
+    el.innerHTML = '<div class="empty-state" style="padding:30px 16px"><div class="icon">✓</div>'
+      + '<div>Все заказы запущены!</div></div>';
+    return;
+  }
+  el.innerHTML = items.map(function(r) {
+    return '<div style="padding:10px 14px;border-bottom:1px solid var(--border);'
+      + 'display:flex;align-items:flex-start;gap:8px;">'
+      + '<input type="checkbox" class="launch-cb" data-row="' + r.rowNum + '"'
+      + ' style="margin-top:3px;cursor:pointer;">'
+      + '<div onclick="showLaunchDetail(' + JSON.stringify(JSON.stringify(r)) + ')"'
+      + ' style="flex:1;cursor:pointer;">'
+      + '<div style="font-family:monospace;font-size:12px;font-weight:600;color:var(--accent)">'
+      + r.drawing + '</div>'
+      + '<div style="font-size:11px;color:var(--text2)">' + (r.name||'') + '</div>'
+      + '<div style="font-size:10px;color:var(--text3);margin-top:2px">'
+      + '№' + r.orderNum + ' · ' + r.firm + ' · ' + (r.qty||'') + ' шт.</div>'
+      + '</div>'
+      + '<button onclick="showLaunchDetail(' + JSON.stringify(JSON.stringify(r)) + ')"'
+      + ' style="background:transparent;border:1px solid var(--border);color:var(--text2);'
+      + 'padding:3px 8px;border-radius:3px;font-size:10px;cursor:pointer;">→</button>'
+      + '</div>';
+  }).join('');
+}
+
+function toggleSelectAll(cb) {
+  document.querySelectorAll('.launch-cb').forEach(function(el) { el.checked = cb.checked; });
+}
+
+async function launchSelected() {
+  var checked = Array.from(document.querySelectorAll('.launch-cb:checked'));
+  if (!checked.length) { showToast('Выберите заказы', true); return; }
+  var rows = checked.map(function(cb) { return cb.dataset.row; }).join(',');
+  var btn = document.querySelector('[onclick="launchSelected()"]');
+  if (btn) { btn.textContent = '⏳…'; btn.disabled = true; }
+  try {
+    var data = await apiCall({ action: 'runSync', rows: rows });
+    showToast('✓ Запущено: ' + (data.launched || 0) + ' заказов');
+    await loadLaunchData();
+  } catch(e) {
+    showToast('Ошибка: ' + e.message, true);
+  } finally {
+    if (btn) { btn.textContent = '🚀 Запустить выбранные'; btn.disabled = false; }
+  }
+}
+
+async function showLaunchDetail(rJson) {
+  var r = typeof rJson === 'string' ? JSON.parse(rJson) : rJson;
+  launchSelected_item = r;
+
+  document.getElementById('launchEmpty').style.display = 'none';
+  document.getElementById('launchDetail').style.display = 'flex';
+  document.getElementById('launchCoverSection').style.display = 'none';
+  document.getElementById('launchWarnings').style.display = 'none';
+  document.getElementById('launchLogItems').innerHTML = '';
+
+  document.getElementById('ld_drawing').textContent = r.drawing;
+  document.getElementById('ld_name').textContent = (r.name||'') + ' · №' + r.orderNum + ' · ' + r.firm;
+
+  // Статусы — заглушки пока грузятся
+  document.getElementById('ld_statusTech').className = 'status-badge status-new';
+  document.getElementById('ld_statusTech').textContent = '⏳ Технологии…';
+  document.getElementById('ld_statusTK').className = 'status-badge status-new';
+  document.getElementById('ld_statusTK').textContent = '⏳ Тех Карта…';
+  document.getElementById('ld_statusMR').className = 'status-badge status-new';
+  document.getElementById('ld_statusMR').textContent = '⏳ Маршрут…';
+
+  // Проверить готовность
+  try {
+    var ready = await apiCall({ action: 'checkReady', drawing: r.drawing });
+    var rd = ready.ready || {};
+
+    setStatus('ld_statusTech', rd.tech, '📐 Технологии', 'нет технологии');
+    setStatus('ld_statusTK',   rd.tehKarty, '📋 Тех Карта', 'нет тех карты');
+    setStatus('ld_statusMR',   rd.marshrut, '🗺️ Маршрут', 'нет маршрута');
+
+    // Предупреждения
+    var warnings = [];
+    if (!rd.tech)     warnings.push('⚠️ Нет технологии — заполните вкладку Технологии');
+    if (!rd.tehKarty) warnings.push('⚠️ Нет тех карты — заполните вкладку Тех Карты');
+    if (!rd.marshrut) warnings.push('⚠️ Нет маршрута — заполните Технологии Маршрут в таблице');
+
+    if (warnings.length) {
+      document.getElementById('launchWarnings').style.display = 'block';
+      document.getElementById('launchWarningText').innerHTML = warnings.join('<br>');
+    }
+  } catch(e) {
+    addLog('⚠️ Не удалось проверить готовность: ' + e.message);
+  }
+}
+
+function setStatus(id, ok, labelOk, labelNo) {
+  var el = document.getElementById(id);
+  if (ok) {
+    el.className = 'status-badge status-ok';
+    el.textContent = '✓ ' + labelOk;
+  } else {
+    el.className = 'status-badge status-no';
+    el.textContent = '✗ ' + labelNo;
+  }
+}
+
+function closeLaunchDetail() {
+  document.getElementById('launchEmpty').style.display = 'flex';
+  document.getElementById('launchDetail').style.display = 'none';
+  launchSelected_item = null;
+}
+
+async function launchOne() {
+  if (!launchSelected_item) return;
+  var r = launchSelected_item;
+  var btn = document.getElementById('btnLaunchOne');
+  if (btn) { btn.textContent = '⏳…'; btn.disabled = true; }
+
+  addLog('🚀 Запуск заказа №' + r.orderNum + ' · ' + r.drawing + '…');
+
+  try {
+    var data = await apiCall({ action: 'runSync', rows: String(r.rowNum) });
+    if (data.launched > 0) {
+      addLog('✓ Добавлен в лист Запуск');
+
+      // Найти номер заявки в Запуске
+      var launchData = await apiCall({ action: 'read', id: TECH_SPREAD_ID_WEB, sheet: 'Запуск' });
+      var rows = (launchData.data || []);
+      var launchNum = null;
+      for (var i = rows.length - 1; i >= 0; i--) {
+        if (String(rows[i][14]).trim() === r.drawing) {
+          launchNum = rows[i][0];
+          break;
+        }
+      }
+
+      if (launchNum) {
+        document.getElementById('ld_launchNum').textContent = '№ ' + launchNum;
+        document.getElementById('launchCoverSection').style.display = 'block';
+        addLog('📋 Номер заявки в Запуске: ' + launchNum);
+      }
+
+      // Убрать из списка
+      launchAllRows = launchAllRows.filter(function(x) { return x.rowNum !== r.rowNum; });
+      document.getElementById('launchCount').textContent = launchAllRows.length + ' шт.';
+      filterLaunchList();
+      showToast('✓ Запущен: ' + r.drawing);
+    } else {
+      addLog('⚠️ Заказ уже был запущен или не найден');
+    }
+  } catch(e) {
+    addLog('✗ Ошибка: ' + e.message);
+    showToast('Ошибка: ' + e.message, true);
+  } finally {
+    if (btn) { btn.textContent = '🚀 Запустить'; btn.disabled = false; }
+  }
+}
+
+async function fillCoverSheet() {
+  var launchNum = document.getElementById('ld_launchNum').textContent.replace('№ ','').trim();
+  if (!launchNum) { showToast('Нет номера заявки', true); return; }
+
+  addLog('📝 Заполнение маршрута для заявки №' + launchNum + '…');
+  try {
+    var data = await apiCall({ action: 'fillCover', requestNum: launchNum });
+    if (data.ok) {
+      addLog('✓ Маршрут заполнен (' + (data.ops||0) + ' операций)');
+      if (data.warning) addLog('⚠️ ' + data.warning);
+      showToast('✓ Маршрут заполнен');
+    } else {
+      addLog('✗ ' + (data.error || 'Ошибка'));
+    }
+  } catch(e) {
+    addLog('✗ ' + e.message);
+  }
+}
+
+function printCoverSheet() {
+  var ssId = TECH_SPREAD_ID_WEB;
+  // Открыть лист для печати в новой вкладке
+  var url = 'https://docs.google.com/spreadsheets/d/' + ssId
+    + '/export?format=pdf&gid=<GID>&portrait=false&fitw=true&gridlines=false&printtitle=false';
+  // Более простой вариант — открыть таблицу на нужном листе
+  var printUrl = 'https://docs.google.com/spreadsheets/d/' + ssId
+    + '/edit#gid=0'; // gid сопроводительного листа
+  addLog('🖨️ Открытие сопроводительного листа для печати…');
+  window.open('https://docs.google.com/spreadsheets/d/' + ssId
+    + '/edit?rm=minimal#gid=0', '_blank');
+  showToast('Откройте Файл → Печать в таблице');
+}
+
+function addLog(msg) {
+  var el = document.getElementById('launchLogItems');
+  if (!el) return;
+  var time = new Date().toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  el.innerHTML += '<div><span style="color:var(--text3)">[' + time + ']</span> ' + msg + '</div>';
+  el.scrollTop = el.scrollHeight;
+}
 
 // ════════════════════════════════
 // ТЕХ КАРТЫ — ФОРМА СОЗДАНИЯ
