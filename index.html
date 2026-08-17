@@ -746,6 +746,30 @@
   }
   .load-job-start { background: rgba(232,200,64,.12); border: 1px solid rgba(232,200,64,.3); color: var(--accent); }
   .load-job-done  { background: rgba(61,220,132,.12);  border: 1px solid rgba(61,220,132,.3);  color: var(--success); }
+
+  /* ── ПЛАН (назначено заранее) ── */
+  .load-plan {
+    border-radius: 4px; padding: 4px 6px; margin-bottom: 4px; position: relative;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; cursor: default;
+    border-style: dashed; border-width: 1px;
+  }
+  .load-plan-icon { font-weight: 700; }
+  .load-plan-done       { background: rgba(61,220,132,.08);  border-color: rgba(61,220,132,.5);  color: var(--success); }
+  .load-plan-inprogress { background: rgba(74,158,255,.08);  border-color: rgba(74,158,255,.5);  color: var(--accent2); }
+  .load-plan-shifted    { background: rgba(255,149,0,.08);   border-color: rgba(255,149,0,.5);   color: #ff9500; }
+  .load-plan-pending    { background: rgba(136,146,164,.08); border-color: var(--text3);          color: var(--text2); }
+  .load-plan-del {
+    position: absolute; top: 2px; right: 2px; background: transparent; border: none;
+    color: inherit; opacity: .5; cursor: pointer; font-size: 10px; line-height: 1; padding: 2px;
+  }
+  .load-plan-del:hover { opacity: 1; color: var(--danger); }
+  .load-plan-add {
+    width: 100%; margin-top: 2px; padding: 3px; border-radius: 4px;
+    border: 1px dashed var(--border); background: transparent; color: var(--text3);
+    cursor: pointer; font-size: 9px; font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: .5px; transition: all .15s;
+  }
+  .load-plan-add:hover { border-color: var(--accent2); color: var(--accent2); }
 </style>
 </head>
 <body>
@@ -1565,7 +1589,7 @@ function doGet(e) {
 // ════════════════════════════════
 // STATE
 // ════════════════════════════════
-const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbw3gxG7IhcPzMTFP6IaLfS2lbuCuuL8k_wSJFA5nsyjLla4UGysNe9oqWHuyMNKAoIiTg/exec';
+const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycby_lEgxdT89U2wZGOA1odljGKg99HN2NbbILzjmDw82c8MVNQ0GxiFDS_3566PuG9xoBA/exec;
 
 const STATE = {
   currentRows: [],
@@ -1649,6 +1673,7 @@ const ROLES = {
     canAddTech: true,
     canAddTehKarty: true,
     canAddOrder: true,
+    canPlan: true,
   },
   manager: {
     label: 'Менеджер',
@@ -1658,6 +1683,7 @@ const ROLES = {
     canAddTech: false,
     canAddTehKarty: false,
     canAddOrder: true,
+    canPlan: false,
   },
   technolog: {
     label: 'Технолог',
@@ -1667,6 +1693,7 @@ const ROLES = {
     canAddTech: true,
     canAddTehKarty: true,
     canAddOrder: false,
+    canPlan: true,
   },
   master: {
     label: 'Мастер',
@@ -1676,6 +1703,7 @@ const ROLES = {
     canAddTech: false,
     canAddTehKarty: false,
     canAddOrder: false,
+    canPlan: true,
   },
 };
 
@@ -2614,6 +2642,8 @@ function renderLoadGrid(data) {
   }
 
   window._loadTooltips = {};
+  const canPlan = canDo('canPlan');
+
   let html = '<table class="load-table"><thead><tr><th class="load-station-col">Станок</th>';
   dates.forEach((d, i) => {
     const we = (i === 5 || i === 6);
@@ -2627,7 +2657,10 @@ function renderLoadGrid(data) {
     dates.forEach((d, i) => {
       const we = (i === 5 || i === 6);
       const jobs = (data.grid[st] && data.grid[st][d]) || [];
+      const plans = (data.planGrid && data.planGrid[st] && data.planGrid[st][d]) || [];
       let cell = '';
+
+      // ── ФАКТ (из "Сбор данных") ──
       jobs.forEach((job, ji) => {
         const cls = job.status === 'Готово' ? 'load-job-done' : 'load-job-start';
         const tipId = 'ltip_' + st.replace(/[^\wа-яА-Я]/g,'_') + '_' + d + '_' + ji;
@@ -2642,6 +2675,29 @@ function renderLoadGrid(data) {
           + '<br>' + esc(job.fio || '')
           + '</div>';
       });
+
+      // ── ПЛАН (назначено заранее) + сверка с фактом ──
+      plans.forEach((plan, pi) => {
+        const iconMap = { done: '✓', inprogress: '⏳', shifted: '↷', pending: '○' };
+        const clsMap  = { done: 'load-plan-done', inprogress: 'load-plan-inprogress', shifted: 'load-plan-shifted', pending: 'load-plan-pending' };
+        const icon = iconMap[plan.matchStatus] || '○';
+        const pcls = clsMap[plan.matchStatus] || 'load-plan-pending';
+        const tipId = 'ptip_' + st.replace(/[^\wа-яА-Я]/g,'_') + '_' + d + '_' + pi;
+        window._loadTooltips[tipId] = buildPlanTooltip(plan);
+        cell += '<div class="load-plan ' + pcls + '" '
+          + 'onmouseenter="showAttTooltip(event,\'' + tipId + '\')" '
+          + 'onmouseleave="hideAttTooltip()" onmousemove="moveAttTooltip(event)">'
+          + '<span class="load-plan-icon">' + icon + '</span> <b>№' + esc(plan.coverNum) + '</b>'
+          + '<br>' + esc(plan.fio || '')
+          + (plan.operation ? '<br><span style="opacity:.8">' + esc(plan.operation) + '</span>' : '')
+          + (canPlan ? '<button class="load-plan-del" title="Удалить план" onclick="event.stopPropagation();deletePlanEntry(\'' + plan.id + '\')">✕</button>' : '')
+          + '</div>';
+      });
+
+      if (canPlan) {
+        cell += '<button class="load-plan-add" title="Добавить план" onclick="openPlanModal(\'' + esc(st).replace(/'/g,"\\'") + '\',\'' + d + '\')">+ план</button>';
+      }
+
       html += '<td class="' + (we ? 'load-weekend' : '') + '">' + cell + '</td>';
     });
     html += '</tr>';
@@ -2655,6 +2711,8 @@ function renderLoadGrid(data) {
 function buildLoadTooltip(job) {
   const label = job.drawing || job.partName || (job.coverNum ? ('№' + job.coverNum) : '—');
   let html = '<div style="font-weight:700;color:var(--text);margin-bottom:6px;font-size:11px">' + esc(label) + '</div>';
+  html += '<div class="att-entry">Чертёж: <b>' + esc(job.drawing || '—') + '</b></div>';
+  html += '<div class="att-entry">Деталь: <b>' + esc(job.partName || '—') + '</b></div>';
   if (job.coverNum) html += '<div class="att-entry">Заявка: <b>№' + esc(job.coverNum) + '</b></div>';
   html += '<div class="att-entry">Статус: <b>' + esc(job.status || '') + '</b></div>';
   html += '<div class="att-entry">ФИО: ' + esc(job.fio || '') + '</div>';
@@ -2662,6 +2720,116 @@ function buildLoadTooltip(job) {
     ? '<div class="att-entry-op" style="margin-top:6px">Следующая операция: <b>' + esc(job.nextOp) + '</b></div>'
     : '<div style="color:var(--text3);font-size:10px;margin-top:6px">Следующая операция не определена</div>';
   return html;
+}
+
+function buildPlanTooltip(plan) {
+  const STATUS_LABEL = {
+    done: 'Выполнено по плану ✓',
+    inprogress: 'В работе (совпадает с планом)',
+    shifted: plan.matchDay ? ('Перенесено на ' + formatDate(plan.matchDay) + (plan.matchStation ? ' · ' + esc(plan.matchStation) : '')) : 'Выполнено на другой день/станке',
+    pending: 'Пока не начато по факту'
+  };
+  let html = '<div style="font-weight:700;color:var(--text);margin-bottom:6px;font-size:11px">План: №' + esc(plan.coverNum) + '</div>';
+  html += '<div class="att-entry">ФИО: <b>' + esc(plan.fio || '—') + '</b></div>';
+  html += '<div class="att-entry">Операция: ' + esc(plan.operation || '—') + '</div>';
+  html += '<div class="att-entry-op" style="margin-top:6px">' + esc(STATUS_LABEL[plan.matchStatus] || '') + '</div>';
+  return html;
+}
+
+// ════════════════════════════════
+// ПЛАН — форма добавления / удаления
+// ════════════════════════════════
+STATE.planEmployees = null;
+STATE.planOperations = null;
+
+async function ensurePlanRefLists() {
+  if (STATE.planEmployees && STATE.planOperations) return;
+  try {
+    if (STATE.loadData && STATE.loadData.operationsList) {
+      STATE.planOperations = STATE.loadData.operationsList;
+    }
+    const accessData = await apiCall({ action: 'read', id: SBORDATA_ID, sheet: 'Справочник доступа' });
+    const allRows = accessData.data || [];
+    STATE.planEmployees = allRows.slice(6, 35).map(r => String(r[1] || '').trim()).filter(Boolean);
+    if (!STATE.planOperations) STATE.planOperations = [];
+  } catch (e) {
+    STATE.planEmployees = STATE.planEmployees || [];
+    STATE.planOperations = STATE.planOperations || [];
+  }
+}
+
+async function openPlanModal(station, day) {
+  await ensurePlanRefLists();
+
+  const existing = document.getElementById('planModalOverlay');
+  if (existing) existing.remove();
+
+  const empOptions = '<option value="">— выбрать —</option>' +
+    STATE.planEmployees.map(n => '<option value="' + esc(n) + '">' + esc(n) + '</option>').join('');
+  const opOptions = '<option value="">— выбрать —</option>' +
+    STATE.planOperations.map(n => '<option value="' + esc(n) + '">' + esc(n) + '</option>').join('');
+
+  const overlay = document.createElement('div');
+  overlay.id = 'planModalOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9998;display:flex;align-items:center;justify-content:center;';
+  overlay.innerHTML = `
+    <div style="background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--accent);
+      border-radius:8px;padding:24px;width:360px;max-width:92vw;display:flex;flex-direction:column;gap:14px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--accent);">
+        План: ${esc(station)} · ${esc(formatDate(day))}
+      </div>
+      <div class="field">
+        <label>№ сопроводительной <span class="required">*</span></label>
+        <input type="text" id="plan_cover" placeholder="например 355">
+      </div>
+      <div class="field">
+        <label>ФИО</label>
+        <select id="plan_fio">${empOptions}</select>
+      </div>
+      <div class="field">
+        <label>Операция</label>
+        <select id="plan_op">${opOptions}</select>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <button class="btn btn-secondary" onclick="document.getElementById('planModalOverlay').remove()">Отмена</button>
+        <button class="btn btn-primary" id="planSaveBtn" onclick="savePlanEntry('${station.replace(/'/g,"\\'")}','${day}')">💾 Сохранить</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  document.getElementById('plan_cover').focus();
+}
+
+async function savePlanEntry(station, day) {
+  const coverNum = document.getElementById('plan_cover').value.trim();
+  if (!coverNum) { showToast('Укажите № сопроводительной', true); return; }
+  const fio = document.getElementById('plan_fio').value;
+  const operation = document.getElementById('plan_op').value;
+
+  const btn = document.getElementById('planSaveBtn');
+  if (btn) { btn.textContent = '…'; btn.disabled = true; }
+
+  try {
+    await apiCall({ action: 'savePlan', station: station, day: day, coverNum: coverNum, fio: fio, operation: operation });
+    const overlay = document.getElementById('planModalOverlay');
+    if (overlay) overlay.remove();
+    showToast('✓ План добавлен');
+    await loadWeekData();
+  } catch (e) {
+    showToast('Ошибка: ' + e.message, true);
+    if (btn) { btn.textContent = '💾 Сохранить'; btn.disabled = false; }
+  }
+}
+
+async function deletePlanEntry(id) {
+  if (!confirm('Удалить эту запись плана?')) return;
+  try {
+    await apiCall({ action: 'deletePlan', id: id });
+    showToast('✓ Удалено');
+    await loadWeekData();
+  } catch (e) {
+    showToast('Ошибка: ' + e.message, true);
+  }
 }
 
 // ════════════════════════════════
