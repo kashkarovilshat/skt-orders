@@ -1589,7 +1589,7 @@ function doGet(e) {
 // ════════════════════════════════
 // STATE
 // ════════════════════════════════
-const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbzZ5qLJoNwpDYZ2fo5aRvY7w2Oy0Ihtx3g29xgpfkfRpyGQLy6Rnz9mJyzxPPmu3HWlRQ/exec';
+const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbxJFQo-7v6NijP57Z2GC2laAlXX98Ss5csHW3e6aKLMbRnCZyfQFlivS3Z4jJeGti0dVQ/exec';
 
 const STATE = {
   currentRows: [],
@@ -2684,10 +2684,11 @@ function renderLoadGrid(data) {
         const pcls = clsMap[plan.matchStatus] || 'load-plan-pending';
         const tipId = 'ptip_' + st.replace(/[^\wа-яА-Я]/g,'_') + '_' + d + '_' + pi;
         window._loadTooltips[tipId] = buildPlanTooltip(plan);
+        const planLabel = plan.drawing ? (plan.drawing + ' · №' + plan.coverNum) : ('№' + plan.coverNum);
         cell += '<div class="load-plan ' + pcls + '" '
           + 'onmouseenter="showAttTooltip(event,\'' + tipId + '\')" '
           + 'onmouseleave="hideAttTooltip()" onmousemove="moveAttTooltip(event)">'
-          + '<span class="load-plan-icon">' + icon + '</span> <b>№' + esc(plan.coverNum) + '</b>'
+          + '<span class="load-plan-icon">' + icon + '</span> <b>' + esc(planLabel) + '</b>'
           + '<br>' + esc(plan.fio || '')
           + (plan.operation ? '<br><span style="opacity:.8">' + esc(plan.operation) + '</span>' : '')
           + (canPlan ? '<button class="load-plan-del" title="Удалить план" onclick="event.stopPropagation();deletePlanEntry(\'' + plan.id + '\')">✕</button>' : '')
@@ -2714,6 +2715,7 @@ function buildLoadTooltip(job) {
   html += '<div class="att-entry">Чертёж: <b>' + esc(job.drawing || '—') + '</b></div>';
   html += '<div class="att-entry">Деталь: <b>' + esc(job.partName || '—') + '</b></div>';
   if (job.coverNum) html += '<div class="att-entry">Заявка: <b>№' + esc(job.coverNum) + '</b></div>';
+  if (job.qty !== '' && job.qty !== undefined && job.qty !== null) html += '<div class="att-entry">Кол-во: <b>' + esc(job.qty) + '</b></div>';
   html += '<div class="att-entry">Статус: <b>' + esc(job.status || '') + '</b></div>';
   html += '<div class="att-entry">ФИО: ' + esc(job.fio || '') + '</div>';
   html += job.nextOp
@@ -2730,8 +2732,14 @@ function buildPlanTooltip(plan) {
     pending: 'Пока не начато по факту'
   };
   let html = '<div style="font-weight:700;color:var(--text);margin-bottom:6px;font-size:11px">План: №' + esc(plan.coverNum) + '</div>';
+  if (plan.drawing) html += '<div class="att-entry">Чертёж: <b>' + esc(plan.drawing) + '</b></div>';
+  if (plan.partName) html += '<div class="att-entry">Деталь: <b>' + esc(plan.partName) + '</b></div>';
+  if (plan.qty !== '' && plan.qty !== undefined && plan.qty !== null) html += '<div class="att-entry">Кол-во: <b>' + esc(plan.qty) + '</b></div>';
   html += '<div class="att-entry">ФИО: <b>' + esc(plan.fio || '—') + '</b></div>';
   html += '<div class="att-entry">Операция: ' + esc(plan.operation || '—') + '</div>';
+  html += plan.nextOp
+    ? '<div class="att-entry-op" style="margin-top:4px">Следующая операция: <b>' + esc(plan.nextOp) + '</b></div>'
+    : '';
   html += '<div class="att-entry-op" style="margin-top:6px">' + esc(STATUS_LABEL[plan.matchStatus] || '') + '</div>';
   return html;
 }
