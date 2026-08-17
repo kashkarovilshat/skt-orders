@@ -724,6 +724,28 @@
     margin-left: 6px;
     vertical-align: middle;
   }
+
+  /* ── LOAD (Загрузка станков) ── */
+  table.load-table { border-collapse: collapse; width: 100%; }
+  table.load-table th, table.load-table td {
+    border: 1px solid var(--border);
+    padding: 6px;
+    vertical-align: top;
+    min-width: 130px;
+    font-size: 11px;
+  }
+  table.load-table thead th { background: var(--surface); position: sticky; top: 0; z-index: 3; }
+  .load-station-col {
+    position: sticky; left: 0; background: var(--surface);
+    font-weight: 600; min-width: 170px; z-index: 2;
+  }
+  .load-weekend { background: rgba(255,255,255,.02); }
+  .load-job {
+    border-radius: 4px; padding: 4px 6px; margin-bottom: 4px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; cursor: default;
+  }
+  .load-job-start { background: rgba(232,200,64,.12); border: 1px solid rgba(232,200,64,.3); color: var(--accent); }
+  .load-job-done  { background: rgba(61,220,132,.12);  border: 1px solid rgba(61,220,132,.3);  color: var(--success); }
 </style>
 </head>
 <body>
@@ -735,6 +757,7 @@
     <button class="tab" onclick="switchTab('current')">Текущие заказы</button>
     <button class="tab" onclick="switchTab('archive')">Архив<span class="archive-indicator"></span></button>
     <button class="tab" onclick="switchTab('launch')">🚀 Запуск</button>
+    <button class="tab" onclick="switchTab('load')">📅 Загрузка станков</button>
     <button class="tab" onclick="switchTab('tech')">Технологии</button>
     <button class="tab" onclick="switchTab('tehkarty')">Тех Карты</button>
     <button class="tab" onclick="switchTab('sbordata')">Сбор данных</button>
@@ -1018,6 +1041,20 @@
 
       </div><!-- end launchDetail -->
     </div><!-- end right -->
+  </div>
+</div>
+
+<!-- ════════════ TAB: ЗАГРУЗКА СТАНКОВ (НЕДЕЛЯ) ════════════ -->
+<div class="page" id="page-load">
+  <div class="table-header" style="gap:12px;">
+    <button class="btn btn-secondary" style="font-size:11px;" onclick="shiftLoadWeek(-1)">← Пред. неделя</button>
+    <div class="count-badge" id="loadWeekLabel" style="min-width:170px;text-align:center;">—</div>
+    <button class="btn btn-secondary" style="font-size:11px;" onclick="shiftLoadWeek(1)">След. неделя →</button>
+    <button class="btn btn-secondary" style="font-size:11px;" onclick="loadWeekToday()">Текущая неделя</button>
+    <button class="btn btn-secondary" style="font-size:10px;padding:6px 14px;margin-left:auto;" onclick="loadWeekData()">↻ Обновить</button>
+  </div>
+  <div class="table-wrap" id="loadGridWrap">
+    <div class="empty-state"><div class="icon">📅</div><div>Загрузка…</div></div>
   </div>
 </div>
 
@@ -1550,6 +1587,15 @@ const STATE = {
 };
 
 // ════════════════════════════════
+// XSS-безопасный вывод в innerHTML
+// ════════════════════════════════
+function esc(v) {
+  return String(v ?? '').replace(/[&<>"']/g, function(c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+// ════════════════════════════════
 // INIT
 // ════════════════════════════════
 // ════════════════════════════════
@@ -1598,7 +1644,7 @@ const ROLES = {
   admin: {
     label: 'Администратор',
     color: 'var(--danger)',
-    tabs: ['new','current','archive','tech','tehkarty','sbordata','history','config'],
+    tabs: ['new','current','archive','launch','load','tech','tehkarty','sbordata','history','config'],
     canDelete: true,
     canAddTech: true,
     canAddTehKarty: true,
@@ -1616,7 +1662,7 @@ const ROLES = {
   technolog: {
     label: 'Технолог',
     color: 'var(--success)',
-    tabs: ['current','tech','tehkarty'],
+    tabs: ['current','load','tech','tehkarty'],
     canDelete: false,
     canAddTech: true,
     canAddTehKarty: true,
@@ -1625,7 +1671,7 @@ const ROLES = {
   master: {
     label: 'Мастер',
     color: '#ff9500',
-    tabs: ['current','sbordata'],
+    tabs: ['current','load','sbordata'],
     canDelete: false,
     canAddTech: false,
     canAddTehKarty: false,
@@ -1652,7 +1698,7 @@ function applyRoleUI() {
   if (!role) return;
 
   // Show/hide tabs based on role
-  const tabNames = ['new','current','archive','tech','tehkarty','sbordata','history','config'];
+  const tabNames = ['new','current','archive','launch','load','tech','tehkarty','sbordata','history','config'];
   document.querySelectorAll('.tab').forEach((btn, i) => {
     if (i < tabNames.length) {
       btn.style.display = role.tabs.includes(tabNames[i]) ? '' : 'none';
@@ -1662,7 +1708,7 @@ function applyRoleUI() {
   // Update user badge with role
   const badge = document.getElementById('userBadge');
   if (badge) {
-    badge.innerHTML = '<span style="color:' + role.color + '">● ' + role.label + '</span>';
+    badge.innerHTML = '<span style="color:' + role.color + '">● ' + esc(role.label) + '</span>';
   }
 
   // Show/hide delete buttons
@@ -1704,18 +1750,8 @@ window.onload = () => {
 };
 
 // ════════════════════════════════
-// AUTH
+// AUTH helpers
 // ════════════════════════════════
-
-function doLogout() {
-  STATE.user = { email: 'local', name: 'Пользователь', role: 'admin', token: '' };
-}
-
-function showApp() {
-  const bar = document.getElementById('userBar');
-  if (bar) bar.style.display = 'flex';
-}
-
 
 // Inject auth params into every API call
 function getAuthParams() {
@@ -1806,12 +1842,13 @@ function updateSheetBadge() {
 // TABS
 // ════════════════════════════════
 function switchTab(name) {
+  const tabNames = ['new','current','archive','launch','load','tech','tehkarty','sbordata','history','config'];
   document.querySelectorAll('.tab').forEach((t,i) => {
-    const names = ['new','current','archive','launch','tech','tehkarty','sbordata','history','config'];
-    t.classList.toggle('active', names[i] === name);
+    t.classList.toggle('active', tabNames[i] === name);
   });
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
+  if (name === 'load') initLoadWeek();
 }
 
 // ════════════════════════════════
@@ -1843,7 +1880,7 @@ function apiCall(params) {
       // Auth error handling
       if (data.error === 'auth') {
         doLogout();
-        reject(new Error('Сессия истекла, войдите снова'));
+        reject(new Error(data.message || 'Сессия истекла, войдите снова'));
         return;
       }
 
@@ -1895,7 +1932,7 @@ async function loadCurrentOrders() {
     renderOrdersTable('tableCurrent', rows, 'countCurrent');
 
   } catch(e) {
-    const msg = `<div class="empty-state"><div class="icon">⚠️</div><div>${e.message}</div><div style="color:var(--text3);margin-top:8px">Настройте Apps Script URL во вкладке «Настройки»</div></div>`;
+    const msg = `<div class="empty-state"><div class="icon">⚠️</div><div>${esc(e.message)}</div><div style="color:var(--text3);margin-top:8px">Настройте Apps Script URL во вкладке «Настройки»</div></div>`;
     containers.forEach(id => document.getElementById(id).innerHTML = msg);
   }
 }
@@ -1917,7 +1954,7 @@ async function loadArchive() {
     renderArchiveTable(rows);
   } catch(e) {
     document.getElementById('tableArchive').innerHTML =
-      `<div class="empty-state"><div class="icon">⚠️</div><div>${e.message}</div></div>`;
+      `<div class="empty-state"><div class="icon">⚠️</div><div>${esc(e.message)}</div></div>`;
   }
 }
 
@@ -2011,7 +2048,7 @@ function renderArchiveTable(rows) {
   let html = '<table><thead><tr>';
   cols.forEach(c => {
     const accent = c.key === 14 ? ' style="color:var(--accent)"' : '';
-    html += `<th${accent}>${c.label}</th>`;
+    html += `<th${accent}>${esc(c.label)}</th>`;
   });
   html += '<th style="width:36px"></th></tr></thead><tbody>';
 
@@ -2020,19 +2057,19 @@ function renderArchiveTable(rows) {
     cols.forEach(c => {
       let val = String(r[c.key] ?? '');
       if (c.key === 0) {
-        html += `<td class="cell-num">${val}</td>`;
+        html += `<td class="cell-num">${esc(val)}</td>`;
       } else if (c.key === 1) {
         const cls = getZakazClass(val);
-        html += `<td><span class="cell-zakazchik ${cls}">${val}</span></td>`;
+        html += `<td><span class="cell-zakazchik ${cls}">${esc(val)}</span></td>`;
       } else if (c.key === 4 || c.key === 14) {
         const formatted = formatDate(val);
         const style = c.key === 14 && formatted ? ' style="color:var(--accent);font-weight:600"' : '';
-        html += `<td${style}>${formatted}</td>`;
+        html += `<td${style}>${esc(formatted)}</td>`;
       } else if (c.key === 8) {
         const cls = getStatusClass(val);
-        html += `<td><span class="status-badge ${cls}">${val}</span></td>`;
+        html += `<td><span class="status-badge ${cls}">${esc(val)}</span></td>`;
       } else {
-        html += `<td title="${val}">${val}</td>`;
+        html += `<td title="${esc(val)}">${esc(val)}</td>`;
       }
     });
     const isAdminA = STATE.user && STATE.user.role === 'admin';
@@ -2085,27 +2122,26 @@ function renderOrdersTable(containerId, rows, countId) {
   ];
 
   let html = '<table><thead><tr>';
-  cols.forEach(c => html += `<th>${c.label}</th>`);
+  cols.forEach(c => html += `<th>${esc(c.label)}</th>`);
   html += '<th style="width:36px"></th>';
   html += '</tr></thead><tbody>';
 
   rows.forEach((r, idx) => {
-    const rowJson = encodeURIComponent(JSON.stringify(r));
     html += `<tr class="data-row" data-idx="${idx}">`;
     cols.forEach(c => {
       let val = String(r[c.key] ?? '');
       if (c.key === 0) {
-        html += `<td class="cell-num">${val}</td>`;
+        html += `<td class="cell-num">${esc(val)}</td>`;
       } else if (c.key === 1) {
         const cls = getZakazClass(val);
-        html += `<td><span class="cell-zakazchik ${cls}">${val}</span></td>`;
+        html += `<td><span class="cell-zakazchik ${cls}">${esc(val)}</span></td>`;
       } else if (c.key === 4) {
-        html += `<td>${formatDate(val)}</td>`;
+        html += `<td>${esc(formatDate(val))}</td>`;
       } else if (c.key === 8) {
         const cls = getStatusClass(val);
-        html += `<td><span class="status-badge ${cls}">${val}</span></td>`;
+        html += `<td><span class="status-badge ${cls}">${esc(val)}</span></td>`;
       } else {
-        html += `<td title="${val}">${val}</td>`;
+        html += `<td title="${esc(val)}">${esc(val)}</td>`;
       }
     });
     const isAdmin = STATE.user && STATE.user.role === 'admin';
@@ -2208,9 +2244,9 @@ function handleAutocomplete(input, listId, colType) {
   list.innerHTML = matches.map(m => {
     const idx = m.toLowerCase().indexOf(val);
     const highlighted = idx >= 0
-      ? m.slice(0,idx) + `<span class="match">${m.slice(idx, idx+val.length)}</span>` + m.slice(idx+val.length)
-      : m;
-    return `<div class="autocomplete-item" onmousedown="selectSuggestion('${listId}','${colType}',this)" data-val="${m.replace(/"/g,'&quot;')}">${highlighted}</div>`;
+      ? esc(m.slice(0,idx)) + `<span class="match">${esc(m.slice(idx, idx+val.length))}</span>` + esc(m.slice(idx+val.length))
+      : esc(m);
+    return `<div class="autocomplete-item" onmousedown="selectSuggestion('${listId}','${colType}',this)" data-val="${esc(m)}">${highlighted}</div>`;
   }).join('');
 
   list.classList.add('show');
@@ -2319,7 +2355,7 @@ async function loadLaunchData() {
     filterLaunchList();
   } catch(e) {
     document.getElementById('launchList').innerHTML =
-      '<div class="empty-state"><div class="icon">⚠️</div><div>' + e.message + '</div></div>';
+      '<div class="empty-state"><div class="icon">⚠️</div><div>' + esc(e.message) + '</div></div>';
   }
 }
 
@@ -2347,10 +2383,10 @@ function renderLaunchList(items) {
       + '<div onclick="showLaunchDetail(' + JSON.stringify(JSON.stringify(r)) + ')"'
       + ' style="flex:1;cursor:pointer;">'
       + '<div style="font-family:monospace;font-size:12px;font-weight:600;color:var(--accent)">'
-      + r.drawing + '</div>'
-      + '<div style="font-size:11px;color:var(--text2)">' + (r.name||'') + '</div>'
+      + esc(r.drawing) + '</div>'
+      + '<div style="font-size:11px;color:var(--text2)">' + esc(r.name||'') + '</div>'
       + '<div style="font-size:10px;color:var(--text3);margin-top:2px">'
-      + '№' + r.orderNum + ' · ' + r.firm + ' · ' + (r.qty||'') + ' шт.</div>'
+      + '№' + esc(r.orderNum) + ' · ' + esc(r.firm) + ' · ' + esc(r.qty||'') + ' шт.</div>'
       + '</div>'
       + '<button onclick="showLaunchDetail(' + JSON.stringify(JSON.stringify(r)) + ')"'
       + ' style="background:transparent;border:1px solid var(--border);color:var(--text2);'
@@ -2509,12 +2545,6 @@ async function fillCoverSheet() {
 
 function printCoverSheet() {
   var ssId = TECH_SPREAD_ID_WEB;
-  // Открыть лист для печати в новой вкладке
-  var url = 'https://docs.google.com/spreadsheets/d/' + ssId
-    + '/export?format=pdf&gid=<GID>&portrait=false&fitw=true&gridlines=false&printtitle=false';
-  // Более простой вариант — открыть таблицу на нужном листе
-  var printUrl = 'https://docs.google.com/spreadsheets/d/' + ssId
-    + '/edit#gid=0'; // gid сопроводительного листа
   addLog('🖨️ Открытие сопроводительного листа для печати…');
   window.open('https://docs.google.com/spreadsheets/d/' + ssId
     + '/edit?rm=minimal#gid=0', '_blank');
@@ -2525,8 +2555,109 @@ function addLog(msg) {
   var el = document.getElementById('launchLogItems');
   if (!el) return;
   var time = new Date().toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  el.innerHTML += '<div><span style="color:var(--text3)">[' + time + ']</span> ' + msg + '</div>';
+  el.innerHTML += '<div><span style="color:var(--text3)">[' + esc(time) + ']</span> ' + msg + '</div>';
   el.scrollTop = el.scrollHeight;
+}
+
+// ════════════════════════════════
+// ЗАГРУЗКА СТАНКОВ (НЕДЕЛЯ)
+// ════════════════════════════════
+STATE.loadWeekStart = null;
+STATE.loadData = null;
+const RU_DOW = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+
+function getMondayISO(d) {
+  const date = new Date(d);
+  const day = date.getDay();
+  date.setDate(date.getDate() + (day === 0 ? -6 : 1 - day));
+  return date.toISOString().slice(0,10);
+}
+
+function initLoadWeek() {
+  if (!STATE.loadWeekStart) STATE.loadWeekStart = getMondayISO(new Date());
+  loadWeekData();
+}
+
+function shiftLoadWeek(delta) {
+  const d = new Date(STATE.loadWeekStart);
+  d.setDate(d.getDate() + delta * 7);
+  STATE.loadWeekStart = getMondayISO(d);
+  loadWeekData();
+}
+
+function loadWeekToday() {
+  STATE.loadWeekStart = getMondayISO(new Date());
+  loadWeekData();
+}
+
+async function loadWeekData() {
+  const wrap = document.getElementById('loadGridWrap');
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div>Загрузка…</div>';
+  try {
+    const data = await apiCall({ action: 'weekLoad', weekStart: STATE.loadWeekStart });
+    STATE.loadData = data.data;
+    document.getElementById('loadWeekLabel').textContent =
+      formatDate(data.data.weekDates[0]) + ' — ' + formatDate(data.data.weekDates[6]);
+    renderLoadGrid(data.data);
+  } catch(e) {
+    wrap.innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><div>' + esc(e.message) + '</div></div>';
+  }
+}
+
+function renderLoadGrid(data) {
+  const wrap = document.getElementById('loadGridWrap');
+  const stations = data.stations || [];
+  const dates = data.weekDates || [];
+  if (!stations.length) {
+    wrap.innerHTML = '<div class="empty-state"><div class="icon">🏭</div><div>Список станков пуст (проверьте лист "Справочник доступа", F2:AJ4)</div></div>';
+    return;
+  }
+
+  window._loadTooltips = {};
+  let html = '<table class="load-table"><thead><tr><th class="load-station-col">Станок</th>';
+  dates.forEach((d, i) => {
+    const we = (i === 5 || i === 6);
+    html += '<th class="' + (we ? 'load-weekend' : '') + '">' + esc(RU_DOW[i])
+      + '<br><span style="font-weight:400;color:var(--text3)">' + esc(formatDate(d)) + '</span></th>';
+  });
+  html += '</tr></thead><tbody>';
+
+  stations.forEach(st => {
+    html += '<tr><td class="load-station-col">' + esc(st) + '</td>';
+    dates.forEach((d, i) => {
+      const we = (i === 5 || i === 6);
+      const jobs = (data.grid[st] && data.grid[st][d]) || [];
+      let cell = '';
+      jobs.forEach((job, ji) => {
+        const cls = job.status === 'Готово' ? 'load-job-done' : 'load-job-start';
+        const tipId = 'ltip_' + st.replace(/[^\wа-яА-Я]/g,'_') + '_' + d + '_' + ji;
+        window._loadTooltips[tipId] = buildLoadTooltip(job);
+        cell += '<div class="load-job ' + cls + '" '
+          + 'onmouseenter="showAttTooltip(event,\'' + tipId + '\')" '
+          + 'onmouseleave="hideAttTooltip()" onmousemove="moveAttTooltip(event)">'
+          + '<b>' + esc(job.drawing || '—') + '</b>'
+          + (job.coverNum ? '<br>№' + esc(job.coverNum) : '')
+          + '<br>' + esc(job.fio || '')
+          + '</div>';
+      });
+      html += '<td class="' + (we ? 'load-weekend' : '') + '">' + cell + '</td>';
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+  window._attTooltips = Object.assign(window._attTooltips || {}, window._loadTooltips);
+}
+
+function buildLoadTooltip(job) {
+  let html = '<div style="font-weight:700;color:var(--text);margin-bottom:6px;font-size:11px">' + esc(job.drawing || '') + '</div>';
+  html += '<div class="att-entry">Статус: <b>' + esc(job.status || '') + '</b></div>';
+  html += '<div class="att-entry">ФИО: ' + esc(job.fio || '') + '</div>';
+  html += job.nextOp
+    ? '<div class="att-entry-op" style="margin-top:6px">Следующая операция: <b>' + esc(job.nextOp) + '</b></div>'
+    : '<div style="color:var(--text3);font-size:10px;margin-top:6px">Следующая операция не определена</div>';
+  return html;
 }
 
 // ════════════════════════════════
@@ -2599,7 +2730,7 @@ async function loadTKDrawings() {
     filterTKDrawings();
   } catch(e) {
     document.getElementById('tkDrawingList').innerHTML =
-      '<div class="empty-state"><div class="icon">⚠️</div><div>' + e.message + '</div></div>';
+      '<div class="empty-state"><div class="icon">⚠️</div><div>' + esc(e.message) + '</div></div>';
   }
 }
 
@@ -2622,15 +2753,15 @@ function renderTKDrawingList(items) {
   el.innerHTML = items.map(function(m) {
     var tps = tkSet[m.drawing] ? tkSet[m.drawing].join(', ') : '';
     var badge = tps
-      ? '<span style="font-size:9px;color:var(--success);float:right">ТП' + tps + '</span>'
+      ? '<span style="font-size:9px;color:var(--success);float:right">ТП' + esc(tps) + '</span>'
       : '<span style="font-size:9px;color:var(--danger);float:right">нет</span>';
     return '<div onclick="selectTKDrawing(' + JSON.stringify(JSON.stringify(m)) + ')"'
       + ' style="padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer"'
       + ' onmouseover="this.style.background=\'#1e2435\'"'
-      + ' onmouseout="this.style.background="""'
+      + ' onmouseout="this.style.background=\'\'">'
       + '<div style="font-family:monospace;font-size:12px;font-weight:600;color:var(--accent)">'
-      + m.drawing + badge + '</div>'
-      + '<div style="font-size:11px;color:var(--text2)">' + (m.name||'') + '</div>'
+      + esc(m.drawing) + badge + '</div>'
+      + '<div style="font-size:11px;color:var(--text2)">' + esc(m.name||'') + '</div>'
       + '</div>';
   }).join('');
 }
@@ -2666,8 +2797,8 @@ function addTKOperation() {
   var ops = tkOpsSheet;
 
   var opOptions = ops.map(function(r, i) {
-    return '<option value="' + String(r[0]||'').trim() + '">'
-      + '[' + String(r[0]||'').trim() + '] ' + String(r[1]||'').trim() + '</option>';
+    return '<option value="' + esc(String(r[0]||'').trim()) + '">'
+      + '[' + esc(String(r[0]||'').trim()) + '] ' + esc(String(r[1]||'').trim()) + '</option>';
   }).join('');
 
   var html = '<div id="tkOp_' + num + '" style="display:flex;gap:8px;align-items:center;">'
@@ -2775,7 +2906,7 @@ async function loadTehKartyData() {
     filterTehKarty();
   } catch(e) {
     document.getElementById('tableTehKarty').innerHTML =
-      '<div class="empty-state"><div class="icon">⚠️</div><div>' + e.message + '</div></div>';
+      '<div class="empty-state"><div class="icon">⚠️</div><div>' + esc(e.message) + '</div></div>';
   }
 }
 
@@ -2815,7 +2946,7 @@ function renderTehKartyTable(rows) {
 
   let html = '<table><thead><tr>';
   html += '<th>№ТП</th><th>Чертёж</th><th>Наименование</th>';
-  opCols.forEach(c => html += '<th style="text-align:center;min-width:60px">' + c.num + '<br><span style="color:var(--text3);font-size:9px">опер.</span></th>');
+  opCols.forEach(c => html += '<th style="text-align:center;min-width:60px">' + esc(c.num) + '<br><span style="color:var(--text3);font-size:9px">опер.</span></th>');
   html += '</tr></thead><tbody>';
 
   rows.forEach(r => {
@@ -2824,9 +2955,9 @@ function renderTehKartyTable(rows) {
     const drawing = String(r[2] || '');
     const name = String(r[3] || '');
 
-    html += "<td><span style='font-family:monospace;font-size:11px;color:var(--accent2)'>ТП" + tp + "</span></td>";
-    html += '<td style="font-family:monospace,monospace;font-weight:600;color:var(--accent);font-size:11px">' + drawing + '</td>';
-    html += '<td>' + name + '</td>';
+    html += "<td><span style='font-family:monospace;font-size:11px;color:var(--accent2)'>ТП" + esc(tp) + "</span></td>";
+    html += '<td style="font-family:monospace,monospace;font-weight:600;color:var(--accent);font-size:11px">' + esc(drawing) + '</td>';
+    html += '<td>' + esc(name) + '</td>';
 
     opCols.forEach(c => {
       const opNum  = String(r[c.idx]     || '').trim(); // номер операции
@@ -2834,8 +2965,8 @@ function renderTehKartyTable(rows) {
 
       if (opNum) {
         html += '<td style="text-align:center;">'
-          + '<span style="font-size:12px;font-weight:700;color:var(--text)">' + opNum + '</span>'
-          + (opTime ? '<br><span style="font-size:10px;color:var(--text3)">' + opTime + '</span>' : '')
+          + '<span style="font-size:12px;font-weight:700;color:var(--text)">' + esc(opNum) + '</span>'
+          + (opTime ? '<br><span style="font-size:10px;color:var(--text3)">' + esc(opTime) + '</span>' : '')
           + '</td>';
       } else {
         html += '<td></td>';
@@ -2975,7 +3106,7 @@ async function loadTechData() {
 
   } catch(e) {
     document.getElementById('techMissingList').innerHTML =
-      '<div class="empty-state"><div class="icon">⚠️</div><div>' + e.message + '</div></div>';
+      '<div class="empty-state"><div class="icon">⚠️</div><div>' + esc(e.message) + '</div></div>';
   }
 }
 
@@ -3005,11 +3136,11 @@ function renderTechMissingList(items) {
     return '<div onclick="selectTechItem(decodeURIComponent(\'' + mJson + '\'))"'
       + ' style="padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer"'
       + ' onmouseover="this.style.background=\'#1e2435\'"'
-      + ' onmouseout="this.style.background=\'\'"'
+      + ' onmouseout="this.style.background=\'\'">'
       + '<div style="font-family:monospace;font-size:12px;font-weight:600;color:var(--accent)">'
-      + m.drawing + badge + '</div>'
-      + '<div style="font-size:11px;color:var(--text2)">' + (m.name || '—') + '</div>'
-      + '<div style="font-size:10px;color:var(--text3)">' + (m.firm || '') + '</div>'
+      + esc(m.drawing) + badge + '</div>'
+      + '<div style="font-size:11px;color:var(--text2)">' + esc(m.name || '—') + '</div>'
+      + '<div style="font-size:10px;color:var(--text3)">' + esc(m.firm || '') + '</div>'
       + '</div>';
   }).join('');
 }
@@ -3206,7 +3337,7 @@ async function loadSborData() {
     applySborFilters();
   } catch(e) {
     document.getElementById('tableSbor').innerHTML =
-      '<div class="empty-state"><div class="icon">⚠️</div><div>' + e.message + '</div></div>';
+      '<div class="empty-state"><div class="icon">⚠️</div><div>' + esc(e.message) + '</div></div>';
   }
 }
 
@@ -3298,7 +3429,7 @@ function renderSborTable(rows) {
   ];
 
   let html = '<table><thead><tr>';
-  cols.forEach(c => html += '<th>' + c.label + '</th>');
+  cols.forEach(c => html += '<th>' + esc(c.label) + '</th>');
   html += '</tr></thead><tbody>';
 
   // Показываем последние 500 строк (новые сверху)
@@ -3314,18 +3445,18 @@ function renderSborTable(rows) {
           ? d.toLocaleDateString('ru', {day:'2-digit',month:'2-digit',year:'2-digit'}) + ' ' +
             d.toLocaleTimeString('ru', {hour:'2-digit',minute:'2-digit'})
           : raw;
-        html += "<td style='font-family:monospace;font-size:11px;color:var(--text2);white-space:nowrap'>" + formatted + "</td>";
+        html += "<td style='font-family:monospace;font-size:11px;color:var(--text2);white-space:nowrap'>" + esc(formatted) + "</td>";
       } else if (c.type === 'station') {
-        html += "<td><span style='font-family:monospace;font-size:11px;background:var(--surface2);border:1px solid var(--border);padding:2px 6px;border-radius:3px;color:var(--accent2)'>" + raw + "</span></td>";
+        html += "<td><span style='font-family:monospace;font-size:11px;background:var(--surface2);border:1px solid var(--border);padding:2px 6px;border-radius:3px;color:var(--accent2)'>" + esc(raw) + "</span></td>";
       } else if (c.type === 'op') {
-        html += '<td><span class="status-badge status-new">' + raw + '</span></td>';
+        html += '<td><span class="status-badge status-new">' + esc(raw) + '</span></td>';
       } else if (c.type === 'status') {
         const cls = raw === 'Готово' ? 'status-ok' : (raw ? 'status-new' : '');
-        html += '<td><span class="status-badge ' + cls + '">' + raw + '</span></td>';
+        html += '<td><span class="status-badge ' + cls + '">' + esc(raw) + '</span></td>';
       } else if (c.type === 'num') {
-        html += "<td style='font-family:monospace;font-weight:600;color:var(--accent);text-align:center'>" + raw + "</td>";
+        html += "<td style='font-family:monospace;font-weight:600;color:var(--accent);text-align:center'>" + esc(raw) + "</td>";
       } else {
-        html += '<td title="' + raw.replace(/"/g,'&quot;') + '">' + raw + '</td>';
+        html += '<td title="' + esc(raw) + '">' + esc(raw) + '</td>';
       }
     });
     html += '</tr>';
@@ -3390,9 +3521,9 @@ function showApp() {
   if (bar) {
     bar.style.display = 'flex';
     const badge = document.getElementById('userBadge');
-    if (badge) badge.innerHTML = STATE.user.name
+    if (badge) badge.innerHTML = esc(STATE.user.name)
       + ' <span style="font-size:9px;color:' + role.color + ';margin-left:4px">'
-      + role.label.toUpperCase() + '</span>';
+      + esc(role.label.toUpperCase()) + '</span>';
   }
   // Logout button in userBar
   const logoutBtn = document.getElementById('logoutBtn');
@@ -3513,7 +3644,7 @@ async function loadAttendance() {
     renderAttendanceGrid(employees, byName, dateVal);
 
   } catch(e) {
-    grid.innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><div>' + e.message + '</div></div>';
+    grid.innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><div>' + esc(e.message) + '</div></div>';
   }
 }
 
@@ -3534,7 +3665,7 @@ function renderAttendanceGrid(employees, byName, dateVal) {
     const statusText = present ? ('✓ ' + records.length + ' отм.') : '✗ нет';
 
     // Собираем tooltip с деталями
-    let tooltipHtml = '<div style="font-weight:700;color:var(--text);margin-bottom:6px;font-size:11px">' + name + '</div>';
+    let tooltipHtml = '<div style="font-weight:700;color:var(--text);margin-bottom:6px;font-size:11px">' + esc(name) + '</div>';
     if (present) {
       records.slice(0, 8).forEach(r => {
         const dt = r[0] ? new Date(r[0]) : null;
@@ -3543,16 +3674,16 @@ function renderAttendanceGrid(employees, byName, dateVal) {
         const op = String(r[5] || '');
         const qty = String(r[4] || '');
         tooltipHtml += '<div class="att-entry">'
-          + '<span class="att-entry-time">' + time + '</span>'
-          + (station ? ' · <b>' + station + '</b>' : '')
-          + '<div class="att-entry-op">' + op + (qty ? ' · ' + qty + ' шт' : '') + '</div>'
+          + '<span class="att-entry-time">' + esc(time) + '</span>'
+          + (station ? ' · <b>' + esc(station) + '</b>' : '')
+          + '<div class="att-entry-op">' + esc(op) + (qty ? ' · ' + esc(qty) + ' шт' : '') + '</div>'
           + '</div>';
       });
       if (records.length > 8) {
         tooltipHtml += '<div style="color:var(--text3);font-size:10px;padding-top:4px">ещё ' + (records.length - 8) + ' записей…</div>';
       }
     } else {
-      tooltipHtml += '<div style="color:var(--danger);font-size:11px">Нет отметок за ' + dateLabel + '</div>';
+      tooltipHtml += '<div style="color:var(--danger);font-size:11px">Нет отметок за ' + esc(dateLabel) + '</div>';
     }
 
     // Краткое имя (Фамилия И.О.)
@@ -3569,9 +3700,9 @@ function renderAttendanceGrid(employees, byName, dateVal) {
       + 'onmouseenter="showAttTooltip(event,\'tt_' + cardId + '\')" '
       + 'onmouseleave="hideAttTooltip()" '
       + 'onmousemove="moveAttTooltip(event)">'
-      + '<div class="att-name">' + shortName + '</div>'
-      + '<div class="att-status">' + statusText + '</div>'
-      + (present ? '<div class="att-count">' + timesStr + '</div>' : '')
+      + '<div class="att-name">' + esc(shortName) + '</div>'
+      + '<div class="att-status">' + esc(statusText) + '</div>'
+      + (present ? '<div class="att-count">' + esc(timesStr) + '</div>' : '')
       + '</div>';
 
     // Tooltip as separate element in body
@@ -3740,7 +3871,7 @@ async function loadHistory() {
     renderHistoryTable(rows);
   } catch(e) {
     document.getElementById('tableHistory').innerHTML =
-      `<div class="empty-state"><div class="icon">⚠️</div><div>${e.message}</div></div>`;
+      `<div class="empty-state"><div class="icon">⚠️</div><div>${esc(e.message)}</div></div>`;
   }
 }
 
@@ -3781,12 +3912,12 @@ function renderHistoryTable(rows) {
     const action = String(r[3] || '');
     const color = ACTION_COLORS[action] || 'var(--text2)';
     html += `<tr>
-      <td style="font-family:monospace;font-size:11px;color:var(--text2)">${dt}</td>
-      <td style="font-weight:600">${r[2] || ''}</td>
-      <td style="font-family:monospace;font-size:11px;color:var(--text3)">${r[1] || ''}</td>
-      <td><span style="color:${color};font-family:monospace;font-size:11px;font-weight:700">${action}</span></td>
-      <td style="color:var(--text2);font-size:11px">${r[4] || ''}</td>
-      <td title="${r[5] || ''}">${r[5] || ''}</td>
+      <td style="font-family:monospace;font-size:11px;color:var(--text2)">${esc(dt)}</td>
+      <td style="font-weight:600">${esc(r[2] || '')}</td>
+      <td style="font-family:monospace;font-size:11px;color:var(--text3)">${esc(r[1] || '')}</td>
+      <td><span style="color:${color};font-family:monospace;font-size:11px;font-weight:700">${esc(action)}</span></td>
+      <td style="color:var(--text2);font-size:11px">${esc(r[4] || '')}</td>
+      <td title="${esc(r[5] || '')}">${esc(r[5] || '')}</td>
     </tr>`;
   });
 
@@ -4039,4 +4170,3 @@ function saveConfigFab() {
 </style>
 </body>
 </html>
-```
