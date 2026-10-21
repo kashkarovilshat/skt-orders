@@ -1737,6 +1737,8 @@ function applyRoleUI() {
   const addOrderBtn = document.querySelector('.btn-primary[onclick="submitOrder()"]');
   if (addOrderBtn) addOrderBtn.style.display = role.canAddOrder ? '' : 'none';
 
+  loadOrderListsFromSheet();
+
   // Navigate to first allowed tab
   const firstTab = role.tabs[0] || 'current';
   switchTab(firstTab);
@@ -1832,6 +1834,22 @@ function loadCuratorsFromConfig() {
 }
 
 function loadOrderTypesFromConfig() { /* список типов заказов убран — ручной ввод */ }
+
+// Кураторы и статусы — из выпадающих списков самой таблицы (чтобы значения совпадали символ в символ)
+async function loadOrderListsFromSheet() {
+  try {
+    const res = await apiCall({ action: 'orderLists' });
+    const fill = (id, list) => {
+      if (!list || !list.length) return;
+      const sel = document.getElementById(id);
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">— выберите —</option>' +
+        list.map(v => '<option value="' + esc(v) + '"' + (v === cur ? ' selected' : '') + '>' + esc(v) + '</option>').join('');
+    };
+    fill('f_kuratorF', res.lists.kurator);
+    fill('f_statusI', res.lists.status);
+  } catch (e) { console.warn('Списки из таблицы не загружены:', e.message); }
+}
 
 function updateSheetBadge() {
   const badge = document.getElementById('sheetBadge');
