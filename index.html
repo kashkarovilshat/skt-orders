@@ -820,14 +820,7 @@
       <!-- B: Заказ -->
       <div class="field">
         <label><span class="col-badge">B</span> Заказ <span class="required">*</span></label>
-        <select id="f_zakazB">
-          <option value="">— выберите —</option>
-          <option>РСК</option>
-          <option>Везерфорд</option>
-          <option>SCT</option>
-          <option>ВН заказы</option>
-          <option>ГПН-Шельф</option>
-        </select>
+        <input type="text" id="f_zakazB" placeholder="Введите заказ вручную" autocomplete="off">
       </div>
 
       <!-- C: Заказчик -->
@@ -903,7 +896,7 @@
 
     <div class="form-footer">
       <button class="btn btn-secondary" onclick="clearForm()">Очистить</button>
-      <button class="btn btn-primary" onclick="submitOrder()">＋ Добавить заказ</button>
+      <button class="btn btn-primary" id="btnSubmitOrder" onclick="submitOrder()">＋ Добавить заказ</button>
     </div>
   </div>
 
@@ -1532,10 +1525,6 @@
       <input type="text" id="cfg_curators" value="Галимьянов 3,Федотов А,Галимьянов З.Р.">
     </div>
 
-    <div class="config-field">
-      <label>Список заказов/типов (через запятую)</label>
-      <input type="text" id="cfg_orders" value="РСК,Везерфорд,SCT,ВН заказы,ГПН-Шельф">
-    </div>
 
     <button class="btn btn-primary" style="width:200px;" onclick="saveConfig()">Сохранить</button>
 
@@ -1589,7 +1578,7 @@ function doGet(e) {
 // ════════════════════════════════
 // STATE
 // ════════════════════════════════
-const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbxJFQo-7v6NijP57Z2GC2laAlXX98Ss5csHW3e6aKLMbRnCZyfQFlivS3Z4jJeGti0dVQ/exec';
+const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbw8vOUZVQ9NyRy4LMCvdp_q-l2YoCbIzqK3u8oURzVNVarABW45tmG14eLVdJ9L2pYbYQ/exec';
 
 const STATE = {
   currentRows: [],
@@ -1804,7 +1793,6 @@ function loadConfig() {
   document.getElementById('cfg_url').value = url;
   document.getElementById('cfg_srcId').value = srcId;
   document.getElementById('cfg_curators').value = curators;
-  document.getElementById('cfg_orders').value = orders;
 
   // Always use hardcoded DEFAULT_URL — ignore localStorage
   STATE.appsScriptUrl = DEFAULT_URL;
@@ -1816,12 +1804,10 @@ function saveConfig() {
   const url = document.getElementById('cfg_url').value.trim();
   const srcId = document.getElementById('cfg_srcId').value.trim();
   const curators = document.getElementById('cfg_curators').value.trim();
-  const orders = document.getElementById('cfg_orders').value.trim();
 
   localStorage.setItem('appsScriptUrl', url);
   localStorage.setItem('srcId', srcId);
   localStorage.setItem('curators', curators);
-  localStorage.setItem('orderTypes', orders);
 
   STATE.appsScriptUrl = url;
   STATE.srcId = srcId;
@@ -1845,18 +1831,7 @@ function loadCuratorsFromConfig() {
   });
 }
 
-function loadOrderTypesFromConfig() {
-  const types = (localStorage.getItem('orderTypes') || 'РСК,SCT').split(',').map(s => s.trim());
-  const sel = document.getElementById('f_zakazB');
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">— выберите —</option>';
-  types.forEach(t => {
-    const o = document.createElement('option');
-    o.value = t; o.textContent = t;
-    if (t === cur) o.selected = true;
-    sel.appendChild(o);
-  });
-}
+function loadOrderTypesFromConfig() { /* список типов заказов убран — ручной ввод */ }
 
 function updateSheetBadge() {
   const badge = document.getElementById('sheetBadge');
@@ -1877,6 +1852,9 @@ function switchTab(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   if (name === 'load') initLoadWeek();
+  if (name === 'launch' && !STATE._launchLoaded) { STATE._launchLoaded = true; loadLaunchData(); }
+  if (name === 'tech' && !STATE._techLoaded) { STATE._techLoaded = true; loadTechData(); }
+  if (name === 'tehkarty' && !STATE._tkLoaded) { STATE._tkLoaded = true; loadTehKartyData(); }
 }
 
 // ════════════════════════════════
@@ -1948,7 +1926,7 @@ async function loadCurrentOrders() {
     const data = await apiRead('Заказы на производство новый');
 
     // Skip header rows (first 3), hide rows where B,C,G all empty
-    const rows = data.slice(3).filter(r => String(r[1]||'').trim() || String(r[2]||'').trim() || String(r[6]||'').trim());
+    const rows = data.slice(3).map((r, i) => { r._row = i + 4; return r; }).filter(r => String(r[1]||'').trim() || String(r[2]||'').trim() || String(r[6]||'').trim());
     STATE.currentRows = rows;
     STATE.filteredCurrent = rows;
 
@@ -1956,8 +1934,10 @@ async function loadCurrentOrders() {
     STATE.drawingSuggestions = [...new Set(rows.map(r => String(r[6]||'').trim()).filter(Boolean))];
     STATE.detailSuggestions = [...new Set(rows.map(r => String(r[7]||'').trim()).filter(Boolean))];
 
+
     renderOrdersTable('tableNew', rows, 'countNew');
     renderOrdersTable('tableCurrent', rows, 'countCurrent');
+    ['tableNew','tableCurrent'].forEach(id => { const el = document.getElementById(id); el.scrollTop = el.scrollHeight; });
 
   } catch(e) {
     const msg = `<div class="empty-state"><div class="icon">⚠️</div><div>${esc(e.message)}</div><div style="color:var(--text3);margin-top:8px">Настройте Apps Script URL во вкладке «Настройки»</div></div>`;
@@ -1973,7 +1953,7 @@ async function loadArchive() {
 
   try {
     const data = await apiRead('Архив Заказы на производство');
-    const rows = data.slice(3).filter(r => String(r[1]||'').trim() || String(r[2]||'').trim() || String(r[6]||'').trim());
+    const rows = data.slice(3).map((r, i) => { r._row = i + 4; return r; }).filter(r => String(r[1]||'').trim() || String(r[2]||'').trim() || String(r[6]||'').trim());
     STATE.archiveRows = rows;
     STATE.filteredArchive = rows;
     STATE.archiveMonthFilter = 'all';
@@ -2101,7 +2081,7 @@ function renderArchiveTable(rows) {
       }
     });
     const isAdminA = STATE.user && STATE.user.role === 'admin';
-    const sheetRowA = rows.indexOf(r) + 4;
+    const sheetRowA = r._row;
     let btnsA = `<button class="btn-repeat" title="Повторить заказ" onclick='repeatOrder(${JSON.stringify(r)})'>↺</button>`;
     if (isAdminA) {
       btnsA += `<button class="btn-delete" title="Удалить" onclick="deleteOrder('Архив Заказы на производство',${sheetRowA},this)">✕</button>`;
@@ -2175,7 +2155,7 @@ function renderOrdersTable(containerId, rows, countId) {
     const isAdmin = STATE.user && STATE.user.role === 'admin';
     const sheetForContainer = containerId === 'tableArchive' ? 'Архив Заказы на производство' : 'Заказы на производство новый';
     // rowNum in sheet = idx + 4 (3 header rows + 1-based)
-    const sheetRowNum = idx + 4;
+    const sheetRowNum = r._row;
     let actionBtns = `<button class="btn-repeat" title="Повторить заказ" onclick='repeatOrder(${JSON.stringify(r)})'>↺</button>`;
     if (isAdmin) {
       actionBtns += `<button class="btn-delete" title="Удалить заказ" onclick="deleteOrder('${sheetForContainer}',${sheetRowNum},this)">✕</button>`;
@@ -2311,30 +2291,20 @@ async function submitOrder() {
   if (!kuratorF)    { showToast('Выберите Куратора (F)', true); return; }
   if (!qtyK || +qtyK <= 0) { showToast('Укажите Кол-во (K)', true); return; }
 
-  // Build row matching sheet columns A..K
-  // A=№(auto), B=Заказ, C=Заказчик, D=Договор, E=Дата, F=Куратор,
-  // G=Чертёж, H=Название, I=Статус, J=пусто, K=Кол-во
-  const row = [
-    '',           // A: № — авто в таблице
-    zakazB,       // B
-    zakazchikC,   // C
-    dogovorD,     // D
-    dateE,        // E
-    kuratorF,     // F
-    drawingG,     // G
-    detailH,      // H
-    statusI,      // I
-    '',           // J
-    +qtyK,        // K
-  ];
+  const d = new Date();
+  const isoDate = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  const order = {
+    zakaz: zakazB, zakazchik: zakazchikC, dogovor: dogovorD, date: isoDate,
+    kurator: kuratorF, drawing: drawingG, detail: detailH, status: statusI, qty: +qtyK
+  };
 
-  const btn = document.querySelector('.btn-primary');
+  const btn = document.getElementById('btnSubmitOrder');
   btn.textContent = '…';
   btn.disabled = true;
 
   try {
-    await apiAppend('Заказы на производство новый', row);
-    showToast('✓ Заказ добавлен!');
+    const res = await apiCall({ action: 'addOrder', order: JSON.stringify(order) });
+    showToast('✓ Заказ добавлен' + (res.num ? ' (№' + res.num + ')' : '') + ', строка ' + res.row);
     clearForm();
     await loadCurrentOrders();
   } catch(e) {
@@ -2346,8 +2316,8 @@ async function submitOrder() {
 }
 
 function clearForm() {
-  ['f_zakazB','f_kuratorF','f_statusI'].forEach(id => document.getElementById(id).value = '');
-  ['f_zakazchikC','f_dogovorD','f_drawingG','f_detailH','f_qtyK'].forEach(id => document.getElementById(id).value = '');
+  ['f_kuratorF','f_statusI'].forEach(id => document.getElementById(id).value = '');
+  ['f_zakazB','f_zakazchikC','f_dogovorD','f_drawingG','f_detailH','f_qtyK'].forEach(id => document.getElementById(id).value = '');
   setTodayDate();
 }
 
@@ -2398,25 +2368,25 @@ function filterLaunchList() {
 
 function renderLaunchList(items) {
   var el = document.getElementById('launchList');
+  window._launchItems = items;
   if (!items.length) {
     el.innerHTML = '<div class="empty-state" style="padding:30px 16px"><div class="icon">✓</div>'
       + '<div>Все заказы запущены!</div></div>';
     return;
   }
-  el.innerHTML = items.map(function(r) {
+  el.innerHTML = items.map(function(r, i) {
     return '<div style="padding:10px 14px;border-bottom:1px solid var(--border);'
       + 'display:flex;align-items:flex-start;gap:8px;">'
-      + '<input type="checkbox" class="launch-cb" data-row="' + r.rowNum + '"'
+      + '<input type="checkbox" class="launch-cb" data-row="' + esc(r.rowNum) + '"'
       + ' style="margin-top:3px;cursor:pointer;">'
-      + '<div onclick="showLaunchDetail(' + JSON.stringify(JSON.stringify(r)) + ')"'
-      + ' style="flex:1;cursor:pointer;">'
+      + '<div onclick="showLaunchDetail(window._launchItems[' + i + '])" style="flex:1;cursor:pointer;">'
       + '<div style="font-family:monospace;font-size:12px;font-weight:600;color:var(--accent)">'
       + esc(r.drawing) + '</div>'
       + '<div style="font-size:11px;color:var(--text2)">' + esc(r.name||'') + '</div>'
       + '<div style="font-size:10px;color:var(--text3);margin-top:2px">'
       + '№' + esc(r.orderNum) + ' · ' + esc(r.firm) + ' · ' + esc(r.qty||'') + ' шт.</div>'
       + '</div>'
-      + '<button onclick="showLaunchDetail(' + JSON.stringify(JSON.stringify(r)) + ')"'
+      + '<button onclick="showLaunchDetail(window._launchItems[' + i + '])"'
       + ' style="background:transparent;border:1px solid var(--border);color:var(--text2);'
       + 'padding:3px 8px;border-radius:3px;font-size:10px;cursor:pointer;">→</button>'
       + '</div>';
@@ -2435,8 +2405,11 @@ async function launchSelected() {
   if (btn) { btn.textContent = '⏳…'; btn.disabled = true; }
   try {
     var data = await apiCall({ action: 'runSync', rows: rows });
-    showToast('✓ Запущено: ' + (data.launched || 0) + ' заказов');
+    var nums = (data.items || []).map(function(x){ return '№' + x.launchNum; }).join(', ');
+    showToast('✓ Запущено: ' + (data.launched || 0) + (nums ? ' (заявки ' + nums + ')' : ''));
+    document.getElementById('launchSelectAll').checked = false;
     await loadLaunchData();
+    loadCurrentOrders();
   } catch(e) {
     showToast('Ошибка: ' + e.message, true);
   } finally {
@@ -2519,16 +2492,7 @@ async function launchOne() {
     if (data.launched > 0) {
       addLog('✓ Добавлен в лист Запуск');
 
-      // Найти номер заявки в Запуске
-      var launchData = await apiCall({ action: 'read', id: TECH_SPREAD_ID_WEB, sheet: 'Запуск' });
-      var rows = (launchData.data || []);
-      var launchNum = null;
-      for (var i = rows.length - 1; i >= 0; i--) {
-        if (String(rows[i][14]).trim() === r.drawing) {
-          launchNum = rows[i][0];
-          break;
-        }
-      }
+      var launchNum = (data.items && data.items[0]) ? data.items[0].launchNum : null;
 
       if (launchNum) {
         document.getElementById('ld_launchNum').textContent = '№ ' + launchNum;
@@ -2540,6 +2504,7 @@ async function launchOne() {
       launchAllRows = launchAllRows.filter(function(x) { return x.rowNum !== r.rowNum; });
       document.getElementById('launchCount').textContent = launchAllRows.length + ' шт.';
       filterLaunchList();
+      loadCurrentOrders();
       showToast('✓ Запущен: ' + r.drawing);
     } else {
       addLog('⚠️ Заказ уже был запущен или не найден');
@@ -2858,10 +2823,7 @@ function switchTKTab(tab) {
   document.getElementById('tkTabCreate').style.background = isList ? 'transparent' : 'var(--accent)';
   document.getElementById('tkTabCreate').style.color      = isList ? 'var(--text2)' : '#0f1117';
 
-  if (!isList && tkOpsSheet.length === 0) {
-    loadTKOperations();
-    loadTKDrawings();
-  }
+  if (!isList && !STATE.tkAllDrawings) loadTKDrawings();
 }
 
 async function loadTKOperations() {
@@ -2871,11 +2833,12 @@ async function loadTKOperations() {
       return String(r[0] || '').trim();
     });
   } catch(e) {
-    console.warn('Не удалось загрузить справочник операций:', e.message);
+    showToast('Не удалось загрузить справочник операций: ' + e.message, true);
   }
 }
 
 async function loadTKDrawings() {
+  if (!tkOpsSheet.length) await loadTKOperations();
   document.getElementById('tkDrawingList').innerHTML =
     '<div class="loading"><div class="spinner"></div>Загрузка…</div>';
   try {
@@ -2905,7 +2868,10 @@ async function loadTKDrawings() {
       if (d) { tkSet[d] = tkSet[d] || []; tkSet[d].push(tp); }
     });
 
-    STATE.tkAllDrawings = Object.values(ordersMap);
+    (STATE.techAllRows || []).forEach(function(t) {
+      if (!ordersMap[t.drawing]) ordersMap[t.drawing] = { drawing: t.drawing, name: t.name, firm: t.firm };
+    });
+    STATE.tkAllDrawings = Object.values(ordersMap).sort(function(a, b) { return a.drawing.localeCompare(b.drawing); });
     STATE.tkSet = tkSet;
     filterTKDrawings();
   } catch(e) {
@@ -2925,19 +2891,20 @@ function filterTKDrawings() {
 
 function renderTKDrawingList(items) {
   var el = document.getElementById('tkDrawingList');
+  window._tkItems = items;
   if (!items.length) {
     el.innerHTML = '<div class="empty-state" style="padding:20px"><div>Не найдено</div></div>';
     return;
   }
   var tkSet = STATE.tkSet || {};
-  el.innerHTML = items.map(function(m) {
+  el.innerHTML = items.map(function(m, i) {
     var tps = tkSet[m.drawing] ? tkSet[m.drawing].join(', ') : '';
     var badge = tps
       ? '<span style="font-size:9px;color:var(--success);float:right">ТП' + esc(tps) + '</span>'
       : '<span style="font-size:9px;color:var(--danger);float:right">нет</span>';
-    return '<div onclick="selectTKDrawing(' + JSON.stringify(JSON.stringify(m)) + ')"'
+    return '<div onclick="selectTKDrawing(window._tkItems[' + i + '])"'
       + ' style="padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer"'
-      + ' onmouseover="this.style.background=\'#1e2435\'"'
+      + ' onmouseover="this.style.background=\'var(--surface2)\'"'
       + ' onmouseout="this.style.background=\'\'">'
       + '<div style="font-family:monospace;font-size:12px;font-weight:600;color:var(--accent)">'
       + esc(m.drawing) + badge + '</div>'
@@ -2977,7 +2944,7 @@ function addTKOperation() {
   var ops = tkOpsSheet;
 
   var opOptions = ops.map(function(r, i) {
-    return '<option value="' + esc(String(r[0]||'').trim()) + '">'
+    return '<option value="' + esc(String(r[0]||'').trim()) + '" data-name="' + esc(String(r[1]||'').trim()) + '">'
       + '[' + esc(String(r[0]||'').trim()) + '] ' + esc(String(r[1]||'').trim()) + '</option>';
   }).join('');
 
@@ -3024,31 +2991,31 @@ async function saveTehKarty() {
     if (!selEl) continue;
     var opNum  = selEl.value;
     var opTime = timeEl ? (parseFloat(timeEl.value) || '') : '';
-    if (opNum) ops.push({ seq: ops.length + 1, opNum: opNum, time: opTime });
+    var opName = selEl.selectedOptions[0] ? selEl.selectedOptions[0].dataset.name : '';
+    if (opNum) ops.push({ seq: ops.length + 1, opNum: opNum, opName: opName, time: opTime });
   }
 
   if (!ops.length) { showToast('Добавьте хотя бы одну операцию', true); return; }
-
-  // Строка для Тех Карты: A=ТП, B=Фирм, C=Чертёж, D=Наим, E+= попарно опер|время
-  var row = [tp, firm, drawing, name];
-  ops.forEach(function(op) {
-    row.push(op.opNum);
-    row.push(op.time);
-  });
 
   var btn = document.querySelector('#tkRightForm .btn-primary');
   if (btn) { btn.textContent = '⏳…'; btn.disabled = true; }
 
   try {
-    await apiCall({
-      action: 'append',
-      id: TECH_SPREAD_ID_WEB,
-      sheet: 'Тех Карты ',
-      row: JSON.stringify(row)
+    var res = await apiCall({
+      action: 'saveTehKarta',
+      card: JSON.stringify({ tp: tp, firm: firm, drawing: drawing, name: name, ops: ops })
     });
 
-    showToast('✓ Тех карта сохранена: ' + drawing + ' (ТП' + tp + ')');
+    var rt = res.route || {};
+    if (rt.ok && (!rt.missing || !rt.missing.length)) {
+      showToast('✓ Тех карта и маршрут сохранены: ' + drawing + ' (ТП' + tp + ')');
+    } else if (rt.ok) {
+      showToast('Тех карта сохранена. В маршрут не попали: ' + rt.missing.join(', '), true);
+    } else {
+      showToast('Тех карта сохранена. Маршрут: ' + (rt.warning || 'не записан'), true);
+    }
     cancelTKForm();
+    switchTKTab('list');
 
     // Обновить список
     if (STATE.tkSet) {
@@ -3140,7 +3107,7 @@ function renderTehKartyTable(rows) {
     html += '<td>' + esc(name) + '</td>';
 
     opCols.forEach(c => {
-      const opNum  = String(r[c.idx]     || '').trim(); // номер операции
+      const opNum  = String(r[c.idx]     || '').trim(); // порядок выполнения операции
       const opTime = String(r[c.idx + 1] || '').trim(); // время
 
       if (opNum) {
@@ -3254,20 +3221,28 @@ async function loadTechData() {
 
     const techSet = new Set();
     const allTechItems = [];
+    const seenTech = new Set();
     techRows.forEach(r => {
       const d = String(r[2] || '').trim();
-      if (d) {
-        techSet.add(d);
-        allTechItems.push({
-          drawing:   d,
-          name:      String(r[3] || '').trim(),
-          firm:      String(r[1] || '').trim(),
-          zakazchik: String(r[0] || '').trim()
-        });
-      }
+      if (!d) return;
+      const filled = !!String(r[4] || '').trim(); // технология считается заполненной, если указан материал (E)
+      if (filled) techSet.add(d);
+      if (seenTech.has(d)) return;
+      seenTech.add(d);
+      allTechItems.push({
+        drawing:   d,
+        name:      String(r[3] || '').trim() || (ordersMap[d] ? ordersMap[d].name : ''),
+        firm:      String(r[1] || '').trim() || (ordersMap[d] ? ordersMap[d].firm : ''),
+        zakazchik: String(r[0] || '').trim() || (ordersMap[d] ? ordersMap[d].zakazchik : ''),
+        filled:    filled
+      });
     });
+    // чертежи из заказов, которых в Технологиях нет совсем, тоже показываем во "Все"
+    Object.values(ordersMap).forEach(m => { if (!seenTech.has(m.drawing)) allTechItems.push(Object.assign({ filled: false }, m)); });
+    allTechItems.sort((a, b) => a.drawing.localeCompare(b.drawing));
+    STATE.techFilledSet = techSet;
 
-    const missing = Object.values(ordersMap)
+    const missing = allTechItems
       .filter(m => !techSet.has(m.drawing))
       .sort((a, b) => a.drawing.localeCompare(b.drawing));
 
@@ -3302,20 +3277,19 @@ function filterTechMissing() {
 
 function renderTechMissingList(items) {
   const el = document.getElementById('techMissingList');
+  window._techItems = items;
   if (!items.length) {
     el.innerHTML = '<div class="empty-state" style="padding:30px 16px"><div class="icon">✓</div><div style="font-size:12px">Все чертежи имеют технологии</div></div>';
     return;
   }
-
-  el.innerHTML = items.map(function(m) {
-    var isExisting = STATE.techAllRows && STATE.techAllRows.some(function(r) { return r.drawing === m.drawing; });
-    var badge = isExisting
+  const filledSet = STATE.techFilledSet || new Set();
+  el.innerHTML = items.map(function(m, i) {
+    var badge = filledSet.has(m.drawing)
       ? '<span style="float:right;font-size:9px;color:var(--success)">&#10003; есть</span>'
       : '<span style="float:right;font-size:9px;color:var(--danger)">нет</span>';
-    var mJson = encodeURIComponent(JSON.stringify(m));
-    return '<div onclick="selectTechItem(decodeURIComponent(\'' + mJson + '\'))"'
+    return '<div onclick="selectTechItem(window._techItems[' + i + '])"'
       + ' style="padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer"'
-      + ' onmouseover="this.style.background=\'#1e2435\'"'
+      + ' onmouseover="this.style.background=\'var(--surface2)\'"'
       + ' onmouseout="this.style.background=\'\'">'
       + '<div style="font-family:monospace;font-size:12px;font-weight:600;color:var(--accent)">'
       + esc(m.drawing) + badge + '</div>'
@@ -3350,6 +3324,15 @@ function selectTechItem(itemJson) {
   document.getElementById('tf_filePreview').style.display = 'none';
   document.getElementById('tf_file').value = '';
   window._techFile = null;
+
+  // Если технология уже есть — подставить сохранённые значения для редактирования
+  const ex = (STATE.techRows || []).find(r => String(r[2] || '').trim() === item.drawing);
+  if (ex) {
+    const put = (id, idx) => { const el = document.getElementById('tf_' + id); if (el) el.value = ex[idx] === undefined || ex[idx] === null ? '' : String(ex[idx]); };
+    put('matName',4); put('matSize',5); put('thick',6); put('type',7); put('cut',8); put('clean',10);
+    put('naklad',12); put('sizes',13); put('hard',14);
+    for (let n = 1; n <= 8; n++) { put('r' + n, 16 + (n-1)*2); put('d' + n, 17 + (n-1)*2); }
+  }
 }
 
 function clearTechForm() {
@@ -3383,65 +3366,27 @@ async function saveTechnology() {
   const matName = document.getElementById('tf_matName').value.trim();
   if (!matName) { showToast('Укажите материал (E)', true); return; }
 
-  const btn = document.querySelector('#page-tech .btn-primary');
+  const btn = document.querySelector('#techFormBody .btn-primary');
   if (btn) { btn.textContent = '⏳ Сохранение…'; btn.disabled = true; }
 
   try {
-    // Собрать строку данных
-    // A,B,C,D — из заказов
-    const row = [
-      document.getElementById('tf_zakazchik').value,  // A
-      document.getElementById('tf_firm').value,        // B
-      drawing,                                          // C
-      document.getElementById('tf_name').value,        // D
-      matName,                                          // E
-      document.getElementById('tf_matSize').value,     // F
-      document.getElementById('tf_thick').value,       // G
-      document.getElementById('tf_type').value,        // H
-      document.getElementById('tf_cut').value,         // I
-      '',                                               // J — формула (пропускаем)
-      document.getElementById('tf_clean').value,       // K
-      '',                                               // L — формула
-      document.getElementById('tf_naklad').value,      // M
-      document.getElementById('tf_sizes').value,       // N
-      document.getElementById('tf_hard').value,        // O
-      '',                                               // P — формула
-      document.getElementById('tf_r1').value,          // Q = Р1
-      document.getElementById('tf_d1').value,          // R = ±1
-      document.getElementById('tf_r2').value,          // S = Р2
-      document.getElementById('tf_d2').value,          // T = ±2
-      document.getElementById('tf_r3').value,          // U = Р3
-      document.getElementById('tf_d3').value,          // V = ±3
-      document.getElementById('tf_r4').value,          // W = Р4
-      document.getElementById('tf_d4').value,          // X = ±4
-      document.getElementById('tf_r5').value,          // Y = Р5
-      document.getElementById('tf_d5').value,          // Z = ±5
-      document.getElementById('tf_r6').value,          // AA = Р6
-      document.getElementById('tf_d6').value,          // AB = ±6
-      document.getElementById('tf_r7').value,          // AC = Р7
-      document.getElementById('tf_d7').value,          // AD = ±7
-      document.getElementById('tf_r8').value,          // AE = Р8
-      document.getElementById('tf_d8').value,          // AF = ±8
-    ];
+    const v = id => (document.getElementById(id).value || '').trim();
+    const tech = {
+      zakazchik: v('tf_zakazchik'), firm: v('tf_firm'), drawing: drawing, name: v('tf_name'),
+      matName: matName, matSize: v('tf_matSize'), thick: v('tf_thick'), type: v('tf_type'),
+      cut: v('tf_cut'), clean: v('tf_clean'), naklad: v('tf_naklad'), sizes: v('tf_sizes'), hard: v('tf_hard')
+    };
+    for (let n = 1; n <= 8; n++) { tech['r' + n] = v('tf_r' + n); tech['d' + n] = v('tf_d' + n); }
 
-    await apiCall({
-      action: 'append',
-      id: TECH_SPREAD_ID_WEB,
-      sheet: TECH_SHEET_WEB,
-      row: JSON.stringify(row)
-    });
+    const res = await apiCall({ action: 'saveTech', tech: JSON.stringify(tech) });
 
     // Загрузить файл если выбран
     if (window._techFile) {
       await uploadDrawingFile(window._techFile, drawing);
     }
 
-    showToast('✓ Технология сохранена: ' + drawing);
-
-    // Убрать из списка отсутствующих
-    STATE.techMissing = STATE.techMissing.filter(m => m.drawing !== drawing);
-    document.getElementById('techMissingCount').textContent = STATE.techMissing.length + ' шт.';
-    renderTechMissingList(STATE.techMissing);
+    showToast('✓ Технология ' + (res.created ? 'добавлена' : 'обновлена') + ': ' + drawing + ' (строка ' + res.row + ')');
+    loadTechData();
 
     // Сбросить форму
     document.getElementById('techFormBody').style.display = 'none';
@@ -3457,29 +3402,26 @@ async function saveTechnology() {
 
 // Загрузка файла на Google Диск через Apps Script
 async function uploadDrawingFile(file, drawingNum) {
-  return new Promise((resolve, reject) => {
+  if (file.size > 15 * 1024 * 1024) { showToast('Файл больше 15 МБ — не загружен', true); return; }
+  const base64 = await new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = async (e) => {
-      try {
-        const base64 = e.target.result.split(',')[1];
-        const ext = file.name.split('.').pop().toLowerCase();
-        const fileName = drawingNum + '.' + ext;
-        const mimeType = file.type || 'application/octet-stream';
-
-        await apiCall({
-          action:   'uploadFile',
-          fileName: fileName,
-          mimeType: mimeType,
-          base64:   base64
-        });
-        resolve();
-      } catch(err) {
-        console.warn('Файл не загружен на Диск:', err.message);
-        resolve(); // не блокируем сохранение если файл не загрузился
-      }
-    };
+    reader.onload = e => resolve(e.target.result.split(',')[1]);
+    reader.onerror = reject;
     reader.readAsDataURL(file);
   });
+  const ext = file.name.split('.').pop().toLowerCase();
+  const mimeType = file.type || (ext === 'pdf' ? 'application/pdf' : ext === 'png' ? 'image/png' : 'image/jpeg');
+  try {
+    // POST: через JSONP (GET) большие файлы не проходят из-за длины адреса
+    await fetch(DEFAULT_URL, {
+      method: 'POST', mode: 'no-cors',
+      body: JSON.stringify({ action: 'uploadFile', email: STATE.user.email, token: STATE.user.token,
+        fileName: drawingNum + '.' + ext, mimeType: mimeType, base64: base64 })
+    });
+  } catch (err) {
+    console.warn('Файл не загружен на Диск:', err.message);
+    showToast('Технология сохранена, но файл не загрузился', true);
+  }
 }
 
 // ════════════════════════════════
@@ -4199,14 +4141,6 @@ function renderHistoryTable(rows) {
              color:var(--text);padding:6px 8px;border-radius:4px;font-size:11px;outline:none;">
   </div>
 
-  <!-- Заказы -->
-  <div style="margin-bottom:14px;">
-    <div style="font-size:11px;color:var(--text2);margin-bottom:6px;font-family:'IBM Plex Mono',monospace;">Типы заказов (через запятую)</div>
-    <input type="text" id="cfg_orders_fab"
-      style="width:100%;background:var(--surface2);border:1px solid var(--border);
-             color:var(--text);padding:6px 8px;border-radius:4px;font-size:11px;outline:none;">
-  </div>
-
   <div style="display:flex;gap:8px;">
     <button onclick="saveConfigFab()" style="
       flex:1;background:var(--accent);color:#0f1117;border:none;
@@ -4227,20 +4161,16 @@ document.addEventListener('DOMContentLoaded', function() {
   // Fill FAB settings from localStorage
   const cfgUrl = document.getElementById('cfg_url_fab');
   const cfgCur = document.getElementById('cfg_curators_fab');
-  const cfgOrd = document.getElementById('cfg_orders_fab');
   if (cfgUrl) cfgUrl.value = DEFAULT_URL;
   if (cfgCur) cfgCur.value = localStorage.getItem('curators') || 'Галимьянов 3,Федотов А';
-  if (cfgOrd) cfgOrd.value = localStorage.getItem('orderTypes') || 'РСК,Везерфорд,SCT,ВН заказы,ГПН-Шельф';
   document.addEventListener('click', closeSettingsPanelOutside);
 });
 
 function saveConfigFab() {
   const url = document.getElementById('cfg_url_fab').value.trim();
   const cur = document.getElementById('cfg_curators_fab').value.trim();
-  const ord = document.getElementById('cfg_orders_fab').value.trim();
   if (url) { localStorage.setItem('appsScriptUrl', url); STATE.appsScriptUrl = url; }
   if (cur) { localStorage.setItem('curators', cur); loadCuratorsFromConfig(); }
-  if (ord) { localStorage.setItem('orderTypes', ord); loadOrderTypesFromConfig(); }
   document.getElementById('settingsPanel').style.display = 'none';
   showToast('✓ Настройки сохранены');
 }
