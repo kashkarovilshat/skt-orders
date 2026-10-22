@@ -770,6 +770,92 @@
     letter-spacing: .5px; transition: all .15s;
   }
   .load-plan-add:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  /* ── ПЛАНИРОВАНИЕ ── */
+  .tabs { overflow-x: auto; scrollbar-width: none; }
+  .tab { white-space: nowrap; padding: 6px 12px; }
+  .pl-bar { gap: 10px; flex-wrap: wrap; }
+  .pl-title { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); }
+  .pl-meta { font-size: 11px; color: var(--text2); margin-left: auto; }
+  .pl-btn { font-size: 10px; padding: 6px 14px; }
+  .pl-input { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 4px; padding: 6px 8px; font-size: 12px; font-family: inherit; }
+  .pl-input:focus { outline: none; border-color: var(--accent); }
+  .pl-bar .pl-input { width: auto; flex: 0 0 auto; min-height: 0; }
+  .pl-bar input.pl-input:not([type=date]) { width: 260px; }
+  .pl-chk input, td input[type=checkbox] { width: auto; min-height: 0; }
+  input.pl-ed, select.pl-ed { min-height: 0; }
+  @media (max-width: 700px) { .pl-bar input.pl-input:not([type=date]) { width: 100%; } .pl-meta { margin-left: 0; } }
+  .pl-chk { font-size: 11px; color: var(--text2); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .pl-scroll { overflow-y: auto; height: calc(100vh - 110px); padding: 14px 16px 40px; }
+  .pl-tw { max-height: none; }
+  #qWrap, #pWrap { height: calc(100vh - 150px); }
+  .pl-kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .pl-kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; }
+  .pl-kpi .k { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--text2); font-family: 'IBM Plex Mono', monospace; }
+  .pl-kpi .v { font-family: 'Bebas Neue', sans-serif; font-size: 30px; line-height: 1.1; color: var(--text); }
+  .pl-kpi .s { font-size: 10px; color: var(--text3); }
+  .pl-kpi.bad .v { color: var(--danger); } .pl-kpi.warn .v { color: #ff9500; } .pl-kpi.ok .v { color: var(--success); }
+  .pl-section { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin-bottom: 14px; }
+  .pl-h { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--text); margin-bottom: 8px; }
+  .pl-h span { text-transform: none; letter-spacing: 0; color: var(--text3); margin-left: 8px; font-family: 'IBM Plex Sans', sans-serif; }
+  .pl-two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 900px) { .pl-two { grid-template-columns: 1fr; } }
+  table.pl-table { border-collapse: collapse; width: 100%; font-size: 11px; }
+  table.pl-table th { background: var(--surface2); color: var(--text2); font-weight: 500; font-size: 10px; padding: 6px 6px; text-align: left; position: sticky; top: 0; z-index: 2; white-space: nowrap; border-bottom: 1px solid var(--border); }
+  table.pl-table td { padding: 5px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  table.pl-table tr.grp td { background: var(--surface2); font-weight: 600; color: var(--accent); font-family: 'IBM Plex Mono', monospace; font-size: 11px; position: sticky; top: 25px; z-index: 1; }
+  table.pl-table tr.grp td small { color: var(--text2); font-weight: 400; margin-left: 10px; }
+  table.pl-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+  table.pl-table .mono { font-family: 'IBM Plex Mono', monospace; }
+  table.pl-table .muted { color: var(--text3); }
+  .pl-bar-cell { min-width: 90px; }
+  .pl-meter { position: relative; height: 14px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .pl-meter i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent2); opacity: .75; }
+  .pl-meter i.hi { background: #ff9500; } .pl-meter i.over { background: var(--danger); }
+  .pl-meter b { position: relative; font-size: 9px; font-weight: 500; padding-left: 4px; line-height: 14px; color: var(--text); }
+  table.pl-heat td.h { text-align: center; font-size: 9px; min-width: 30px; padding: 4px 2px; color: var(--text); }
+  table.pl-heat th.d { text-align: center; font-size: 9px; padding: 4px 2px; }
+  .pl-st { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px; white-space: nowrap; }
+  .s-work { background: rgba(61,220,132,.18); color: var(--success); }
+  .s-next { background: rgba(232,200,64,.18); color: var(--accent); }
+  .s-queue { background: rgba(74,158,255,.15); color: var(--accent2); }
+  .s-par { background: rgba(255,149,0,.15); color: #ff9500; }
+  .s-late { background: rgba(255,77,77,.18); color: var(--danger); }
+  .s-done { background: rgba(136,146,164,.15); color: var(--text2); }
+  .s-none { background: rgba(255,77,77,.1); color: var(--danger); }
+  .pl-legend { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 6px 16px; font-size: 10px; }
+  .pl-lg { padding: 2px 8px; border-radius: 3px; }
+  .pl-hint { color: var(--text3); font-size: 11px; }
+  .pl-gantt { position: relative; height: 14px; min-width: 220px; background:
+    repeating-linear-gradient(90deg, transparent 0, transparent calc(10% - 1px), var(--border) calc(10% - 1px), var(--border) 10%); border-radius: 2px; }
+  .pl-gantt i { position: absolute; top: 2px; bottom: 2px; border-radius: 2px; min-width: 3px; }
+  .pl-gantt i.s-work { background: var(--success); } .pl-gantt i.s-next { background: var(--accent); }
+  .pl-gantt i.s-queue { background: var(--accent2); } .pl-gantt i.s-par { background: #ff9500; } .pl-gantt i.late { background: var(--danger); }
+  .pl-gantt-head { display: flex; min-width: 220px; font-size: 9px; color: var(--text2); }
+  .pl-gantt-head span { flex: 1; text-align: left; padding-left: 2px; border-left: 1px solid var(--border); }
+  .pl-ed { background: transparent; border: 1px solid transparent; color: var(--text); font-size: 11px; padding: 2px 4px; border-radius: 3px; font-family: inherit; }
+  .pl-ed:hover { border-color: var(--border); } .pl-ed:focus { outline: none; border-color: var(--accent); background: var(--surface2); }
+  .pl-ed[disabled] { opacity: .6; cursor: default; border-color: transparent; }
+  .pl-ed.n { width: 44px; text-align: center; } .pl-ed.d { width: 118px; } .pl-ed.t { width: 140px; } .pl-ed.s { max-width: 150px; }
+  .pl-ed.saving { border-color: var(--accent2); } .pl-ed.saved { border-color: var(--success); }
+  .pl-prog { display: inline-block; width: 48px; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; vertical-align: middle; margin-right: 4px; }
+  .pl-prog i { display: block; height: 100%; background: var(--success); }
+  .pl-route { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text2); white-space: nowrap; }
+  .pl-list .it { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
+  .pl-list .it:last-child { border-bottom: none; }
+  .pl-check { display: grid; grid-template-columns: 90px 140px 1fr 60px; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 12px; align-items: start; background: var(--surface); }
+  .pl-check .lv { font-size: 10px; text-align: center; padding: 2px 6px; border-radius: 3px; }
+  .lv-error { background: rgba(255,77,77,.18); color: var(--danger); } .lv-warn { background: rgba(255,149,0,.15); color: #ff9500; }
+  .lv-info { background: rgba(74,158,255,.12); color: var(--accent2); } .lv-ok { background: rgba(61,220,132,.15); color: var(--success); }
+  .pl-check .ar { color: var(--text2); font-size: 11px; } .pl-check .cnt { text-align: right; color: var(--text2); font-variant-numeric: tabular-nums; }
+  @media (max-width: 700px) { .pl-check { grid-template-columns: 70px 1fr; } .pl-check .ar, .pl-check .cnt { display: none; } }
+  .g-Норма { color: var(--success); } .g-Внимание { color: #ff9500; } .g-Нарушение { color: var(--danger); font-weight: 600; }
+  table.pl-cal td.c { text-align: center; font-size: 10px; min-width: 22px; padding: 3px 1px; }
+  table.pl-cal td.c.zero { background: rgba(255,77,77,.18); color: var(--danger); }
+  table.pl-cal td.c.has { background: rgba(61,220,132,.15); color: var(--success); }
+  table.pl-cal td.c.off { color: var(--text3); } table.pl-cal td.c.abs { background: rgba(74,158,255,.12); color: var(--accent2); }
+  table.pl-cal th.c { text-align: center; font-size: 9px; padding: 3px 1px; min-width: 22px; }
+  .pl-loading { padding: 40px; text-align: center; color: var(--text2); }
 </style>
 </head>
 <body>
@@ -777,15 +863,20 @@
 <div class="header">
   <div class="logo">СКТ · ЗАКАЗЫ</div>
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('new')">Новый заказ</button>
-    <button class="tab" onclick="switchTab('current')">Текущие заказы</button>
-    <button class="tab" onclick="switchTab('archive')">Архив<span class="archive-indicator"></span></button>
-    <button class="tab" onclick="switchTab('launch')">🚀 Запуск</button>
-    <button class="tab" onclick="switchTab('load')">📅 Загрузка станков</button>
-    <button class="tab" onclick="switchTab('tech')">Технологии</button>
-    <button class="tab" onclick="switchTab('tehkarty')">Тех Карты</button>
-    <button class="tab" onclick="switchTab('sbordata')">Сбор данных</button>
-    <button class="tab" onclick="switchTab('history')">История</button>
+    <button class="tab active" data-tab="new" onclick="switchTab('new')">Новый заказ</button>
+    <button class="tab" data-tab="current" onclick="switchTab('current')">Текущие заказы</button>
+    <button class="tab" data-tab="archive" onclick="switchTab('archive')">Архив<span class="archive-indicator"></span></button>
+    <button class="tab" data-tab="launch" onclick="switchTab('launch')">🚀 Запуск</button>
+    <button class="tab" data-tab="svodka" onclick="switchTab('svodka')">📊 Сводка</button>
+    <button class="tab" data-tab="queue" onclick="switchTab('queue')">🗂 Очередь</button>
+    <button class="tab" data-tab="parts" onclick="switchTab('parts')">🧩 Детали в работе</button>
+    <button class="tab" data-tab="load" onclick="switchTab('load')">📅 Загрузка станков</button>
+    <button class="tab" data-tab="tech" onclick="switchTab('tech')">Технологии</button>
+    <button class="tab" data-tab="tehkarty" onclick="switchTab('tehkarty')">Тех Карты</button>
+    <button class="tab" data-tab="sbordata" onclick="switchTab('sbordata')">Сбор данных</button>
+    <button class="tab" data-tab="discipline" onclick="switchTab('discipline')">👷 Дисциплина</button>
+    <button class="tab" data-tab="check" onclick="switchTab('check')">✔ Проверка</button>
+    <button class="tab" data-tab="history" onclick="switchTab('history')">История</button>
     <!-- Настройки перенесены в FAB (правый нижний угол) -->
   </div>
   <div id="userBar" style="display:none;align-items:center;gap:8px;margin-left:auto;">
@@ -1483,6 +1574,101 @@
 
 </div><!-- end page-sbordata -->
 
+
+<!-- ════════════ TAB: СВОДКА ════════════ -->
+<div class="page" id="page-svodka">
+  <div class="table-header pl-bar">
+    <div class="pl-title">Сводка по производству</div>
+    <div class="pl-meta" id="svMeta">—</div>
+    <button class="btn btn-secondary pl-btn" onclick="loadPlanning(true)">↻ Пересчитать</button>
+  </div>
+  <div class="pl-scroll">
+    <div class="pl-kpis" id="svKpis"></div>
+    <div class="pl-section">
+      <div class="pl-h">Загрузка станков <span>по очереди операций и нормам времени</span></div>
+      <div class="table-wrap pl-tw"><table class="pl-table" id="svStations"></table></div>
+    </div>
+    <div class="pl-section">
+      <div class="pl-h">Гант станков <span>загрузка по рабочим дням, % от фонда</span></div>
+      <div class="table-wrap pl-tw"><table class="pl-table pl-heat" id="svGantt"></table></div>
+    </div>
+    <div class="pl-two">
+      <div class="pl-section"><div class="pl-h">Риск срыва срока <span>план позже срока сдачи</span></div><div id="svRisk"></div></div>
+      <div class="pl-section"><div class="pl-h">Без движения больше 7 дней</div><div id="svIdle"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ TAB: ОЧЕРЕДЬ ПО СТАНКАМ ════════════ -->
+<div class="page" id="page-queue">
+  <div class="table-header pl-bar">
+    <div class="pl-title">Очередь по станкам</div>
+    <select id="qStation" class="pl-input" onchange="renderQueue()"><option value="">Все станки</option></select>
+    <input id="qSearch" class="pl-input" placeholder="Поиск: чертёж, деталь, заказ" oninput="renderQueue()">
+    <label class="pl-chk"><input type="checkbox" id="qOnlyNext" onchange="renderQueue()"> только «в работе» и «следующая»</label>
+    <div class="pl-meta" id="qMeta"></div>
+    <button class="btn btn-secondary pl-btn" onclick="loadPlanning(true)">↻ Пересчитать</button>
+  </div>
+  <div class="pl-legend">
+    <span class="pl-lg s-work">В работе</span><span class="pl-lg s-next">Следующая</span><span class="pl-lg s-queue">В очереди</span>
+    <span class="pl-lg s-par">Параллельно</span><span class="pl-lg s-late">После срока</span>
+    <span class="pl-hint" id="qHint">Оч. — очерёдность на станке (1 — встанет первой после текущей). Станок — назначить вручную. Изменения применяются сразу.</span>
+  </div>
+  <div class="table-wrap pl-tw" id="qWrap"></div>
+</div>
+
+<!-- ════════════ TAB: ДЕТАЛИ В РАБОТЕ ════════════ -->
+<div class="page" id="page-parts">
+  <div class="table-header pl-bar">
+    <div class="pl-title">Детали в работе</div>
+    <select id="pState" class="pl-input" onchange="renderParts()">
+      <option value="">Все, кроме выполненных</option><option>В работе</option><option>Ожидает</option><option>Не начат</option>
+      <option>Нет маршрута</option><option>Маршрут выполнен</option><option value="risk">Риск срыва</option><option value="off">Сняты с плана</option><option value="all">Все</option>
+    </select>
+    <input id="pSearch" class="pl-input" placeholder="Поиск: чертёж, деталь, заказ, сопр." oninput="renderParts()">
+    <div class="pl-meta" id="pMeta"></div>
+    <button class="btn btn-secondary pl-btn" onclick="loadPlanning(true)">↻ Пересчитать</button>
+  </div>
+  <div class="pl-legend"><span class="pl-hint">Приоритет (1 — самая срочная), Срок сдачи, Учитывать (снять с плана) и Примечание — рычаги начальника производства. Изменения сразу пересчитывают очередь.</span></div>
+  <div class="table-wrap pl-tw" id="pWrap"></div>
+</div>
+
+<!-- ════════════ TAB: ДИСЦИПЛИНА ОТМЕТОК ════════════ -->
+<div class="page" id="page-discipline">
+  <div class="table-header pl-bar">
+    <div class="pl-title">Дисциплина отметок</div>
+    <select id="dPeriod" class="pl-input" onchange="loadDiscipline()"><option>День</option><option selected>Неделя</option><option>Месяц</option></select>
+    <input type="date" id="dDate" class="pl-input" onchange="loadDiscipline()">
+    <div class="pl-meta" id="dMeta"></div>
+    <button class="btn btn-secondary pl-btn" onclick="loadDiscipline()">↻ Обновить</button>
+  </div>
+  <div class="pl-scroll">
+    <div class="pl-kpis" id="dKpis"></div>
+    <div class="pl-section">
+      <div class="pl-h">Сводка по сотрудникам <span>регулярность — доля рабочих дней с отметками; выходные, праздники и отсутствия не считаются</span></div>
+      <div class="table-wrap pl-tw"><table class="pl-table" id="dTable"></table></div>
+    </div>
+    <div class="pl-section">
+      <div class="pl-h">Календарь отметок <span>31 день · число отметок · красный — рабочий день без отметок</span></div>
+      <div class="table-wrap pl-tw"><table class="pl-table pl-cal" id="dCal"></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ TAB: ПРОВЕРКА ════════════ -->
+<div class="page" id="page-check">
+  <div class="table-header pl-bar">
+    <div class="pl-title">Проверка справочников и данных</div>
+    <div class="pl-meta" id="cMeta"></div>
+    <button class="btn btn-secondary pl-btn" onclick="loadPlanning(true)">↻ Проверить заново</button>
+  </div>
+  <div class="pl-scroll">
+    <div class="pl-legend"><span class="pl-hint">Учитываются только названия станков из «Справочника доступа». Старые названия в «Сборе данных» пересчитываются на новые
+      автоматически или по листу «План · переименования станков» (таблица «Сбор информации»). Станки, которых нет в справочнике, не учитываются.</span></div>
+    <div id="cList"></div>
+  </div>
+</div>
+
 <!-- ════════════ TAB: ИСТОРИЯ ════════════ -->
 <div class="page" id="page-history">
   <div class="table-header">
@@ -1657,7 +1843,7 @@ const ROLES = {
   admin: {
     label: 'Администратор',
     color: 'var(--danger)',
-    tabs: ['new','current','archive','launch','load','tech','tehkarty','sbordata','history','config'],
+    tabs: ['new','current','archive','launch','svodka','queue','parts','load','tech','tehkarty','sbordata','discipline','check','history','config'],
     canDelete: true,
     canAddTech: true,
     canAddTehKarty: true,
@@ -1667,7 +1853,7 @@ const ROLES = {
   manager: {
     label: 'Менеджер',
     color: 'var(--accent2)',
-    tabs: ['new','current','archive'],
+    tabs: ['new','current','archive','svodka','parts'],
     canDelete: false,
     canAddTech: false,
     canAddTehKarty: false,
@@ -1677,7 +1863,7 @@ const ROLES = {
   technolog: {
     label: 'Технолог',
     color: 'var(--success)',
-    tabs: ['current','load','tech','tehkarty'],
+    tabs: ['current','svodka','queue','parts','load','tech','tehkarty','check'],
     canDelete: false,
     canAddTech: true,
     canAddTehKarty: true,
@@ -1687,7 +1873,7 @@ const ROLES = {
   master: {
     label: 'Мастер',
     color: '#ff9500',
-    tabs: ['current','load','sbordata'],
+    tabs: ['current','svodka','queue','parts','load','sbordata','discipline','check'],
     canDelete: false,
     canAddTech: false,
     canAddTehKarty: false,
@@ -1715,11 +1901,8 @@ function applyRoleUI() {
   if (!role) return;
 
   // Show/hide tabs based on role
-  const tabNames = ['new','current','archive','launch','load','tech','tehkarty','sbordata','history','config'];
-  document.querySelectorAll('.tab').forEach((btn, i) => {
-    if (i < tabNames.length) {
-      btn.style.display = role.tabs.includes(tabNames[i]) ? '' : 'none';
-    }
+  document.querySelectorAll('.tab[data-tab]').forEach(btn => {
+    btn.style.display = role.tabs.includes(btn.dataset.tab) ? '' : 'none';
   });
 
   // Update user badge with role
@@ -1863,9 +2046,8 @@ function updateSheetBadge() {
 // TABS
 // ════════════════════════════════
 function switchTab(name) {
-  const tabNames = ['new','current','archive','launch','load','tech','tehkarty','sbordata','history','config'];
-  document.querySelectorAll('.tab').forEach((t,i) => {
-    t.classList.toggle('active', tabNames[i] === name);
+  document.querySelectorAll('.tab[data-tab]').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === name);
   });
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
@@ -1873,6 +2055,8 @@ function switchTab(name) {
   if (name === 'launch' && !STATE._launchLoaded) { STATE._launchLoaded = true; loadLaunchData(); }
   if (name === 'tech' && !STATE._techLoaded) { STATE._techLoaded = true; loadTechData(); }
   if (name === 'tehkarty' && !STATE._tkLoaded) { STATE._tkLoaded = true; loadTehKartyData(); }
+  if (['svodka','queue','parts','check'].includes(name) && !PL.data) loadPlanning(false);
+  if (name === 'discipline' && !PL.disc) loadDiscipline();
 }
 
 // ════════════════════════════════
@@ -1880,7 +2064,7 @@ function switchTab(name) {
 // ════════════════════════════════
 function apiCall(params) {
   return new Promise((resolve, reject) => {
-    const cbName = 'cb_' + Date.now();
+    const cbName = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
     // Always use DEFAULT_URL
     const url = DEFAULT_URL;
     STATE.appsScriptUrl = url;
@@ -4064,6 +4248,286 @@ function renderHistoryTable(rows) {
   html += '</tbody></table>';
   document.getElementById('tableHistory').innerHTML = html;
 }
+
+// ════════════════════════════════════════════════════════════════
+// ПЛАНИРОВАНИЕ: Сводка · Очередь по станкам · Детали в работе ·
+// Дисциплина отметок · Проверка
+// ════════════════════════════════════════════════════════════════
+const PL = { data: null, loading: null, disc: null };
+
+function plCanEdit() { const r = ROLES[getUserRole()]; return !!(r && r.canPlan); }
+function plPct(v) { return v == null ? '—' : Math.round(v * 100) + '%'; }
+function plDate(iso) { if (!iso) return ''; const p = String(iso).slice(0, 10).split('-'); return p.length === 3 ? p[2] + '.' + p[1] + '.' + p[0].slice(2) : iso; }
+function plDT(iso) { if (!iso) return ''; return plDate(iso) + ' ' + String(iso).slice(11, 16); }
+function plStateCls(s) { return { 'В работе': 's-work', 'Ожидает': 's-next', 'Не начат': 's-queue', 'Нет маршрута': 's-none', 'Маршрут выполнен': 's-done' }[s] || 's-queue'; }
+function plMeter(v) {
+  if (v == null) return '<span class="muted">паралл.</span>';
+  const w = Math.min(v, 1) * 100, cls = v > 1 ? 'over' : (v >= 0.9 ? 'hi' : '');
+  return '<div class="pl-meter"><i class="' + cls + '" style="width:' + w + '%"></i><b>' + Math.round(v * 100) + '%</b></div>';
+}
+function plHeat(v) {
+  if (!v) return 'transparent';
+  if (v > 1) return 'rgba(255,77,77,.55)';
+  if (v >= 0.9) return 'rgba(255,149,0,.5)';
+  if (v >= 0.5) return 'rgba(232,200,64,.4)';
+  return 'rgba(74,158,255,' + (0.12 + v * 0.4).toFixed(2) + ')';
+}
+function plDow(key) { const d = new Date(key + 'T12:00:00'); return ['вс','пн','вт','ср','чт','пт','сб'][d.getDay()]; }
+
+async function loadPlanning(force) {
+  if (PL.loading && !force) return PL.loading;
+  ['svKpis', 'qWrap', 'pWrap', 'cList'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && (!PL.data || force)) el.innerHTML = '<div class="pl-loading">⏳ Расчёт очереди и загрузки…</div>';
+  });
+  PL.loading = (async () => {
+    try {
+      const res = await apiCall({ action: 'planning', force: force ? '1' : '0' });
+      PL.data = res.data;
+      plRenderAll();
+    } catch (e) {
+      showToast('Планирование: ' + e.message, true);
+      ['svKpis', 'qWrap', 'pWrap', 'cList'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = '<div class="pl-loading">Ошибка: ' + esc(e.message) + '</div>'; });
+    } finally { PL.loading = null; }
+  })();
+  return PL.loading;
+}
+
+function plRenderAll() {
+  if (!PL.data) return;
+  const meta = 'Данные на ' + plDT(PL.data.updated) + ' · план с ' + plDate(PL.data.planStart);
+  ['svMeta', 'cMeta'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = meta; });
+  const sel = document.getElementById('qStation');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Все станки</option>' + PL.data.stations.map(s =>
+    '<option value="' + esc(s.name) + '"' + (s.name === cur ? ' selected' : '') + '>' + esc(s.name) + ' (' + s.queueCount + ')</option>').join('');
+  renderSvodka(); renderQueue(); renderParts(); renderCheck();
+}
+
+// ── СВОДКА ──
+function renderSvodka() {
+  const D = PL.data, k = D.kpi;
+  const tile = (key, v, sub, cls) => '<div class="pl-kpi ' + (cls || '') + '"><div class="k">' + key + '</div><div class="v">' + v + '</div><div class="s">' + sub + '</div></div>';
+  document.getElementById('svKpis').innerHTML =
+    tile('Деталей в работе', k.inWork, 'позиций в плане, снято: ' + k.excluded) +
+    tile('На станках сейчас', k.onMachines, 'закрыто операций за 7 дн: ' + k.closedOps7, 'ok') +
+    tile('Ожидают операции', k.waiting, 'межоперационное ожидание') +
+    tile('Не начаты', k.notStarted, 'запущены, нет отметок') +
+    tile('Без маршрута', k.noRoute, 'не попадают в план', k.noRoute ? 'warn' : '') +
+    tile('Очередь, нормо-ч', k.queueHours, 'на собственных станках') +
+    tile('Риск срыва срока', k.risk, 'план позже срока сдачи', k.risk ? 'bad' : '') +
+    tile('Без движения > 7 дн', k.idle7, 'нет отметок больше недели', k.idle7 ? 'warn' : '');
+
+  const can = plCanEdit();
+  const rows = D.stations.map(s => '<tr>' +
+    '<td class="mono">' + esc(s.name) + (s.known ? '' : ' <span class="pl-st s-late" title="Нет в Справочнике доступа">?</span>') + '</td>' +
+    '<td>' + (s.current ? esc(s.current) : '<span class="muted">—</span>') + '</td>' +
+    '<td class="num">' + s.queueCount + '</td><td class="num">' + s.hours + '</td>' +
+    '<td class="pl-bar-cell">' + plMeter(s.load5) + '</td><td class="pl-bar-cell">' + plMeter(s.load10) + '</td><td class="pl-bar-cell">' + plMeter(s.load20) + '</td>' +
+    '<td>' + (s.freeFrom ? plDate(s.freeFrom) : '—') + '</td>' +
+    '<td><input class="pl-ed n" type="number" min="1" max="24" value="' + esc(s.cap) + '" ' + (can ? '' : 'disabled') +
+      ' title="Часов в сутки: 8 — одна смена, 16 — две" onchange="plSaveStation(this,' + esc(JSON.stringify(s.name)) + ')" data-f="cap"></td>' +
+    '<td style="text-align:center"><input type="checkbox" ' + (s.parallel ? 'checked' : '') + ' ' + (can ? '' : 'disabled') +
+      ' title="Без очереди: участок работает параллельно (ТО, сторонние)" onchange="plSaveStation(this,' + esc(JSON.stringify(s.name)) + ')" data-f="parallel"></td>' +
+    '<td style="text-align:center"><input type="checkbox" ' + (s.show ? 'checked' : '') + ' ' + (can ? '' : 'disabled') +
+      ' onchange="plSaveStation(this,' + esc(JSON.stringify(s.name)) + ')" data-f="show"></td>' +
+    '</tr>').join('');
+  document.getElementById('svStations').innerHTML = '<thead><tr><th>Станок</th><th>Сейчас в работе</th><th>В очереди, опер.</th><th>Очередь, ч</th>' +
+    '<th>5 р.д.</th><th>10 р.д.</th><th>20 р.д.</th><th>Свободен с</th><th>Ч/сут</th><th>Без очереди</th><th>Показ.</th></tr></thead><tbody>' + rows + '</tbody>';
+
+  const days = D.days.slice(0, 20);
+  const g = D.stations.filter(s => s.show && !s.parallel).map(s => '<tr><td class="mono">' + esc(s.name) + '</td>' +
+    days.map((d, i) => { const v = s.daily[i] || 0; return '<td class="h" style="background:' + plHeat(v) + '">' + (v ? Math.round(v * 100) : '') + '</td>'; }).join('') + '</tr>').join('');
+  document.getElementById('svGantt').innerHTML = '<thead><tr><th>Станок</th>' + days.map(d => '<th class="d">' + plDow(d) + '<br>' + plDate(d).slice(0, 5) + '</th>').join('') + '</tr></thead><tbody>' + g + '</tbody>';
+
+  const risk = D.parts.filter(p => p.risk);
+  document.getElementById('svRisk').innerHTML = risk.length ? '<div class="pl-list">' + risk.map(p =>
+    '<div class="it"><div><b class="mono">' + esc(p.drawing) + '</b> ' + esc(p.name) + ' <span class="muted">№' + esc(p.order) + '</span></div>' +
+    '<div><span class="pl-st s-late">срок ' + plDate(p.due) + ' → план ' + plDate(p.planEnd) + '</span></div></div>').join('') + '</div>'
+    : '<div class="muted" style="font-size:11px">Нет. Укажите «Срок сдачи» на вкладке «Детали в работе», чтобы видеть риск.</div>';
+  const idle = D.parts.filter(p => p.state !== 'Маршрут выполнен' && p.idleDays > 7).sort((a, b) => b.idleDays - a.idleDays);
+  document.getElementById('svIdle').innerHTML = idle.length ? '<div class="pl-list">' + idle.map(p =>
+    '<div class="it"><div><b class="mono">' + esc(p.drawing) + '</b> ' + esc(p.name) + ' <span class="muted">№' + esc(p.order) + ' · ' + esc(p.state) + (p.lastOp ? ' · ' + esc(p.lastOp) : '') + '</span></div>' +
+    '<div><span class="pl-st s-par">' + p.idleDays + ' дн.</span></div></div>').join('') + '</div>' : '<div class="muted" style="font-size:11px">Нет.</div>';
+}
+
+// ── ОЧЕРЕДЬ ──
+function renderQueue() {
+  if (!PL.data) return;
+  const D = PL.data, can = plCanEdit();
+  const fSt = document.getElementById('qStation').value;
+  const q = document.getElementById('qSearch').value.trim().toLowerCase();
+  const onlyNext = document.getElementById('qOnlyNext').checked;
+  const span = 10;
+  const head = '<div class="pl-gantt-head">' + D.days.slice(0, span).map(d => '<span>' + plDow(d) + ' ' + plDate(d).slice(0, 5) + '</span>').join('') + '</div>';
+  let total = 0;
+  const body = D.stations.filter(s => (!fSt || s.name === fSt) && s.queueCount).map(s => {
+    const rows = s.queue.filter(x => {
+      if (onlyNext && !(x.status === 'В работе' || x.status === 'Следующая')) return false;
+      if (!q) return true;
+      return [x.drawing, x.name, x.order, x.sopr, x.op].join(' ').toLowerCase().indexOf(q) !== -1;
+    });
+    if (!rows.length) return '';
+    total += rows.length;
+    const stOpts = (x) => {
+      const list = Array.from(new Set((x.cands || []).concat(D.stationNames)));
+      return '<option value="">авто</option>' + list.map(n => '<option' + (n === x.assigned ? ' selected' : '') + '>' + esc(n) + '</option>').join('');
+    };
+    return '<tr class="grp"><td colspan="15">' + esc(s.name) + '<small>' + s.queueCount + ' опер. · ' + s.hours + ' ч · ' +
+      (s.parallel ? 'параллельно' : 'свободен с ' + plDate(s.freeFrom) + ' · ' + s.cap + ' ч/сут') + '</small></td></tr>' +
+      rows.map(x => {
+        const cls = x.late ? 's-late' : ({ 'В работе': 's-work', 'Следующая': 's-next', 'Параллельно': 's-par' }[x.status] || 's-queue');
+        const l = Math.max(0, Math.min(x.t0, span)) / span * 100, r = Math.max(0, Math.min(x.t1, span)) / span * 100;
+        const key = esc(JSON.stringify({ sopr: x.sopr, op: x.op }));
+        return '<tr>' +
+          '<td class="num muted">' + x.n + '</td>' +
+          '<td><span class="pl-st ' + cls + '">' + esc(x.status) + '</span></td>' +
+          '<td class="num">' + (x.priority === '' ? '' : x.priority) + '</td>' +
+          '<td><input class="pl-ed n" type="number" min="1" value="' + esc(x.manual) + '" ' + (can && x.status !== 'В работе' ? '' : 'disabled') +
+            ' data-k="' + key + '" data-f="order" onchange="plSaveOp(this)"></td>' +
+          '<td class="mono">' + esc(x.drawing) + '</td><td>' + esc(x.name) + '</td>' +
+          '<td class="mono">' + esc(x.order) + '<span class="muted"> / ' + esc(x.sopr) + '</span></td>' +
+          '<td>' + esc(x.op) + '</td><td class="num">' + x.qty + '</td><td class="num">' + x.hours + '</td>' +
+          '<td style="font-size:10px;' + (x.ready.indexOf('после') === 0 ? 'color:#ff9500' : 'color:var(--success)') + '">' + esc(x.ready) + '</td>' +
+          '<td style="white-space:nowrap">' + plDT(x.start) + '</td><td style="white-space:nowrap">' + plDT(x.end) + '</td>' +
+          '<td>' + (x.due ? plDate(x.due) : '') + '</td>' +
+          '<td>' + (x.status === 'В работе' ? '' : '<select class="pl-ed s" ' + (can ? '' : 'disabled') + ' data-k="' + key + '" data-f="station" onchange="plSaveOp(this)">' + stOpts(x) + '</select>') +
+          '<div class="pl-gantt" style="margin-top:3px"><i class="' + cls + (x.late ? ' late' : '') + '" style="left:' + l + '%;width:' + Math.max(r - l, 0.6) + '%"></i></div></td>' +
+          '</tr>';
+      }).join('');
+  }).join('');
+  document.getElementById('qMeta').textContent = total + ' операций';
+  document.getElementById('qWrap').innerHTML = '<table class="pl-table"><thead><tr><th>№</th><th>Статус</th><th>Пр.</th><th>Оч.</th><th>Чертёж</th><th>Наименование</th>' +
+    '<th>Заказ / сопр.</th><th>Операция</th><th>Кол-во</th><th>Часов</th><th>Готовность детали</th><th>Начало</th><th>Выход со станка</th><th>Срок</th>' +
+    '<th style="min-width:280px">Станок (назначить) · Гант 10 р.д.' + head + '</th></tr></thead><tbody>' + (body || '<tr><td colspan="15" class="muted" style="padding:20px">Нет операций</td></tr>') + '</tbody></table>';
+}
+
+// ── ДЕТАЛИ В РАБОТЕ ──
+function renderParts() {
+  if (!PL.data) return;
+  const can = plCanEdit();
+  const f = document.getElementById('pState').value;
+  const q = document.getElementById('pSearch').value.trim().toLowerCase();
+  const list = PL.data.parts.filter(p => {
+    if (f === 'all') {} else if (f === 'risk') { if (!p.risk) return false; }
+    else if (f === 'off') { if (p.include) return false; }
+    else if (f) { if (p.state !== f) return false; }
+    else if (p.state === 'Маршрут выполнен') return false;
+    if (!q) return true;
+    return [p.drawing, p.name, p.order, p.sopr, p.customer, p.firm].join(' ').toLowerCase().indexOf(q) !== -1;
+  }).sort((a, b) => ((a.priority === '' ? 1e9 : a.priority) - (b.priority === '' ? 1e9 : b.priority)) || String(b.sopr).localeCompare(String(a.sopr), 'ru', { numeric: true }));
+  document.getElementById('pMeta').textContent = list.length + ' позиций';
+  const dis = can ? '' : 'disabled';
+  const rows = list.map(p => {
+    const k = esc(String(p.sopr));
+    const prog = p.totalOps ? p.doneOps / p.totalOps : 0;
+    return '<tr' + (p.include ? '' : ' style="opacity:.55"') + '>' +
+      '<td class="mono">' + esc(p.order) + '</td><td class="mono muted">' + esc(p.sopr) + '</td>' +
+      '<td>' + esc(p.firm) + (p.customer ? '<div class="muted" style="font-size:10px">' + esc(p.customer) + '</div>' : '') + '</td>' +
+      '<td class="mono">' + esc(p.drawing) + '</td><td>' + esc(p.name) + '</td><td class="num">' + esc(p.qty) + '</td>' +
+      '<td><span class="pl-st ' + plStateCls(p.state) + '">' + esc(p.state) + '</span></td>' +
+      '<td style="font-size:10px">' + (p.lastOp ? esc(p.lastOp) + ' · ' + esc(p.lastEvent) + '<div class="muted">' + esc(p.lastStation) + ' · ' + plDT(p.lastTime) + '</div>' : '<span class="muted">—</span>') + '</td>' +
+      '<td style="font-size:11px">' + esc(p.nextOp || '') + '</td>' +
+      '<td style="white-space:nowrap"><span class="pl-prog"><i style="width:' + (prog * 100) + '%"></i></span>' + p.doneOps + '/' + p.totalOps + '</td>' +
+      '<td class="pl-route" title="' + esc(p.route) + '">' + esc(p.route) + '</td>' +
+      '<td><input class="pl-ed n" type="number" min="1" max="999" value="' + esc(p.priority) + '" ' + dis + ' data-s="' + k + '" data-f="priority" onchange="plSavePart(this)"></td>' +
+      '<td><input class="pl-ed d" type="date" value="' + esc(p.due) + '" ' + dis + ' data-s="' + k + '" data-f="due" onchange="plSavePart(this)"></td>' +
+      '<td><select class="pl-ed" ' + dis + ' data-s="' + k + '" data-f="include" onchange="plSavePart(this)"><option value="true"' + (p.include ? ' selected' : '') + '>Да</option><option value="false"' + (p.include ? '' : ' selected') + '>Нет</option></select></td>' +
+      '<td><input class="pl-ed t" value="' + esc(p.note) + '" ' + dis + ' data-s="' + k + '" data-f="note" onchange="plSavePart(this)"></td>' +
+      '<td>' + (p.planEnd ? plDate(p.planEnd) : '') + '</td>' +
+      '<td class="num" style="' + (p.reserve !== '' && p.reserve < 0 ? 'color:var(--danger);font-weight:600' : '') + '">' + (p.reserve === '' ? '' : p.reserve) + '</td>' +
+      '<td class="num ' + (p.idleDays > 7 && p.state !== 'Маршрут выполнен' ? '' : 'muted') + '">' + (p.idleDays === '' ? '' : p.idleDays) + '</td>' +
+      '</tr>';
+  }).join('');
+  document.getElementById('pWrap').innerHTML = '<table class="pl-table"><thead><tr><th>Заказ №</th><th>Сопр.</th><th>Заказ / заказчик</th><th>Чертёж</th><th>Наименование</th><th>Кол-во</th>' +
+    '<th>Состояние</th><th>Последнее событие</th><th>Следующая операция</th><th>Прогресс</th><th>Маршрут</th>' +
+    '<th>Приоритет</th><th>Срок сдачи</th><th>Учитывать</th><th>Примечание</th><th>План. оконч.</th><th>Запас, дн</th><th>Без движ., дн</th></tr></thead><tbody>' +
+    (rows || '<tr><td colspan="18" class="muted" style="padding:20px">Нет позиций</td></tr>') + '</tbody></table>';
+}
+
+// ── СОХРАНЕНИЕ РЫЧАГОВ ──
+async function plSave(el, kind, data) {
+  el.classList.remove('saved'); el.classList.add('saving');
+  try {
+    await apiCall({ action: 'savePlanLever', kind: kind, data: JSON.stringify(data) });
+    el.classList.remove('saving'); el.classList.add('saved');
+    showToast('✓ Сохранено, очередь пересчитывается…');
+    clearTimeout(PL._t);
+    PL._t = setTimeout(() => loadPlanning(true), 600);
+  } catch (e) {
+    el.classList.remove('saving');
+    showToast('Не сохранено: ' + e.message, true);
+  }
+}
+function plSavePart(el) {
+  const sopr = el.dataset.s;
+  const p = PL.data.parts.find(x => String(x.sopr) === sopr);
+  if (!p) return;
+  const f = el.dataset.f;
+  p[f] = f === 'include' ? el.value === 'true' : (f === 'priority' ? (el.value === '' ? '' : Number(el.value)) : el.value);
+  plSave(el, 'part', { sopr: p.sopr, priority: p.priority, due: p.due, include: p.include, note: p.note });
+}
+function plSaveOp(el) {
+  const k = JSON.parse(el.dataset.k);
+  let rec = null;
+  PL.data.stations.forEach(s => s.queue.forEach(x => { if (x.sopr === k.sopr && x.op === k.op) rec = x; }));
+  if (!rec) return;
+  if (el.dataset.f === 'order') rec.manual = el.value === '' ? '' : Number(el.value); else rec.assigned = el.value;
+  plSave(el, 'op', { sopr: k.sopr, op: k.op, order: rec.manual, station: rec.assigned });
+}
+function plSaveStation(el, name) {
+  const s = PL.data.stations.find(x => x.name === name);
+  if (!s) return;
+  const f = el.dataset.f;
+  if (f === 'cap') s.cap = el.value === '' ? '' : Number(el.value); else s[f] = el.checked;
+  plSave(el, 'station', { station: s.name, cap: s.cap, parallel: s.parallel, show: s.show });
+}
+
+// ── ДИСЦИПЛИНА ──
+async function loadDiscipline() {
+  const dEl = document.getElementById('dDate');
+  if (!dEl.value) { const t = new Date(); dEl.value = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0'); }
+  document.getElementById('dTable').innerHTML = '<tr><td class="pl-loading">⏳ Загрузка…</td></tr>';
+  try {
+    const res = await apiCall({ action: 'discipline', period: document.getElementById('dPeriod').value, date: dEl.value });
+    PL.disc = res.data;
+    renderDiscipline();
+  } catch (e) {
+    document.getElementById('dTable').innerHTML = '<tr><td class="pl-loading">Ошибка: ' + esc(e.message) + '</td></tr>';
+  }
+}
+function renderDiscipline() {
+  const D = PL.disc;
+  document.getElementById('dMeta').textContent = 'Период: ' + plDate(D.from) + ' – ' + plDate(D.to);
+  const cnt = g => D.rows.filter(r => r.grade === g).length;
+  const tile = (key, v, cls) => '<div class="pl-kpi ' + cls + '"><div class="k">' + key + '</div><div class="v">' + v + '</div></div>';
+  document.getElementById('dKpis').innerHTML = tile('Нарушение', cnt('Нарушение'), 'bad') + tile('Внимание', cnt('Внимание'), 'warn') + tile('Норма', cnt('Норма'), 'ok');
+  const regColor = v => v == null ? '' : (v >= 0.9 ? 'color:var(--success)' : v >= 0.7 ? 'color:#ff9500' : 'color:var(--danger)');
+  document.getElementById('dTable').innerHTML = '<thead><tr><th>Сотрудник</th><th>Должность</th><th>Оценка</th><th>Регулярность</th><th>Дней с отметками</th>' +
+    '<th>Макс. подряд без отметок</th><th>Отметок</th><th>«Готово»</th><th>без «Старт»</th><th>Пакетных</th><th>Незакр. «Старт»</th><th>Посл. отметка, дн</th>' +
+    '<th>Нормо-ч</th><th>Факт, ч</th><th>Выполн. норм</th><th>Дольше нормы</th><th>Быстрее ×2</th><th>Что не так</th></tr></thead><tbody>' +
+    D.rows.map(r => '<tr><td>' + esc(r.fio) + (r.inDir ? '' : ' <span class="pl-st s-late" title="Нет в Справочнике доступа">уволен?</span>') + '</td>' +
+      '<td class="muted">' + esc(r.role) + '</td><td class="g-' + r.grade + '">' + r.grade + '</td>' +
+      '<td class="num" style="' + regColor(r.reg) + '">' + plPct(r.reg) + '</td><td class="num">' + r.withMarks + ' / ' + r.expected + '</td>' +
+      '<td class="num">' + r.maxGap + '</td><td class="num">' + r.total + '</td><td class="num">' + r.done + '</td><td class="num">' + r.noStart + '</td>' +
+      '<td class="num">' + r.batch + '</td><td class="num">' + r.open + '</td><td class="num">' + r.lastDays + '</td>' +
+      '<td class="num">' + r.normH + '</td><td class="num">' + r.factH + '</td><td class="num">' + (r.perf == null ? '—' : plPct(r.perf)) + '</td>' +
+      '<td class="num">' + r.slow + '</td><td class="num">' + r.fast + '</td><td style="font-size:10px;min-width:240px">' + esc(r.why) + '</td></tr>').join('') + '</tbody>';
+  document.getElementById('dCal').innerHTML = '<thead><tr><th>Сотрудник</th>' + D.calDays.map(d => '<th class="c">' + d.dow + '<br>' + d.key.slice(8) + '</th>').join('') + '</tr></thead><tbody>' +
+    D.calendar.map(r => '<tr><td style="white-space:nowrap">' + esc(r.fio) + '</td>' + r.cells.map(c => {
+      const cls = c.absent ? 'abs' : (c.n ? 'has' : (c.work && !c.future ? 'zero' : 'off'));
+      return '<td class="c ' + cls + '">' + (c.absent ? 'о' : (c.n || (c.work && !c.future ? 0 : '·'))) + '</td>';
+    }).join('') + '</tr>').join('') + '</tbody>';
+}
+
+// ── ПРОВЕРКА ──
+function renderCheck() {
+  const items = PL.data.check || [];
+  const name = { error: 'Ошибка', warn: 'Внимание', info: 'Инфо', ok: 'OK' };
+  document.getElementById('cList').innerHTML = items.map(i => '<div class="pl-check"><span class="lv lv-' + i.level + '">' + name[i.level] + '</span>' +
+    '<span class="ar">' + esc(i.area) + '</span><span>' + esc(i.text) + '</span><span class="cnt">' + (i.count === '' ? '' : i.count) + '</span></div>').join('');
+}
+
 </script>
 <!-- LOGIN SCREEN -->
 <div id="loginScreen" style="
