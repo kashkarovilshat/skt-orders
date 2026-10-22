@@ -4304,6 +4304,14 @@ function plRenderAll() {
   renderSvodka(); renderQueue(); renderParts(); renderCheck();
 }
 
+// Что сейчас на станке: чертёж, название детали, операция, заказ
+function plCurrentCell(s) {
+  const work = (s.queue || []).filter(x => x.status === 'В работе');
+  if (!work.length) return s.current ? '<span class="mono">' + esc(s.current) + '</span>' : '<span class="muted">—</span>';
+  return work.map(x => '<div style="line-height:1.35"><span class="mono">' + esc(x.drawing) + '</span> <b>' + esc(x.name) + '</b>' +
+    '<div class="muted" style="font-size:10px">' + esc(x.op) + ' · №' + esc(x.order) + ' · ' + esc(x.qty) + ' шт · выход ' + plDT(x.end) + '</div></div>').join('');
+}
+
 // ── СВОДКА ──
 function renderSvodka() {
   const D = PL.data, k = D.kpi;
@@ -4321,7 +4329,7 @@ function renderSvodka() {
   const can = plCanEdit();
   const rows = D.stations.map(s => '<tr>' +
     '<td class="mono">' + esc(s.name) + (s.known ? '' : ' <span class="pl-st s-late" title="Нет в Справочнике доступа">?</span>') + '</td>' +
-    '<td>' + (s.current ? esc(s.current) : '<span class="muted">—</span>') + '</td>' +
+    '<td>' + plCurrentCell(s) + '</td>' +
     '<td class="num">' + s.queueCount + '</td><td class="num">' + s.hours + '</td>' +
     '<td class="pl-bar-cell">' + plMeter(s.load5) + '</td><td class="pl-bar-cell">' + plMeter(s.load10) + '</td><td class="pl-bar-cell">' + plMeter(s.load20) + '</td>' +
     '<td>' + (s.freeFrom ? plDate(s.freeFrom) : '—') + '</td>' +
